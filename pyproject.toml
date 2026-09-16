@@ -17,7 +17,7 @@ dependencies = [
     "uvicorn==0.52.4",
 ]
 
-[dependency-groups]
+[project.optional-dependencies]
 dev = [
     "black==26.5.1",
     "isort==9.0.1",

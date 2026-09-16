@@ -8,8 +8,7 @@
 python3 -m venv venv
 source venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install .
-python -m pip install --group dev
+python -m pip install -e ".[dev]"
 ```
 
 ### Run the API server

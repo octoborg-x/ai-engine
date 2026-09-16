@@ -10,8 +10,7 @@ source .venv/bin/activate
 # Windows PowerShell:
 # .venv\\Scripts\\Activate.ps1
 python -m pip install --upgrade pip
-python -m pip install .
-python -m pip install --group dev
+python -m pip install -e ".[dev]"
 ```
 
 Create `.env` using the project's existing configuration:

@@ -25,8 +25,7 @@ jobs:
       - name: Install project and development dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install .
-          python -m pip install --group dev
+          python -m pip install ".[dev]"
           python -m pip install ruff
 
       - name: Auto-fix safe lint and formatting issues
