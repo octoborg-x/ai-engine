@@ -26,9 +26,7 @@ def build_corpus(embedder: EmbeddingModel) -> list[Chunk]:
         },
         {
             "id": "payment-001",
-            "text": (
-                "Error code ERR_PAYMENT_403 indicates a forbidden transaction."
-            ),
+            "text": ("Error code ERR_PAYMENT_403 indicates a forbidden transaction."),
             "document_id": "doc_errors",
             "source": "errors.pdf",
             "page": 2,

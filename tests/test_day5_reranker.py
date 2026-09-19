@@ -9,8 +9,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day5"))
 sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day4"))
 
 # pylint: disable=import-error, wrong-import-position
-from models import Chunk, ChunkMetadata, SearchResult  # noqa: E402
-from reranker import CrossEncoderReranker, LLMReranker  # noqa: E402
+from models import Chunk, ChunkMetadata, SearchResult
+from reranker import CrossEncoderReranker, LLMReranker
 
 
 def _mk(chunk_id: str, text: str, score: float) -> SearchResult:

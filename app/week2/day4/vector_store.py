@@ -2,8 +2,6 @@
 In-memory vector store implementation with hybrid search capabilities.
 """
 
-from typing import List
-
 import numpy as np
 
 # pylint: disable=import-error
@@ -14,9 +12,9 @@ class SimpleVectorStore:
     """Simple in-memory vector store for document chunks."""
 
     def __init__(self):
-        self.chunks: List[Chunk] = []
+        self.chunks: list[Chunk] = []
 
-    def add_chunks(self, chunks: List[Chunk]):
+    def add_chunks(self, chunks: list[Chunk]):
         """Add a list of document chunks to the store."""
         self.chunks.extend(chunks)
 
@@ -29,11 +27,11 @@ class SimpleVectorStore:
     def search(
         self,
         query_text: str,
-        query_vector: List[float],
+        query_vector: list[float],
         tenant_id: str,
         top_k: int = 5,
         alpha: float = 0.5,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """Perform hybrid search using vector similarity and keyword matching."""
         results = []
 

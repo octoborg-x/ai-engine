@@ -2,8 +2,6 @@
 Data models for document chunks, metadata, and search results.
 """
 
-from typing import List, Optional
-
 from pydantic import BaseModel
 
 
@@ -12,8 +10,8 @@ class ChunkMetadata(BaseModel):
 
     document_id: str
     source: str
-    page: Optional[int] = None
-    section: Optional[str] = None
+    page: int | None = None
+    section: str | None = None
     tenant_id: str
     created_at: str  # Using string for simplicity, e.g., "2026-09-01"
 
@@ -24,7 +22,7 @@ class Chunk(BaseModel):
     id: str
     text: str
     metadata: ChunkMetadata
-    embedding: Optional[List[float]] = None
+    embedding: list[float] | None = None
     score: float = 0.0  # Used for ranking
 
 

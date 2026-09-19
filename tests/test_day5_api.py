@@ -7,8 +7,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day5"))
 sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day4"))
 
-from api import app  # noqa: E402
-from fastapi.testclient import TestClient  # noqa: E402
+from api import app
+from fastapi.testclient import TestClient
 
 client = TestClient(app)
 

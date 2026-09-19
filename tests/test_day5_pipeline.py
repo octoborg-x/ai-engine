@@ -7,10 +7,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day5"))
 sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day4"))
 
-import numpy as np  # noqa: E402
-from compare import compare_strategies, precision_at_k  # noqa: E402
-from models import Chunk, ChunkMetadata  # noqa: E402
-from pipeline import Day5RAGPipeline  # noqa: E402
+import numpy as np
+from compare import compare_strategies, precision_at_k
+from models import Chunk, ChunkMetadata
+from pipeline import Day5RAGPipeline
 
 
 class MockEmbedder:

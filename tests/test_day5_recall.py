@@ -8,9 +8,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day5"))
 sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day4"))  # for models
 
 # pylint: disable=import-error, wrong-import-position
-from bm25 import BM25  # noqa: E402
-from models import Chunk, ChunkMetadata, SearchResult  # noqa: E402
-from recall import fuse_candidates  # noqa: E402
+from bm25 import BM25
+from models import Chunk, ChunkMetadata, SearchResult
+from recall import fuse_candidates
 
 # ---------- BM25 ----------
 

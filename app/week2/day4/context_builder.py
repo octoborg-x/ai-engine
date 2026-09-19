@@ -2,8 +2,6 @@
 Utilities for formatting retrieved chunks into an LLM context string.
 """
 
-from typing import List
-
 # pylint: disable=import-error
 from models import SearchResult
 
@@ -15,7 +13,7 @@ def count_tokens(text: str) -> int:
 
 
 def build_context(
-    retrieved_results: List[SearchResult], max_chunks: int = 5, token_budget: int = 1000
+    retrieved_results: list[SearchResult], max_chunks: int = 5, token_budget: int = 1000
 ) -> str:
     """
     Builds a formatted context string from search results.
