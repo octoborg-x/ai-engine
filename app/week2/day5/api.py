@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException
 from models import Chunk, ChunkMetadata
 from pipeline import Day5RAGPipeline
 from pydantic import BaseModel
+from corpus import build_corpus
 
 app = FastAPI(title="Day 5 RAG API")
 
@@ -28,40 +29,11 @@ class AskResponse(BaseModel):
     retrieved_ids: list[str]
 
 
-# Initialize with sample data (same pattern as Day 4)
 def _seed_pipeline() -> Day5RAGPipeline:
-    """Create a pipeline with sample chunks."""
+    """Create a pipeline with the canonical corpus."""
     embedder = EmbeddingModel()
-    chunks = [
-        Chunk(
-            id="1",
-            text="Refunds are allowed within 30 days of purchase.",
-            metadata=ChunkMetadata(
-                document_id="doc_123",
-                source="refund-policy.pdf",
-                page=1,
-                section="Returns",
-                tenant_id="company_42",
-                created_at="2026-09-01",
-            ),
-            embedding=embedder.get_embedding("Refunds are allowed within 30 days."),
-        ),
-        Chunk(
-            id="2",
-            text="Error code ERR_PAYMENT_403 indicates a forbidden transaction.",
-            metadata=ChunkMetadata(
-                document_id="doc_456",
-                source="errors.pdf",
-                page=2,
-                section="Payment Errors",
-                tenant_id="company_42",
-                created_at="2026-09-02",
-            ),
-            embedding=embedder.get_embedding("Error code ERR_PAYMENT_403 forbidden."),
-        ),
-    ]
+    chunks = build_corpus(embedder)
     return Day5RAGPipeline(chunks, embedder)
-
 
 pipeline = _seed_pipeline()
 

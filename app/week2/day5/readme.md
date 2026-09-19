@@ -20,3 +20,28 @@ Day 4's alpha-weighted hybrid is fine for small corpora, but in production:
   of their recalls, then a stronger model to re-order.
 - The reranker (Step 2) sees the query + each candidate together and scores
   relevance directly — far more accurate than either first-stage signal.
+
+
+# Week 2 day 5 -- canonical corpus
+
+                         canonical corpus
+                               │
+                               ▼
+                       build_corpus()
+                               │
+                     20 stable Chunk IDs
+                               │
+                               ▼
+                     Day5RAGPipeline
+                       │           │
+                  vector          BM25
+                       │           │
+                       └─────┬─────┘
+                             ▼
+                          fusion
+                             ▼
+                         reranker
+                             ▼
+                          sources
+                             ▼
+                         citations

@@ -59,7 +59,7 @@ async def observability_middleware(request: Request, call_next):
 @app.middleware("http")
 async def api_security_middleware(request: Request, call_next):
     """Enforce rate limit -> authentication -> validation -> LLM."""
-    if request.url.path == "/chat" and request.method == "POST":
+    if request.url.path in ["/chat", "/ask"] and request.method == "POST":
         remaining, window = rate_limiter.check(client_key(request))
         authenticate(request)
         response = await call_next(request)
@@ -74,6 +74,7 @@ def health():
     return {"status": "ok"}
 
 
+@app.post("/ask", response_model=ChatResponse)
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
     try:
