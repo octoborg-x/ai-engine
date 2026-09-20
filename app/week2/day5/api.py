@@ -1,11 +1,12 @@
 # pylint: disable=import-error
 """FastAPI endpoint for Day 5 RAG pipeline."""
 
-from corpus import build_corpus
 from embeddings import EmbeddingModel  # Day 4 mock
 from fastapi import FastAPI, HTTPException
 from pipeline import Day5RAGPipeline
 from pydantic import BaseModel
+
+from corpus import build_corpus
 
 app = FastAPI(title="Day 5 RAG API")
 
