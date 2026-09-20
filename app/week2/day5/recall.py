@@ -7,8 +7,7 @@ plausibly relevant), ranking optimizes for PRECISION. Never conflate them.
 
 from __future__ import annotations
 
-# pylint: disable=import-error
-from models import SearchResult  # reuse Day 4 models
+from .models import SearchResult  # reuse the shared chunk/search models
 
 
 def fuse_candidates(

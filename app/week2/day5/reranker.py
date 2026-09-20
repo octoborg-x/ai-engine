@@ -14,8 +14,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-# pylint: disable=import-error
-from models import SearchResult
+from .models import SearchResult
 
 
 # pylint: disable=too-few-public-methods

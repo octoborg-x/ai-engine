@@ -54,7 +54,8 @@ The UI intentionally does not calculate domain metrics or invent benchmark value
 Existing Python setup and `app/main.py` endpoints:
 
 - `GET /health`
-- `POST /chat`
+- `POST /chat` — single-turn chat
+- `POST /ask` — Knowledge Assistant: hybrid retrieve -> rerank -> grounded, cited answer
 - `POST /chat/stream`
 - `POST /extract-ticket`
 
@@ -67,8 +68,27 @@ Existing Python setup and `app/main.py` endpoints:
 - Differentiated 429/504/502/500 errors
 - Deterministic cheap/balanced/powerful routing
 - Per-call model/token/latency/cost/success telemetry
-- Bearer-token authentication on `POST /chat`
+- Bearer-token authentication on `POST /chat` and `POST /ask`
 - Process-local rate limiting and `Retry-After`
+
+## Knowledge Assistant (`/ask`)
+
+`POST /ask` runs the Week 2 Day 5 RAG pipeline and returns a grounded answer with
+sources. Request body:
+
+```json
+{"query": "what is the refund policy?", "recall_k": 10, "final_k": 3}
+```
+
+`recall_k` and `final_k` are optional. `recall_k` controls candidate recall per
+channel (vector + BM25); `final_k` controls how many reranked chunks are sent as
+context. The response includes `answer`, the citation-tagged `context`, `sources`,
+`retrieved_ids`, model/route/token/cost metadata, and a `citations` report that
+flags any hallucinated `[SN]` tags.
+
+The retrieval/grounding layer lives in `app/rag/` and is shared with the standalone
+Day 5 demo (`app/week2/day5/api.py`), which serves the same shapes without calling
+a provider.
 
 ## Model routing
 

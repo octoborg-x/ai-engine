@@ -1,12 +1,16 @@
-# pylint: disable=import-error
 """Full Day 5 RAG pipeline: recall -> rerank -> cite."""
 
 import numpy as np
-from bm25 import BM25
-from citations import build_sources, format_context_with_citations, validate_citations
-from models import Chunk, SearchResult
-from recall import fuse_candidates
-from reranker import CrossEncoderReranker
+
+from .bm25 import BM25
+from .citations import (
+    build_sources,
+    format_context_with_citations,
+    validate_citations,
+)
+from .models import Chunk, SearchResult
+from .recall import fuse_candidates
+from .reranker import CrossEncoderReranker
 
 
 def _cosine_similarity(v1: list[float], v2: list[float]) -> float:
@@ -56,6 +60,7 @@ class Day5RAGPipeline:
             "query": query,
             "context": context,
             "sources": sources,
+            "source_scores": [r.score for r in reranked],
             "retrieved_ids": [s.chunk_id for s in sources],
         }
 

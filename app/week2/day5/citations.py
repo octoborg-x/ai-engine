@@ -13,8 +13,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-# pylint: disable=import-error
-from models import SearchResult
+from .models import SearchResult
 
 
 @dataclass

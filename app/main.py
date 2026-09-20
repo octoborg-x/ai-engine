@@ -2,12 +2,14 @@ import logging
 import time
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from openai import APIError, APITimeoutError, RateLimitError
 from pydantic import BaseModel
 
 from app.llm.client import ask, ask_stream, extract_ticket_info
 from app.llm.schemas import ChatRequest, ChatResponse, TicketExtraction
+from app.rag.schemas import AskRequest, AskResponse
+from app.rag.service import answer
 from app.security.auth import authenticate
 from app.security.rate_limit import client_key, rate_limiter
 from app.telemetry.logging import (
@@ -60,8 +62,15 @@ async def observability_middleware(request: Request, call_next):
 async def api_security_middleware(request: Request, call_next):
     """Enforce rate limit -> authentication -> validation -> LLM."""
     if request.url.path in ["/chat", "/ask"] and request.method == "POST":
-        remaining, window = rate_limiter.check(client_key(request))
-        authenticate(request)
+        try:
+            remaining, window = rate_limiter.check(client_key(request))
+            authenticate(request)
+        except HTTPException as exc:
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={"detail": exc.detail},
+                headers=exc.headers,
+            )
         response = await call_next(request)
         response.headers["X-RateLimit-Remaining"] = str(remaining)
         response.headers["X-RateLimit-Window"] = str(window)
@@ -74,22 +83,37 @@ def health():
     return {"status": "ok"}
 
 
-@app.post("/ask", response_model=ChatResponse)
+def _provider_error(e: Exception) -> HTTPException:
+    """Map LLM provider failures onto the documented HTTP status codes."""
+    if isinstance(e, RateLimitError):
+        return HTTPException(
+            status_code=429, detail="Rate limited by provider, try again shortly"
+        )
+    if isinstance(e, APITimeoutError):
+        return HTTPException(status_code=504, detail="LLM provider timed out")
+    if isinstance(e, APIError):
+        return HTTPException(status_code=502, detail=f"LLM provider error: {e!s}")
+    return HTTPException(status_code=500, detail=f"Unexpected error: {e!s}")
+
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
     try:
         result = await ask(req.prompt)
         return ChatResponse(**result)
-    except RateLimitError as e:
-        raise HTTPException(
-            status_code=429, detail="Rate limited by provider, try again shortly"
-        ) from e
-    except APITimeoutError as e:
-        raise HTTPException(status_code=504, detail="LLM provider timed out") from e
-    except APIError as e:
-        raise HTTPException(status_code=502, detail=f"LLM provider error: {e!s}") from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Unexpected error: {e!s}") from e
+        raise _provider_error(e) from e
+
+
+@app.post("/ask", response_model=AskResponse)
+async def ask_endpoint(req: AskRequest):
+    """Answer a question grounded in the retrieved knowledge-base context."""
+    if not req.query.strip():
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
+    try:
+        return await answer(req.query, ask, recall_k=req.recall_k, final_k=req.final_k)
+    except Exception as e:
+        raise _provider_error(e) from e
 
 
 @app.post("/chat/stream")
