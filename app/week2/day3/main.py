@@ -4,6 +4,7 @@ This module handles the ingestion of a Markdown handbook and provides a CLI for 
 """
 
 import os
+from pathlib import Path
 
 # pylint: disable=import-error
 from embeddings import generate_embedding
@@ -51,8 +52,10 @@ def load_and_chunk_handbook(file_path: str):
 def main():
     """Initializes the store, indexes the handbook, and starts the interactive CLI."""
     handbook_path = (
-        "/home/miloudlafttah849/ai-api-project/week2/day3/"
-        "employee_handbook_rag_source.md"
+        Path(__file__).resolve().parents[3]
+        / "corpus"
+        / "source_docs"
+        / "employee_handbook_rag_source.md"
     )
 
     if not os.path.exists(handbook_path):
