@@ -1,72 +1,31 @@
-# pylint: disable=import-error
-"""FastAPI endpoint for Day 5 RAG pipeline."""
+"""FastAPI endpoint for Day 5 RAG pipeline.
 
-from embeddings import EmbeddingModel  # Day 4 mock
+Kept as a standalone demo app. The retrieval and grounding logic lives in
+`app.rag.service` so this endpoint and the main `/ask` endpoint share one
+implementation. This one stays offline: it echoes a mock answer instead of
+calling a provider.
+"""
+
 from fastapi import FastAPI, HTTPException
-from pipeline import Day5RAGPipeline
-from pydantic import BaseModel
 
-from corpus import build_corpus
+from app.rag.schemas import AskRequest, RetrievalResponse
+from app.rag.service import retrieve, sources_out
 
 app = FastAPI(title="Day 5 RAG API")
 
 
-class AskRequest(BaseModel):
-    """Request body for /ask."""
-
-    query: str
-    recall_k: int = 10
-    final_k: int = 3
-
-
-class AskResponse(BaseModel):
-    """Response from /ask."""
-
-    query: str
-    answer: str  # LLM answer would go here
-    context: str
-    sources: list[dict]
-    retrieved_ids: list[str]
-
-
-def _seed_pipeline() -> Day5RAGPipeline:
-    """Create a pipeline with the canonical corpus."""
-    embedder = EmbeddingModel()
-    chunks = build_corpus(embedder)
-    return Day5RAGPipeline(chunks, embedder)
-
-
-pipeline = _seed_pipeline()
-
-
-@app.post("/ask", response_model=AskResponse)
-def ask_endpoint(request: AskRequest) -> AskResponse:
+@app.post("/ask", response_model=RetrievalResponse)
+def ask_endpoint(request: AskRequest) -> RetrievalResponse:
     """Answer a question using the Day 5 RAG pipeline."""
     if not request.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
 
-    result = pipeline.ask(
-        query=request.query,
-        recall_k=request.recall_k,
-        final_k=request.final_k,
-    )
+    result = retrieve(request.query, request.recall_k, request.final_k)
 
-    # pylint: disable=fixme
-    # TODO: Call real LLM here with result["context"]
-    mock_answer = f"Based on the context: {result['context'][:100]}..."
-
-    return AskResponse(
+    return RetrievalResponse(
         query=result["query"],
-        answer=mock_answer,
+        answer=f"Based on the context: {result['context'][:100]}...",
         context=result["context"],
-        sources=[
-            {
-                "source_id": s.source_id,
-                "chunk_id": s.chunk_id,
-                "source": s.source,
-                "page": s.page,
-            }
-            for s in result["sources"]
-        ],
+        sources=sources_out(result),
         retrieved_ids=result["retrieved_ids"],
     )

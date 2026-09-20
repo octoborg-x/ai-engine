@@ -1,16 +1,10 @@
-# pylint: disable=import-error,wrong-import-position
 """Tests for Week 2 Day 5 full pipeline."""
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day5"))
-sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day4"))
-
 import numpy as np
-from compare import compare_strategies, precision_at_k
-from models import Chunk, ChunkMetadata
-from pipeline import Day5RAGPipeline
+
+from app.week2.day5.compare import compare_strategies, precision_at_k
+from app.week2.day5.models import Chunk, ChunkMetadata
+from app.week2.day5.pipeline import Day5RAGPipeline
 
 
 class MockEmbedder:

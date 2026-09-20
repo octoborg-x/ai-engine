@@ -1,7 +1,7 @@
 """Canonical evaluation corpus shared by Day 5 RAG and Day 6 evaluation."""
 
-from embeddings import EmbeddingModel
-from models import Chunk, ChunkMetadata
+from .embeddings import EmbeddingModel
+from .models import Chunk, ChunkMetadata
 
 
 def build_corpus(embedder: EmbeddingModel) -> list[Chunk]:

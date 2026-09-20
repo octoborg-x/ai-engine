@@ -1,16 +1,8 @@
 """Tests for Week 2 Day 5: BM25 scorer + candidate recall fusion."""
 
-import sys
-from pathlib import Path
-
-# Allow importing from week2/day5 (same pattern Day 4 uses)
-sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day5"))
-sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day4"))  # for models
-
-# pylint: disable=import-error, wrong-import-position
-from bm25 import BM25
-from models import Chunk, ChunkMetadata, SearchResult
-from recall import fuse_candidates
+from app.week2.day5.bm25 import BM25
+from app.week2.day5.models import Chunk, ChunkMetadata, SearchResult
+from app.week2.day5.recall import fuse_candidates
 
 # ---------- BM25 ----------
 
