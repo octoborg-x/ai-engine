@@ -1,19 +1,12 @@
-# pylint: disable=import-error,wrong-import-position
 """Tests for Week 2 Day 5 citation tracking."""
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day5"))
-sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day4"))
-
-from citations import (
+from app.week2.day5.citations import (
     build_sources,
     extract_citations,
     format_context_with_citations,
     validate_citations,
 )
-from models import Chunk, ChunkMetadata, SearchResult
+from app.week2.day5.models import Chunk, ChunkMetadata, SearchResult
 
 
 def _mk(chunk_id: str, text: str, source: str, page: int | None = None) -> SearchResult:

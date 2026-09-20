@@ -1,16 +1,9 @@
 """Tests for Week 2 Day 5 reranker."""
 
-import sys
-from pathlib import Path
-
 import pytest
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day5"))
-sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day4"))
-
-# pylint: disable=import-error, wrong-import-position
-from models import Chunk, ChunkMetadata, SearchResult
-from reranker import CrossEncoderReranker, LLMReranker
+from app.week2.day5.models import Chunk, ChunkMetadata, SearchResult
+from app.week2.day5.reranker import CrossEncoderReranker, LLMReranker
 
 
 def _mk(chunk_id: str, text: str, score: float) -> SearchResult:

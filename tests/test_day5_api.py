@@ -1,14 +1,8 @@
-# pylint: disable=import-error,wrong-import-position
 """Integration tests for Day 5 /ask endpoint."""
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day5"))
-sys.path.insert(0, str(Path(__file__).parent.parent / "week2" / "day4"))
-
-from api import app
 from fastapi.testclient import TestClient
+
+from app.week2.day5.api import app
 
 client = TestClient(app)
 

@@ -1,11 +1,11 @@
-# pylint: disable=import-error
 """Compare vector-only vs hybrid vs hybrid+rerank retrieval quality."""
 
 import numpy as np
-from bm25 import BM25
-from models import SearchResult
-from recall import fuse_candidates
-from reranker import CrossEncoderReranker
+
+from .bm25 import BM25
+from .models import SearchResult
+from .recall import fuse_candidates
+from .reranker import CrossEncoderReranker
 
 
 def precision_at_k(retrieved_ids: list[str], relevant_ids: set[str], k: int) -> float:
