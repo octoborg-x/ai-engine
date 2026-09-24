@@ -35,3 +35,4 @@ The absolute core
 Minimum definition:
 
 An agent is an LLM-driven loop that can observe state, decide an action, call an authorized tool, receive the result, and continue until a termination condition is reached.
+i
