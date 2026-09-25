@@ -1,0 +1,15 @@
+{
+  "name": "week3-day2-tool-loop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Framework-free LLM tool loop: registry, validation, execution, feedback, termination.",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node run.ts",
+    "demo": "node run.ts",
+    "test": "node --test"
+  }
+}
