@@ -1,0 +1,279 @@
+{
+  "timestamp": "2026-09-27T03-57-10",
+  "dataset_records": 20,
+  "cases_completed": 20,
+  "total_latency_ms": 39,
+  "cases_with_sources": 0,
+  "cases_with_errors": 20,
+  "results": [
+    {
+      "id": "q001",
+      "tags": [
+        "correctness",
+        "factual"
+      ],
+      "latency_ms": 28,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q002",
+      "tags": [
+        "correctness",
+        "factual"
+      ],
+      "latency_ms": 2,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q003",
+      "tags": [
+        "correctness",
+        "factual"
+      ],
+      "latency_ms": 2,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q004",
+      "tags": [
+        "correctness",
+        "factual"
+      ],
+      "latency_ms": 1,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q005",
+      "tags": [
+        "correctness",
+        "factual"
+      ],
+      "latency_ms": 1,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q006",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "relevance"
+      ],
+      "latency_ms": 1,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q007",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "relevance"
+      ],
+      "latency_ms": 1,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q008",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "relevance"
+      ],
+      "latency_ms": 1,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q009",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "relevance"
+      ],
+      "latency_ms": 1,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q010",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "relevance"
+      ],
+      "latency_ms": 1,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q011",
+      "tags": [
+        "faithfulness",
+        "hallucination"
+      ],
+      "latency_ms": 0,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q012",
+      "tags": [
+        "faithfulness",
+        "hallucination"
+      ],
+      "latency_ms": 0,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q013",
+      "tags": [
+        "faithfulness",
+        "hallucination"
+      ],
+      "latency_ms": 0,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q014",
+      "tags": [
+        "faithfulness",
+        "hallucination"
+      ],
+      "latency_ms": 0,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q015",
+      "tags": [
+        "faithfulness",
+        "hallucination"
+      ],
+      "latency_ms": 0,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q016",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "multi-step"
+      ],
+      "latency_ms": 0,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q017",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "multi-step"
+      ],
+      "latency_ms": 0,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q018",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "multi-step"
+      ],
+      "latency_ms": 0,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q019",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "multi-step"
+      ],
+      "latency_ms": 0,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    },
+    {
+      "id": "q020",
+      "tags": [
+        "correctness",
+        "multi-step"
+      ],
+      "latency_ms": 0,
+      "sources_count": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "has_error": true
+    }
+  ]
+}
