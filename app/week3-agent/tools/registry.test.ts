@@ -15,6 +15,7 @@ const echoTool: Tool = {
       required: ["value"],
       additionalProperties: false,
     },
+    risk: "read",
   },
   execute: async (args) => ({ echoed: (args as { value: string }).value }),
 };
