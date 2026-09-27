@@ -6,6 +6,7 @@ import type { ChatMessage } from "./agent/llm.ts";
 import { createScriptedLLM, type ScriptStep } from "./agent/scriptedLlm.ts";
 import { createOpenAILLM, configFromEnv } from "./agent/openaiLlm.ts";
 import { createDefaultRegistry } from "./tools/registry.ts";
+import { HumanApprovalRequiredError } from "./tools/registry.ts";
 
 /**
  * Runnable demo for the tool loop.
@@ -34,8 +35,45 @@ const SCRIPT: ScriptStep[] = [
 ];
 
 async function main(): Promise<void> {
-  const liveIndex = process.argv.indexOf("--live");
+  console.log("=== Running Week 3 Agent Exercises & Demos ===\n");
+
   const registry = createDefaultRegistry();
+
+  // --- DEMO 1: IDEMPOTENCY FOR create_ticket ---
+  console.log("--- Demo 1: Idempotency Verification ---");
+  const ticketArgs = { customerId: "C-1002", issueType: "refund", description: "Requesting a refund" };
+  const res1 = await registry.executeTool("create_ticket", ticketArgs);
+  const res2 = await registry.executeTool("create_ticket", ticketArgs);
+  console.log(`First call result:`, res1);
+  console.log(`Second call result:`, res2);
+  console.log(`Idempotency verification passed: ${JSON.stringify(res1) === JSON.stringify(res2) ? "YES" : "NO"}\n`);
+
+  // --- DEMO 2: RETRIES AND EXPONENTIAL BACKOFF ---
+  console.log("--- Demo 2: Retry with Exponential Backoff ---");
+  try {
+    await registry.executeTool("create_ticket", { ...ticketArgs, simulateTransientError: true });
+  } catch (err) {
+    console.log(`Failed as expected after max attempts with: ${(err as Error).message}\n`);
+  }
+
+  // --- DEMO 3: HUMAN APPROVAL GATE ---
+  console.log("--- Demo 3: Human Approval Gate ---");
+  const emailArgs = { recipient: "grace@hopper.com", subject: "Refund update", body: "Your refund is processed." };
+  try {
+    await registry.executeTool("send_email", emailArgs);
+  } catch (err) {
+    if (err instanceof HumanApprovalRequiredError) {
+      console.log(`[Gate Intercepted] ${err.message}`);
+      console.log(`Approving action...`);
+      registry.approveCall("send_email", emailArgs);
+      const approvedRes = await registry.executeTool("send_email", emailArgs);
+      console.log(`Execution after approval:`, approvedRes);
+    }
+  }
+  console.log();
+
+  console.log("--- Running Main Agent Loop ---");
+  const liveIndex = process.argv.indexOf("--live");
   const messages: ChatMessage[] = [
     { role: "system", content: SYSTEM_PROMPT },
     { role: "user", content: "Can customer C-1002 still get a refund?" },
