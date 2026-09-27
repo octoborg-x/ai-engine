@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-27T09:04:36.590Z",
+  "timestamp": "2026-09-27T09:17:32.599Z",
   "dataset_path": "/workspace/project/ai-engine/eval/dataset.jsonl",
   "total_cases": 20,
   "retrieval_cases": 10,
@@ -8,6 +8,8 @@
   "retrieval_precision": 0.1,
   "retrieval_recall": 0.1,
   "retrieval_hit_rate": 0.35,
+  "average_faithfulness": 0,
+  "hallucination_rate": 1,
   "per_case": [
     {
       "id": "q001",
@@ -20,7 +22,12 @@
       "retrieval_recall": 1,
       "retrieval_hit": true,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q002",
@@ -33,7 +40,12 @@
       "retrieval_recall": 1,
       "retrieval_hit": true,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q003",
@@ -46,7 +58,12 @@
       "retrieval_recall": 1,
       "retrieval_hit": true,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q004",
@@ -59,7 +76,12 @@
       "retrieval_recall": 1,
       "retrieval_hit": true,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q005",
@@ -72,7 +94,12 @@
       "retrieval_recall": 1,
       "retrieval_hit": true,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q006",
@@ -86,7 +113,12 @@
       "retrieval_recall": 0,
       "retrieval_hit": false,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q007",
@@ -100,7 +132,12 @@
       "retrieval_recall": 0,
       "retrieval_hit": false,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q008",
@@ -114,7 +151,12 @@
       "retrieval_recall": 0,
       "retrieval_hit": false,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q009",
@@ -128,7 +170,12 @@
       "retrieval_recall": 0,
       "retrieval_hit": false,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q010",
@@ -142,7 +189,12 @@
       "retrieval_recall": 0,
       "retrieval_hit": false,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q011",
@@ -155,7 +207,12 @@
       "retrieval_recall": 0,
       "retrieval_hit": false,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q012",
@@ -168,7 +225,12 @@
       "retrieval_recall": 1,
       "retrieval_hit": true,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q013",
@@ -181,7 +243,12 @@
       "retrieval_recall": 0,
       "retrieval_hit": false,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q014",
@@ -194,7 +261,12 @@
       "retrieval_recall": 0,
       "retrieval_hit": false,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q015",
@@ -207,7 +279,12 @@
       "retrieval_recall": 0,
       "retrieval_hit": false,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q016",
@@ -221,7 +298,12 @@
       "retrieval_recall": 0,
       "retrieval_hit": false,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q017",
@@ -235,7 +317,12 @@
       "retrieval_recall": 0,
       "retrieval_hit": false,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q018",
@@ -249,7 +336,12 @@
       "retrieval_recall": 0,
       "retrieval_hit": false,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q019",
@@ -263,7 +355,12 @@
       "retrieval_recall": 0,
       "retrieval_hit": false,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     },
     {
       "id": "q020",
@@ -276,7 +373,12 @@
       "retrieval_recall": 1,
       "retrieval_hit": true,
       "answer_length": 25,
-      "sources_count": 0
+      "sources_count": 0,
+      "faithfulness_score": 0,
+      "unsupported_claims": [
+        "FETCH_ERROR: fetch failed"
+      ],
+      "hallucination_detected": true
     }
   ]
 }

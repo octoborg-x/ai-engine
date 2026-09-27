@@ -49,6 +49,38 @@ function loadMostRecentResults(): any[] | null {
   } catch { return null; }
 }
 
+
+
+function splitClaims(text: string): string[] {
+  return text.split(/[.!?]/).map(s => s.trim()).filter(s => s.length > 3);
+}
+
+function extractKeyTerms(text: string): string[] {
+  const words = normalizeText(text).split(" ").filter(w => w.length > 3);
+  return Array.from(new Set(words));
+}
+
+function computeFaithfulnessScore(answer: string, sources: string[]): { score: number; unsupported_claims: string[]; detected: boolean } {
+  const claims = splitClaims(answer);
+  if (claims.length === 0) return { score: 1.0, unsupported_claims: [], detected: false };
+  
+  const sourceText = sources.join(" ").toLowerCase();
+  const unsupported: string[] = [];
+  
+  for (const claim of claims) {
+    const terms = extractKeyTerms(claim);
+    if (terms.length === 0) continue;
+    const supportedTerms = terms.filter(t => sourceText.includes(t)).length;
+    const ratio = terms.length ? supportedTerms / terms.length : 1;
+    if (ratio < 0.5) {
+      unsupported.push(claim);
+    }
+  }
+  
+  const score = claims.length > 0 ? Math.round((1 - unsupported.length / claims.length) * 100) / 100 : 1.0;
+  return { score, unsupported_claims: unsupported, detected: score < 0.7 };
+}
+
 function main() {
   console.log("=== Week 4 Day 2 — Deterministic Correctness + Retrieval Scoring ===");
   if (!existsSync(DATASET_PATH)) { console.error("Dataset not found"); process.exit(1); }
@@ -69,7 +101,7 @@ function main() {
   const finalScored = resultsSource.map((r: any) => {
     const rec = records.find((re) => re.id === r.id);
     const ret = computeRetrievalMetrics(r.retrieved_sources || [], rec?.expected_sources || []);
-    return { ...r, tags: rec?.tags || [], correctness_score: computeCorrectnessScore(r.answer || "", rec?.expected_answer || ""), retrieval_precision: ret.precision, retrieval_recall: ret.recall, retrieval_hit: ret.hit };
+    const faith = computeFaithfulnessScore(r.answer || "", r.retrieved_sources || []); return { ...r, tags: rec?.tags || [], correctness_score: computeCorrectnessScore(r.answer || "", rec?.expected_answer || ""), retrieval_precision: ret.precision, retrieval_recall: ret.recall, retrieval_hit: ret.hit, faithfulness_score: faith.score, unsupported_claims: faith.unsupported_claims, hallucination_detected: faith.detected };
   });
 
   const total = finalScored.length;
@@ -85,8 +117,8 @@ function main() {
     timestamp: new Date().toISOString(), dataset_path: DATASET_PATH, total_cases: total,
     retrieval_cases: retrievalResults.length, answer_accuracy: Math.round(accuracy*100)/100,
     average_correctness: Math.round(avgCorrectness*100)/100, retrieval_precision: Math.round(avgPrecision*100)/100,
-    retrieval_recall: Math.round(avgRecall*100)/100, retrieval_hit_rate: Math.round(hitRate*100)/100,
-    per_case: finalScored.map((r) => ({id: r.id, tags: r.tags, correctness_score: r.correctness_score, retrieval_precision: r.retrieval_precision, retrieval_recall: r.retrieval_recall, retrieval_hit: r.retrieval_hit, answer_length: (r.answer||"").length, sources_count: (r.retrieved_sources||[]).length}))
+    retrieval_recall: Math.round(avgRecall*100)/100, retrieval_hit_rate: Math.round(hitRate*100)/100, average_faithfulness: Math.round(finalScored.reduce((s, r) => s + (r.faithfulness_score || 0), 0) / total * 100) / 100, hallucination_rate: Math.round(finalScored.filter((r) => r.hallucination_detected).length / total * 100) / 100,
+    per_case: finalScored.map((r) => ({id: r.id, tags: r.tags, correctness_score: r.correctness_score, retrieval_precision: r.retrieval_precision, retrieval_recall: r.retrieval_recall, retrieval_hit: r.retrieval_hit, answer_length: (r.answer||"").length, sources_count: (r.retrieved_sources||[]).length, faithfulness_score: r.faithfulness_score || 0, unsupported_claims: r.unsupported_claims || [], hallucination_detected: !!r.hallucination_detected}))
   }, null, 2), "utf-8");
   console.log(`\nSummary written to ${summaryPath}`);
   console.log(`  answer_accuracy: ${Math.round(accuracy*100)/100}`);
