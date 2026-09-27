@@ -1,0 +1,282 @@
+{
+  "timestamp": "2026-09-27T09:04:36.590Z",
+  "dataset_path": "/workspace/project/ai-engine/eval/dataset.jsonl",
+  "total_cases": 20,
+  "retrieval_cases": 10,
+  "answer_accuracy": 0,
+  "average_correctness": 0,
+  "retrieval_precision": 0.1,
+  "retrieval_recall": 0.1,
+  "retrieval_hit_rate": 0.35,
+  "per_case": [
+    {
+      "id": "q001",
+      "tags": [
+        "correctness",
+        "factual"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 1,
+      "retrieval_recall": 1,
+      "retrieval_hit": true,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q002",
+      "tags": [
+        "correctness",
+        "factual"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 1,
+      "retrieval_recall": 1,
+      "retrieval_hit": true,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q003",
+      "tags": [
+        "correctness",
+        "factual"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 1,
+      "retrieval_recall": 1,
+      "retrieval_hit": true,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q004",
+      "tags": [
+        "correctness",
+        "factual"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 1,
+      "retrieval_recall": 1,
+      "retrieval_hit": true,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q005",
+      "tags": [
+        "correctness",
+        "factual"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 1,
+      "retrieval_recall": 1,
+      "retrieval_hit": true,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q006",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "relevance"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 0,
+      "retrieval_recall": 0,
+      "retrieval_hit": false,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q007",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "relevance"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 0,
+      "retrieval_recall": 0,
+      "retrieval_hit": false,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q008",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "relevance"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 0,
+      "retrieval_recall": 0,
+      "retrieval_hit": false,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q009",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "relevance"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 0,
+      "retrieval_recall": 0,
+      "retrieval_hit": false,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q010",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "relevance"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 0,
+      "retrieval_recall": 0,
+      "retrieval_hit": false,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q011",
+      "tags": [
+        "faithfulness",
+        "hallucination"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 0,
+      "retrieval_recall": 0,
+      "retrieval_hit": false,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q012",
+      "tags": [
+        "faithfulness",
+        "hallucination"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 1,
+      "retrieval_recall": 1,
+      "retrieval_hit": true,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q013",
+      "tags": [
+        "faithfulness",
+        "hallucination"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 0,
+      "retrieval_recall": 0,
+      "retrieval_hit": false,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q014",
+      "tags": [
+        "faithfulness",
+        "hallucination"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 0,
+      "retrieval_recall": 0,
+      "retrieval_hit": false,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q015",
+      "tags": [
+        "faithfulness",
+        "hallucination"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 0,
+      "retrieval_recall": 0,
+      "retrieval_hit": false,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q016",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "multi-step"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 0,
+      "retrieval_recall": 0,
+      "retrieval_hit": false,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q017",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "multi-step"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 0,
+      "retrieval_recall": 0,
+      "retrieval_hit": false,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q018",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "multi-step"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 0,
+      "retrieval_recall": 0,
+      "retrieval_hit": false,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q019",
+      "tags": [
+        "correctness",
+        "retrieval",
+        "multi-step"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 0,
+      "retrieval_recall": 0,
+      "retrieval_hit": false,
+      "answer_length": 25,
+      "sources_count": 0
+    },
+    {
+      "id": "q020",
+      "tags": [
+        "correctness",
+        "multi-step"
+      ],
+      "correctness_score": 0,
+      "retrieval_precision": 1,
+      "retrieval_recall": 1,
+      "retrieval_hit": true,
+      "answer_length": 25,
+      "sources_count": 0
+    }
+  ]
+}
