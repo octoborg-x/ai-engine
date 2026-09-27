@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-27T09:17:32.599Z",
+  "timestamp": "2026-09-27T10:53:22.198Z",
   "dataset_path": "/workspace/project/ai-engine/eval/dataset.jsonl",
   "total_cases": 20,
   "retrieval_cases": 10,
@@ -10,6 +10,9 @@
   "retrieval_hit_rate": 0.35,
   "average_faithfulness": 0,
   "hallucination_rate": 1,
+  "judge_correctness": 0,
+  "judge_relevance": 0,
+  "judge_faithfulness": 0,
   "per_case": [
     {
       "id": "q001",
@@ -27,7 +30,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q002",
@@ -45,7 +52,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q003",
@@ -63,7 +74,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q004",
@@ -81,7 +96,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q005",
@@ -99,7 +118,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q006",
@@ -118,7 +141,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q007",
@@ -137,7 +164,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q008",
@@ -156,7 +187,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q009",
@@ -175,7 +210,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q010",
@@ -194,7 +233,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q011",
@@ -212,7 +255,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q012",
@@ -230,7 +277,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q013",
@@ -248,7 +299,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q014",
@@ -266,7 +321,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q015",
@@ -284,7 +343,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q016",
@@ -303,7 +366,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q017",
@@ -322,7 +389,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q018",
@@ -341,7 +412,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q019",
@@ -360,7 +435,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q020",
@@ -378,7 +457,11 @@
       "unsupported_claims": [
         "FETCH_ERROR: fetch failed"
       ],
-      "hallucination_detected": true
+      "hallucination_detected": true,
+      "judge_correctness": 0,
+      "judge_relevance": 0,
+      "judge_faithfulness": 0,
+      "judge_reason": "Judge error: TypeError: fetch failed"
     }
   ]
 }
