@@ -337,10 +337,7 @@ function decodeArguments(toolName: string, raw: unknown): unknown {
 export function createDefaultRegistry(): ToolRegistry {
   return new ToolRegistry()
     .register(getCustomerTool)
-    .register(searchDocumentsTool)
-    .register(createTicketTool)
-    .register(sendEmailTool)
-    .register(updateDatabaseTool);
+    .register(searchDocumentsTool);
 }
 
 export { getCustomerTool, searchDocumentsTool };
