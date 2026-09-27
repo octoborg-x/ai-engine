@@ -5,8 +5,10 @@ import type { JsonSchema, Tool, ToolCall, ToolDefinition } from "./types.ts";
 import { validateArgs } from "./validate.ts";
 
 export class HumanApprovalRequiredError extends Error {
-  constructor(public readonly toolName: string, public readonly args: unknown) {
+  constructor(toolName: string, args: unknown) {
     super(`Human approval required for tool "${toolName}".`);
+    this.toolName = toolName;
+    this.args = args;
     this.name = "HumanApprovalRequiredError";
   }
 }
