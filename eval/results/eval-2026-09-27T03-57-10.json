@@ -1,0 +1,226 @@
+{
+  "timestamp": "2026-09-27T03-57-10",
+  "base_url": "http://127.0.0.1:8000",
+  "results": [
+    {
+      "id": "q001",
+      "question": "What is the capital of France?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 28,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.667Z"
+    },
+    {
+      "id": "q002",
+      "question": "What color is the sky on a clear day?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 2,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.670Z"
+    },
+    {
+      "id": "q003",
+      "question": "How many days are in a leap year?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 2,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.672Z"
+    },
+    {
+      "id": "q004",
+      "question": "Who wrote the play Hamlet?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 1,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.673Z"
+    },
+    {
+      "id": "q005",
+      "question": "What is the chemical symbol for water?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 1,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.674Z"
+    },
+    {
+      "id": "q006",
+      "question": "What does the employee handbook say about remote work eligibility?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 1,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.675Z"
+    },
+    {
+      "id": "q007",
+      "question": "According to the shipping policy, how long does standard delivery take?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 1,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.676Z"
+    },
+    {
+      "id": "q008",
+      "question": "What does the engineer handbook say about code review requirements?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 1,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.676Z"
+    },
+    {
+      "id": "q009",
+      "question": "What information is in the account guide regarding two-factor authentication?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 1,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.677Z"
+    },
+    {
+      "id": "q010",
+      "question": "What does the RAG source document describe about the retrieval pipeline?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 1,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.678Z"
+    },
+    {
+      "id": "q011",
+      "question": "Can a refund be processed for a purchase made 60 days ago?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.679Z"
+    },
+    {
+      "id": "q012",
+      "question": "Does the employee handbook guarantee a company car for all employees?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.679Z"
+    },
+    {
+      "id": "q013",
+      "question": "Is there a clause in the account guide allowing password resets via social media?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.679Z"
+    },
+    {
+      "id": "q014",
+      "question": "Can the engineer handbook be used to justify skipping security scans?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.680Z"
+    },
+    {
+      "id": "q015",
+      "question": "Does the RAG pipeline use a neural network for citation validation?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.680Z"
+    },
+    {
+      "id": "q016",
+      "question": "What steps are needed to onboard a new engineer according to the handbook, and what retrieval sources are used?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.681Z"
+    },
+    {
+      "id": "q017",
+      "question": "If a customer wants a refund and has a billing issue, which policy applies and what is the first action?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.681Z"
+    },
+    {
+      "id": "q018",
+      "question": "How should an agent handle a request that requires both document retrieval and customer lookup, and what should the final answer contain?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.682Z"
+    },
+    {
+      "id": "q019",
+      "question": "Describe the full RAG pipeline steps from user query to answer, including which source files define each stage.",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.682Z"
+    },
+    {
+      "id": "q020",
+      "question": "When responding to a complex multi-source query, what evaluation metrics should the runner capture?",
+      "answer": "FETCH_ERROR: fetch failed",
+      "retrieved_sources": [],
+      "latency_ms": 0,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cost_usd": null,
+      "timestamp": "2026-09-27T03:57:10.683Z"
+    }
+  ]
+}
