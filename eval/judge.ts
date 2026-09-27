@@ -5,18 +5,18 @@ function buildPrompt(question: string, expected: string, answer: string, sources
   return "Judge evaluation.\nQUESTION: " + question + "\nEXPECTED: " + expected + "\nANSWER: " + answer + "\nCONTEXT: " + ctx + "\nRespond ONLY JSON: {\"correctness\":0.0,\"relevance\":0.0,\"faithfulness\":0.0,\"reason\":\"...\"}";
 }
 export async function judge(question: string, expectedAnswer: string, generatedAnswer: string, retrievedSources: string[]): Promise<JudgeResult> {
-  const apiKey = process.env.GROQ_API_KEY || process.env.OPENROUTER_API_KEY || "";
-  const model = process.env.JUDGE_MODEL || "mixtral-8x7b-32768";
+  const apiKey = process.env.HUGGINGFACE_APIKEY || process.env.GROQ_API_KEY || process.env.OPENROUTER_API_KEY || "";
+  const model = process.env.HUGGING_MODEL || process.env.JUDGE_MODEL || "mistralai/Mistral-7B-Instruct-v0.2";
   const prompt = buildPrompt(question, expectedAnswer, generatedAnswer, retrievedSources);
-  const url = (process.env.GROQ_BASE_URL || "https://api.groq.com/openai/v1") + "/chat/completions";
+  const url = "https://api-inference.huggingface.co/models/" + model;
   const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ model: model, messages: [{ role: "user", content: prompt }], temperature: 0.0, max_tokens: 512 }),
+    headers: { "Content-Type": "application/json", Authorization: "Bearer " + apiKey },
+    body: JSON.stringify({ inputs: prompt, parameters: { temperature: 0, max_new_tokens: 512 } }),
   });
-  if (!res.ok) { const t = await res.text(); throw new Error("Judge Groq request failed (" + res.status + "): " + t); }
+  if (!res.ok) { const t = await res.text(); throw new Error("Judge HuggingFace request failed (" + res.status + "): " + t); }
   const data: any = await res.json();
-  const raw = data.choices?.[0]?.message?.content || "";
+  const raw = (Array.isArray(data) ? (data[0]?.generated_text || data[0]?.generated_text || "") : (data.generated_text || data[0]?.generated_text || "")) || "";
   let clean = (typeof raw === "string" ? raw : JSON.stringify(raw)).trim();
   if (clean.startsWith("```")) { clean = clean.replace(/^```(json)?\n/, "").replace(/\n```$/, "").trim(); }
   const parsed = JSON.parse(clean);

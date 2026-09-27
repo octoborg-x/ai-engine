@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-27T10:42:52.028Z",
+  "timestamp": "2026-09-27T10:53:22.198Z",
   "dataset_path": "/workspace/project/ai-engine/eval/dataset.jsonl",
   "total_cases": 20,
   "retrieval_cases": 10,
@@ -34,7 +34,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q002",
@@ -56,7 +56,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q003",
@@ -78,7 +78,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q004",
@@ -100,7 +100,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q005",
@@ -122,7 +122,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q006",
@@ -145,7 +145,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q007",
@@ -168,7 +168,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q008",
@@ -191,7 +191,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q009",
@@ -214,7 +214,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q010",
@@ -237,7 +237,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q011",
@@ -259,7 +259,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q012",
@@ -281,7 +281,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q013",
@@ -303,7 +303,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q014",
@@ -325,7 +325,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q015",
@@ -347,7 +347,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q016",
@@ -370,7 +370,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q017",
@@ -393,7 +393,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q018",
@@ -416,7 +416,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q019",
@@ -439,7 +439,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     },
     {
       "id": "q020",
@@ -461,7 +461,7 @@
       "judge_correctness": 0,
       "judge_relevance": 0,
       "judge_faithfulness": 0,
-      "judge_reason": "Judge error: Error: Judge Gemini request failed (401): {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+      "judge_reason": "Judge error: TypeError: fetch failed"
     }
   ]
 }
