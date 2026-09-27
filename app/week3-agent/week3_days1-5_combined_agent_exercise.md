@@ -94,9 +94,7 @@ Example conceptual contract:
 Tool = {
     "name": "get_customer",
     "description": "Retrieve customer information by customer ID",
-    "parameters": {
-        "customer_id": "string"
-    }
+    "parameters": {"customer_id": "string"},
 }
 ```
 
@@ -436,11 +434,7 @@ already completed?
 Example:
 
 ```python
-idempotency_key = hash(
-    customer_id +
-    issue_type +
-    normalized_description
-)
+idempotency_key = hash(customer_id + issue_type + normalized_description)
 ```
 
 Store the key with the created ticket.
@@ -510,11 +504,7 @@ if the ticket creates an externally visible business action.
 Represent approval explicitly:
 
 ```python
-approval = {
-    "status": "pending",
-    "action": "send_email",
-    "arguments": {...}
-}
+approval = {"status": "pending", "action": "send_email", "arguments": {...}}
 ```
 
 Allowed states:
