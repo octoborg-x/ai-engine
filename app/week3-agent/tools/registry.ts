@@ -11,6 +11,53 @@ export class HumanApprovalRequiredError extends Error {
   }
 }
 
+export type ToolRisk = "read" | "write";
+
+export type ApprovalStatus =
+  | "not_required"
+  | "pending"
+  | "approved"
+  | "rejected";
+
+export interface PendingApproval {
+  toolCallId: string;
+  toolName: string;
+  arguments: unknown;
+  status: ApprovalStatus;
+}
+
+export type AgentStatus =
+  | "running"
+  | "waiting_for_approval"
+  | "completed"
+  | "failed"
+  | "max_iterations";
+
+export interface AgentState {
+  status: AgentStatus;
+  messages: any[];
+  tool_results: any[];
+  memory: any[];
+  plan: string[];
+  iteration: number;
+  pendingApproval?: PendingApproval;
+}
+
+export function approveToolCall(state: AgentState, toolCallId: string, registry: ToolRegistry): void {
+  if (state.pendingApproval && state.pendingApproval.toolCallId === toolCallId) {
+    state.pendingApproval.status = "approved";
+    registry.approveCall(state.pendingApproval.toolName, state.pendingApproval.arguments);
+    state.status = "running";
+  }
+}
+
+export function rejectToolCall(state: AgentState, toolCallId: string): void {
+  if (state.pendingApproval && state.pendingApproval.toolCallId === toolCallId) {
+    state.pendingApproval.status = "rejected";
+    state.status = "running";
+  }
+}
+
 /**
  * Tool registry.
  *
@@ -25,15 +72,29 @@ export class ToolRegistry {
   private readonly tools = new Map<string, Tool>();
   private readonly approvedCalls = new Set<string>();
   private readonly ticketIdempotencyDb = new Map<string, unknown>();
+  private readonly executedToolCallIds = new Set<string>();
 
   approveCall(name: string, args: unknown): void {
     this.approvedCalls.add(JSON.stringify({ name, args }));
+  }
+
+  isExecuted(toolCallId: string): boolean {
+    return this.executedToolCallIds.has(toolCallId);
+  }
+
+  markExecuted(toolCallId: string): void {
+    this.executedToolCallIds.add(toolCallId);
   }
 
   register(tool: Tool): this {
     if (this.tools.has(tool.definition.name)) {
       throw new Error(`Tool "${tool.definition.name}" is already registered`);
     }
+    const name = tool.definition.name;
+    const risk = (tool.definition as any).risk ||
+      (["get_customer", "getcustomer", "search_documents", "searchdocuments"].includes(name.toLowerCase()) ? "read" : "write");
+    (tool.definition as any).risk = risk;
+
     this.tools.set(tool.definition.name, tool);
     return this;
   }
@@ -77,11 +138,18 @@ export class ToolRegistry {
   }
 
   /** Validate, then execute. The only path that runs tool code. */
-  async executeTool(name: string, rawArguments: unknown): Promise<unknown> {
+  async executeTool(name: string, rawArguments: unknown, toolCallId?: string): Promise<unknown> {
     const args = this.validate({ name, arguments: rawArguments });
     const tool = this.get(name);
 
-    if (["send_email", "update_database"].includes(name)) {
+    if (toolCallId) {
+      if (this.isExecuted(toolCallId)) {
+        console.log(`[Idempotency] toolCallId ${toolCallId} has already been executed. Skipping execution.`);
+        return { success: true, duplicateSkip: true, toolCallId };
+      }
+    }
+
+    if ((tool.definition as any).risk === "write" || ["send_email", "update_database", "create_ticket"].includes(name)) {
       const approvalKey = JSON.stringify({ name, args });
       if (!this.approvedCalls.has(approvalKey)) {
         throw new HumanApprovalRequiredError(name, args);
@@ -92,6 +160,7 @@ export class ToolRegistry {
       const idempotencyKey = JSON.stringify(args);
       if (this.ticketIdempotencyDb.has(idempotencyKey)) {
         console.log(`[Idempotency] Returning existing ticket result for key: ${idempotencyKey}`);
+        if (toolCallId) this.markExecuted(toolCallId);
         return this.ticketIdempotencyDb.get(idempotencyKey);
       }
     }
@@ -111,6 +180,10 @@ export class ToolRegistry {
 
       if (name === "create_ticket") {
         this.ticketIdempotencyDb.set(JSON.stringify(args), result);
+      }
+
+      if (toolCallId) {
+        this.markExecuted(toolCallId);
       }
 
       return result;
@@ -193,7 +266,8 @@ export const createTicketTool: Tool = {
       required: ["customerId", "issueType", "description"],
       additionalProperties: false,
     },
-  },
+    risk: "write",
+  } as any,
   execute: async (args: any) => {
     return { success: true, ticketId: `TKT-${Math.floor(Math.random() * 9000) + 1000}` };
   },
@@ -213,7 +287,8 @@ export const sendEmailTool: Tool = {
       required: ["recipient", "subject", "body"],
       additionalProperties: false,
     },
-  },
+    risk: "write",
+  } as any,
   execute: async (args: any) => {
     return { success: true, sentTo: args.recipient };
   },
@@ -233,7 +308,8 @@ export const updateDatabaseTool: Tool = {
       required: ["customerId", "key", "value"],
       additionalProperties: false,
     },
-  },
+    risk: "write",
+  } as any,
   execute: async (args: any) => {
     return { success: true, updated: `${args.key} = ${args.value}` };
   },

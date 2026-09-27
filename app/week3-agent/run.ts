@@ -6,6 +6,7 @@ import type { ChatMessage } from "./agent/llm.ts";
 import { createScriptedLLM, type ScriptStep } from "./agent/scriptedLlm.ts";
 import { createOpenAILLM, configFromEnv } from "./agent/openaiLlm.ts";
 import { createDefaultRegistry } from "./tools/registry.ts";
+import { approveToolCall, rejectToolCall, type AgentState, type PendingApproval } from "./tools/registry.ts";
 import { HumanApprovalRequiredError } from "./tools/registry.ts";
 
 /**
@@ -72,6 +73,33 @@ async function main(): Promise<void> {
   }
   console.log();
 
+  // --- DEMO 4: FULL APPROVAL FLOW TEST ---
+  console.log("--- Demo 4: Full Human Approval Flow ---");
+  await simulateAgentWithApproval(
+    registry,
+    "Customer 123 has a refund issue. Create a support ticket.",
+    "approve"
+  );
+  console.log();
+
+  // --- DEMO 5: REJECTION FLOW TEST ---
+  console.log("--- Demo 5: Human Rejection Flow ---");
+  await simulateAgentWithApproval(
+    registry,
+    "Customer 123 has a refund issue. Create a support ticket.",
+    "reject"
+  );
+  console.log();
+
+  // --- DEMO 6: DUP PROTECTION TEST ---
+  console.log("--- Demo 6: Same toolCallId Duplicate Protection ---");
+  await simulateAgentWithApproval(
+    registry,
+    "Customer 123 has a refund issue. Create a support ticket.",
+    "duplicate"
+  );
+  console.log();
+
   console.log("--- Running Main Agent Loop ---");
   const liveIndex = process.argv.indexOf("--live");
   const messages: ChatMessage[] = [
@@ -110,6 +138,90 @@ async function main(): Promise<void> {
   console.log();
   console.log(`iterations: ${result.iterations}`);
   console.log(`final answer: ${result.text}`);
+}
+
+async function simulateAgentWithApproval(
+  registry: any,
+  userQuery: string,
+  approvalAction: "approve" | "reject" | "duplicate"
+): Promise<void> {
+  console.log(`[Simulation] Query: "${userQuery}"`);
+
+  const state: AgentState = {
+    status: "running",
+    messages: [{ role: "user", content: userQuery }],
+    tool_results: [],
+    memory: [],
+    plan: ["1. Lookup customer", "2. Search policy", "3. Create support ticket if needed"],
+    iteration: 0,
+  };
+
+  const steps = [
+    { name: "get_customer", args: { customerId: "C123" } },
+    { name: "search_documents", args: { query: "refund policy" } },
+    { name: "create_ticket", args: { customerId: "C123", issueType: "refund", description: "Customer 123 refund issue" } }
+  ];
+
+  const toolCallId = "call_abc123";
+
+  for (const step of steps) {
+    state.iteration++;
+    console.log(`  [Step ${state.iteration}] Agent decides to run: ${step.name}(${JSON.stringify(step.args)})`);
+
+    const tool = registry.get(step.name);
+    const risk = (tool.definition as any).risk;
+    console.log(`    - Tool risk: "${risk}"`);
+
+    if (risk === "write") {
+      state.pendingApproval = {
+        toolCallId,
+        toolName: step.name,
+        arguments: step.args,
+        status: "pending",
+      };
+      state.status = "waiting_for_approval";
+      console.log(`    - [Boundary Intercepted] Write tool paused! State status: "${state.status}"`);
+      break;
+    } else {
+      const res = await registry.executeTool(step.name, step.args);
+      state.tool_results.push({ name: step.name, result: res });
+      console.log(`    - [Auto Execute] Result:`, res);
+    }
+  }
+
+  if (state.status === "waiting_for_approval" && state.pendingApproval) {
+    const pending = state.pendingApproval;
+    console.log(`  --- Human Action: status is ${pending.status} ---`);
+
+    if (approvalAction === "approve") {
+      approveToolCall(state, pending.toolCallId, registry);
+      console.log(`    - State status after approveToolCall: "${state.status}"`);
+      console.log(`    - Pending status: "${state.pendingApproval?.status}"`);
+
+      const res = await registry.executeTool(pending.toolName, pending.arguments, pending.toolCallId);
+      state.tool_results.push({ name: pending.toolName, result: res });
+      state.status = "completed";
+      console.log(`    - [Execute Success] Result:`, res);
+    } else if (approvalAction === "reject") {
+      rejectToolCall(state, pending.toolCallId);
+      console.log(`    - State status after rejectToolCall: "${state.status}"`);
+      console.log(`    - Pending status: "${state.pendingApproval?.status}"`);
+
+      state.messages.push({
+        role: "tool",
+        name: pending.toolName,
+        content: "Error: Human rejected execution of this action.",
+      });
+      state.status = "completed";
+      console.log(`    - [Execute Prevented] Rejection message sent back to Agent.`);
+    } else if (approvalAction === "duplicate") {
+      approveToolCall(state, pending.toolCallId, registry);
+      const res1 = await registry.executeTool(pending.toolName, pending.arguments, pending.toolCallId);
+      console.log(`    - First execution result:`, res1);
+      const res2 = await registry.executeTool(pending.toolName, pending.arguments, pending.toolCallId);
+      console.log(`    - Second execution with same toolCallId result:`, res2);
+    }
+  }
 }
 
 /** Render arguments that may arrive as an object or a JSON string. */
