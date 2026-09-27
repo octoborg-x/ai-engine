@@ -2,6 +2,7 @@
 // eval/run_eval_day2.ts — Week 4 Day 2: deterministic correctness + retrieval scoring
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { resolve, dirname } from "path";
+import { judge, JudgeResult } from "./judge";
 
 const DATASET_PATH = resolve(__dirname, "dataset.jsonl");
 const RESULTS_DIR = resolve(__dirname, "results");
@@ -81,7 +82,7 @@ function computeFaithfulnessScore(answer: string, sources: string[]): { score: n
   return { score, unsupported_claims: unsupported, detected: score < 0.7 };
 }
 
-function main() {
+async function main() {
   console.log("=== Week 4 Day 2 — Deterministic Correctness + Retrieval Scoring ===");
   if (!existsSync(DATASET_PATH)) { console.error("Dataset not found"); process.exit(1); }
   const raw = readFileSync(DATASET_PATH, "utf-8");
@@ -98,7 +99,18 @@ function main() {
     return {...r, tags: rec?.tags || [], correctness_score: computeCorrectnessScore(r.answer || "", rec?.expected_answer || ""), ...computeRetrievalMetrics(r.retrieved_sources || [], rec?.expected_sources || []), retrieval_precision: computeRetrievalMetrics(r.retrieved_sources || [], rec?.expected_sources || []).precision, retrieval_recall: computeRetrievalMetrics(r.retrieved_sources || [], rec?.expected_sources || []).recall, retrieval_hit: computeRetrievalMetrics(r.retrieved_sources || [], rec?.expected_sources || []).hit};
   });
   // Recompute cleanly
-  const finalScored = resultsSource.map((r: any) => {
+  const judgePromises = resultsSource.map(async (r: any) => {
+    const rec = records.find((re) => re.id === r.id);
+    try {
+      const j: JudgeResult = await judge(r.question || "", rec?.expected_answer || "", r.answer || "", r.retrieved_sources || []);
+      return { ...r, judge: j };
+    } catch (err) {
+      console.error(`Judge failed for ${r.id}:`, err);
+      return { ...r, judge: { correctness: 0, relevance: 0, faithfulness: 0, reason: `Judge error: ${err}` } };
+    }
+  });
+  const judgedResults = await Promise.all(judgePromises);
+  const finalScored = judgedResults.map((r: any) => {
     const rec = records.find((re) => re.id === r.id);
     const ret = computeRetrievalMetrics(r.retrieved_sources || [], rec?.expected_sources || []);
     const faith = computeFaithfulnessScore(r.answer || "", r.retrieved_sources || []); return { ...r, tags: rec?.tags || [], correctness_score: computeCorrectnessScore(r.answer || "", rec?.expected_answer || ""), retrieval_precision: ret.precision, retrieval_recall: ret.recall, retrieval_hit: ret.hit, faithfulness_score: faith.score, unsupported_claims: faith.unsupported_claims, hallucination_detected: faith.detected };
@@ -117,8 +129,8 @@ function main() {
     timestamp: new Date().toISOString(), dataset_path: DATASET_PATH, total_cases: total,
     retrieval_cases: retrievalResults.length, answer_accuracy: Math.round(accuracy*100)/100,
     average_correctness: Math.round(avgCorrectness*100)/100, retrieval_precision: Math.round(avgPrecision*100)/100,
-    retrieval_recall: Math.round(avgRecall*100)/100, retrieval_hit_rate: Math.round(hitRate*100)/100, average_faithfulness: Math.round(finalScored.reduce((s, r) => s + (r.faithfulness_score || 0), 0) / total * 100) / 100, hallucination_rate: Math.round(finalScored.filter((r) => r.hallucination_detected).length / total * 100) / 100,
-    per_case: finalScored.map((r) => ({id: r.id, tags: r.tags, correctness_score: r.correctness_score, retrieval_precision: r.retrieval_precision, retrieval_recall: r.retrieval_recall, retrieval_hit: r.retrieval_hit, answer_length: (r.answer||"").length, sources_count: (r.retrieved_sources||[]).length, faithfulness_score: r.faithfulness_score || 0, unsupported_claims: r.unsupported_claims || [], hallucination_detected: !!r.hallucination_detected}))
+    retrieval_recall: Math.round(avgRecall*100)/100, retrieval_hit_rate: Math.round(hitRate*100)/100, average_faithfulness: Math.round(finalScored.reduce((s, r) => s + (r.faithfulness_score || 0), 0) / total * 100) / 100, hallucination_rate: Math.round(finalScored.filter((r) => r.hallucination_detected).length / total * 100) / 100, judge_correctness: Math.round(finalScored.reduce((s, r) => s + ((r.judge?.correctness ?? 0) as number), 0) / total * 100) / 100, judge_relevance: Math.round(finalScored.reduce((s, r) => s + ((r.judge?.relevance ?? 0) as number), 0) / total * 100) / 100, judge_faithfulness: Math.round(finalScored.reduce((s, r) => s + ((r.judge?.faithfulness ?? 0) as number), 0) / total * 100) / 100,
+    per_case: finalScored.map((r) => ({id: r.id, tags: r.tags, correctness_score: r.correctness_score, retrieval_precision: r.retrieval_precision, retrieval_recall: r.retrieval_recall, retrieval_hit: r.retrieval_hit, answer_length: (r.answer||"").length, sources_count: (r.retrieved_sources||[]).length, faithfulness_score: r.faithfulness_score || 0, unsupported_claims: r.unsupported_claims || [], hallucination_detected: !!r.hallucination_detected, judge_correctness: r.judge?.correctness ?? 0, judge_relevance: r.judge?.relevance ?? 0, judge_faithfulness: r.judge?.faithfulness ?? 0, judge_reason: r.judge?.reason ?? ""}))
   }, null, 2), "utf-8");
   console.log(`\nSummary written to ${summaryPath}`);
   console.log(`  answer_accuracy: ${Math.round(accuracy*100)/100}`);
@@ -126,6 +138,6 @@ function main() {
   console.log(`  retrieval_precision: ${Math.round(avgPrecision*100)/100}`);
   console.log(`  retrieval_recall: ${Math.round(avgRecall*100)/100}`);
   console.log(`  retrieval_hit_rate: ${Math.round(hitRate*100)/100}`);
-  console.log("No LLM judge used. Deterministic scores.");
+  console.log("LLM-as-judge integrated alongside deterministic metrics. Structured JSON validated loudly.");
 }
-main();
+main().catch((err) => { console.error(err); process.exit(1); });
