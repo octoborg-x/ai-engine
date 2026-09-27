@@ -1,22 +1,22 @@
-// eval/judge.ts — LLM-as-judge (Gemini via direct API, Week 4 Day 4)
+// eval/judge.ts — LLM-as-judge (Groq via OpenAI-compatible endpoint, Week 4 Day 4)
 export interface JudgeResult { correctness: number; relevance: number; faithfulness: number; reason: string; }
 function buildPrompt(question: string, expected: string, answer: string, sources: string[]): string {
   const ctx = sources.join("\n---\n") || "(no sources retrieved)";
   return "Judge evaluation.\nQUESTION: " + question + "\nEXPECTED: " + expected + "\nANSWER: " + answer + "\nCONTEXT: " + ctx + "\nRespond ONLY JSON: {\"correctness\":0.0,\"relevance\":0.0,\"faithfulness\":0.0,\"reason\":\"...\"}";
 }
 export async function judge(question: string, expectedAnswer: string, generatedAnswer: string, retrievedSources: string[]): Promise<JudgeResult> {
-  const apiKey = process.env.GEMINI_APIKEY_2 || process.env.GEMINI_APIKEY || process.env.OPENROUTER_API_KEY || "";
-  const model = process.env.JUDGE_MODEL || "gemini-1.5-flash";
+  const apiKey = process.env.GROQ_API_KEY || process.env.OPENROUTER_API_KEY || "";
+  const model = process.env.JUDGE_MODEL || "mixtral-8x7b-32768";
   const prompt = buildPrompt(question, expectedAnswer, generatedAnswer, retrievedSources);
-  const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
+  const url = (process.env.GROQ_BASE_URL || "https://api.groq.com/openai/v1") + "/chat/completions";
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.0, maxOutputTokens: 512, responseMimeType: "application/json" } }),
+    body: JSON.stringify({ model: model, messages: [{ role: "user", content: prompt }], temperature: 0.0, max_tokens: 512 }),
   });
-  if (!res.ok) { const t = await res.text(); throw new Error("Judge Gemini request failed (" + res.status + "): " + t); }
+  if (!res.ok) { const t = await res.text(); throw new Error("Judge Groq request failed (" + res.status + "): " + t); }
   const data: any = await res.json();
-  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || data.candidates?.[0]?.content || "";
+  const raw = data.choices?.[0]?.message?.content || "";
   let clean = (typeof raw === "string" ? raw : JSON.stringify(raw)).trim();
   if (clean.startsWith("```")) { clean = clean.replace(/^```(json)?\n/, "").replace(/\n```$/, "").trim(); }
   const parsed = JSON.parse(clean);
