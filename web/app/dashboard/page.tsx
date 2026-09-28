@@ -45,7 +45,7 @@ export default function EvalDashboard() {
     <main style={{ padding: "2rem", maxWidth: 980, margin: "0 auto", fontFamily: "system-ui, sans-serif", color: "#111" }}>
       <header style={{ marginBottom: "1.5rem" }}>
         <h1>AI Evaluation Dashboard</h1>
-        <p style={{ color: "#555" }}>Week 4 · Day 6 · Source: <code>eval/results/summary.json</code> · Loader: <code>eval/dashboard.ts</code></p>
+        <p style={{ color: "#555" }}>Week 4 · Day 6 · Source: <code>eval-week4/results/summary.json</code> · Loader: <code>eval-week4/dashboard.ts</code></p>
       </header>
 
       <section style={{ marginBottom: "2rem", border: "1px solid #ddd", borderRadius: 12, padding: "1rem" }}>
@@ -110,7 +110,7 @@ export default function EvalDashboard() {
 
       <section style={{ marginBottom: "2rem", border: "1px solid #ddd", borderRadius: 12, padding: "1rem", background: regStatus.overall === "FAIL" ? "#fff5f5" : "#f5fff9" }}>
         <h2>6. Regression Status <span style={{ fontSize: 16, color: regStatus.overall === "FAIL" ? "#c00" : "#2a8f5e", fontWeight: 700 }}>{regStatus.overall}</span></h2>
-        <p style={{ fontSize: 12, color: "#555" }}>Current vs <code>eval/baseline.json</code> with thresholds from <code>summary.json</code>.</p>
+        <p style={{ fontSize: 12, color: "#555" }}>Current vs <code>eval-week4/baseline.json</code> with thresholds from <code>summary.json</code>.</p>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginTop: 8 }}>
           <thead><tr style={{ borderBottom: "2px solid #ccc", textAlign: "left" }}><th style={{ padding: 6 }}>Metric</th><th style={{ padding: 6 }}>Current</th><th style={{ padding: 6 }}>Threshold</th><th style={{ padding: 6 }}>Op</th><th style={{ padding: 6 }}>Status</th></tr></thead>
           <tbody>
@@ -128,7 +128,7 @@ export default function EvalDashboard() {
       </section>
 
       <footer style={{ borderTop: "1px solid #ddd", paddingTop: 12, fontSize: 11, color: "#777" }}>
-        Source: <code>eval/results/summary.json</code> (actual measurements) · <code>eval/baseline.json</code> (thresholds) · <code>eval/dashboard.ts</code> (loader). Re-run <code>npx tsx eval/run_eval.ts</code> then refresh.
+        Source: <code>eval-week4/results/summary.json</code> (actual measurements) · <code>eval-week4/baseline.json</code> (thresholds) · <code>eval-week4/dashboard.ts</code> (loader). Re-run <code>npx tsx eval-week4/run_eval.ts</code> then refresh.
       </footer>
     </main>
   );

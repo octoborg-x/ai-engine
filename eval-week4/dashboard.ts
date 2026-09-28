@@ -2,8 +2,8 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 
 export function loadDashboardData() {
-  const summary = JSON.parse(readFileSync(resolve("eval/results/summary.json"), "utf-8"));
-  const baseline = JSON.parse(readFileSync(resolve("eval/baseline.json"), "utf-8"));
+  const summary = JSON.parse(readFileSync(resolve("eval-week4/results/summary.json"), "utf-8"));
+  const baseline = JSON.parse(readFileSync(resolve("eval-week4/baseline.json"), "utf-8"));
   return { summary, baseline };
 }
 
