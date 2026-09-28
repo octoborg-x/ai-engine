@@ -1,0 +1,6 @@
+{
+  "answer_accuracy": 0.85,
+  "hallucination_rate": 0.10,
+  "average_latency_ms": 1200,
+  "average_cost_per_request_usd": 0.004
+}
