@@ -28,7 +28,9 @@ for i in range(20):
     b.grad.zero_()
 
     if (i + 1) % 5 == 0:
-        print(f"iter {i+1}: prediction={y_pred.item():.4f}, loss={loss.item():.4f}, w={w.item():.4f}, b={b.item():.4f}")
+        print(
+            f"iter {i + 1}: prediction={y_pred.item():.4f}, loss={loss.item():.4f}, w={w.item():.4f}, b={b.item():.4f}"
+        )
 
 print("updated w:", w.item())
 print("updated b:", b.item())
