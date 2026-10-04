@@ -56,7 +56,9 @@ def evaluate(name, model, X_tr, y_tr, X_va, y_va, X_te, y_te):
 
     # Confusion matrix on validation
     cm = confusion_matrix(y_va, preds_va)
-    tn, fp, fn, tp = cm.ravel() if cm.size == 4 else (0, 0, 0, 0)
+    if cm.size == 4:
+        tn, fp, fn, tp = cm.ravel()
+        print(f"    CM: TP={tp} FP={fp} FN={fn} TN={tn}")
 
     def metrics(y_true, y_pred, probs=None):
         return {
