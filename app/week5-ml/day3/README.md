@@ -12,15 +12,15 @@ Dataset
     └─→ Test       → final estimate of generalization
 ```
 
-**Overfitting** = good on train, bad on unseen.  
-**Underfitting** = too simple to capture signal.  
+**Overfitting** = good on train, bad on unseen.
+**Underfitting** = too simple to capture signal.
 **Regularization** = deliberately constrain complexity to improve generalization.
 
 ---
 
 ## Experiment (`experiment.py`)
 
-Uses `sklearn.datasets.make_classification` (85% negative / 15% positive, 1000 samples).  
+Uses `sklearn.datasets.make_classification` (85% negative / 15% positive, 1000 samples).
 Train / validation / test split with `stratify=y` to preserve class ratios.
 
 ### Model progression
