@@ -64,10 +64,10 @@ function extractKeyTerms(text: string): string[] {
 function computeFaithfulnessScore(answer: string, sources: string[]): { score: number; unsupported_claims: string[]; detected: boolean } {
   const claims = splitClaims(answer);
   if (claims.length === 0) return { score: 1.0, unsupported_claims: [], detected: false };
-  
+
   const sourceText = sources.join(" ").toLowerCase();
   const unsupported: string[] = [];
-  
+
   for (const claim of claims) {
     const terms = extractKeyTerms(claim);
     if (terms.length === 0) continue;
@@ -77,7 +77,7 @@ function computeFaithfulnessScore(answer: string, sources: string[]): { score: n
       unsupported.push(claim);
     }
   }
-  
+
   const score = claims.length > 0 ? Math.round((1 - unsupported.length / claims.length) * 100) / 100 : 1.0;
   return { score, unsupported_claims: unsupported, detected: score < 0.7 };
 }

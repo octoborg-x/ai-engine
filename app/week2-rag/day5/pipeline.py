@@ -3,11 +3,7 @@
 import numpy as np
 
 from .bm25 import BM25
-from .citations import (
-    build_sources,
-    format_context_with_citations,
-    validate_citations,
-)
+from .citations import build_sources, format_context_with_citations, validate_citations
 from .models import Chunk, SearchResult
 from .recall import fuse_candidates
 from .reranker import CrossEncoderReranker

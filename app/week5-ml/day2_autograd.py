@@ -1,3 +1,5 @@
+"""Autograd and gradient descent demonstration using PyTorch."""
+
 import torch
 
 # 1. Parameters we want to learn
@@ -29,7 +31,8 @@ for i in range(20):
 
     if (i + 1) % 5 == 0:
         print(
-            f"iter {i + 1}: prediction={y_pred.item():.4f}, loss={loss.item():.4f}, w={w.item():.4f}, b={b.item():.4f}"
+            f"iter {i + 1}: prediction={y_pred.item():.4f}, "
+            f"loss={loss.item():.4f}, w={w.item():.4f}, b={b.item():.4f}"
         )
 
 print("updated w:", w.item())

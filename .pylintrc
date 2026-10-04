@@ -1,10 +1,12 @@
 [MASTER]
 # Add the current directory and the specific week directory to the path
 # so Pylint can find 'chunker'
-init-hook="import sys; sys.path.append('.'); sys.path.append('./week2/day2')"
+init-hook="import sys; sys.path.append('.'); sys.path.append('./app/week2-rag/day2')"
+ignored-modules=torch
 
 [BASIC]
-# Allow snake_case for constants (module-level variables)
-# This fixes: Constant name "document" doesn't conform to UPPER_CASE naming style
-const-naming-style=snake_case
-const-rgx=[a-z_][a-z0-9_]{2,30}$
+# Allow hyphens in module/directory names such as week2-rag
+module-naming-style=any
+
+# Allow snake_case, single letters (w, b, x), and ML matrix naming conventions (X_train, X_test)
+const-naming-style=any

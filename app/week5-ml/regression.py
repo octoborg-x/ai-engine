@@ -1,3 +1,5 @@
+"""Linear regression training and evaluation using scikit-learn."""
+
 from sklearn.datasets import load_diabetes
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error
