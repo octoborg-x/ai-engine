@@ -1,6 +1,6 @@
-import torch
-from torch.utils.data import Dataset, DataLoader, random_split
 import model
+import torch
+from torch.utils.data import DataLoader, Dataset, random_split
 
 
 class TabularDataset(Dataset):
@@ -21,8 +21,9 @@ def main():
     dataset = TabularDataset(n=200)
     train_size = int(0.8 * len(dataset))
     val_size = len(dataset) - train_size
-    train_ds, val_ds = random_split(dataset, [train_size, val_size],
-                                    generator=torch.Generator().manual_seed(42))
+    train_ds, val_ds = random_split(
+        dataset, [train_size, val_size], generator=torch.Generator().manual_seed(42)
+    )
 
     train_loader = DataLoader(train_ds, batch_size=16, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=16)
@@ -59,7 +60,9 @@ def main():
         avg_train = sum(train_losses) / len(train_losses)
         avg_val = sum(val_losses) / len(val_losses)
         acc = correct / total
-        print(f"epoch={epoch:02d} train_loss={avg_train:.4f} val_loss={avg_val:.4f} val_acc={acc:.3f}")
+        print(
+            f"epoch={epoch:02d} train_loss={avg_train:.4f} val_loss={avg_val:.4f} val_acc={acc:.3f}"
+        )
 
     # inference on unseen samples
     net.eval()
@@ -68,7 +71,12 @@ def main():
         out = net(unseen)
         probs = torch.sigmoid(out)
         preds = (probs >= 0.5).float()
-    print("inference unseen:", probs.squeeze().tolist(), "preds:", preds.squeeze().tolist())
+    print(
+        "inference unseen:",
+        probs.squeeze().tolist(),
+        "preds:",
+        preds.squeeze().tolist(),
+    )
 
 
 if __name__ == "__main__":
