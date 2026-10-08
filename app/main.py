@@ -20,43 +20,11 @@ from app.telemetry.logging import (
     get_trace_id,
     set_request_context,
 )
+from app.telemetry.metrics import MetricsCollector
 
 configure_logging()
 logger = logging.getLogger("app.request")
 app = FastAPI(title="AI API Project")
-
-
-@app.middleware("http")
-async def observability_middleware(request: Request, call_next):
-    tokens = set_request_context(
-        request.headers.get("x-request-id"),
-        request.headers.get("x-trace-id"),
-    )
-    started = time.perf_counter()
-    status = "success"
-    try:
-        logger.info(
-            "request started",
-            extra={"event": "request.start", "status": "started"},
-        )
-        response = await call_next(request)
-        response.headers["x-request-id"] = get_request_id()
-        response.headers["x-trace-id"] = get_trace_id()
-        status = "success" if response.status_code < 500 else "error"
-        return response
-    except Exception:
-        status = "error"
-        raise
-    finally:
-        logger.info(
-            "request completed",
-            extra={
-                "event": "request.end",
-                "latency_ms": round((time.perf_counter() - started) * 1000, 2),
-                "status": status,
-            },
-        )
-        clear_request_context(tokens)
 
 
 @app.middleware("http")
@@ -82,6 +50,56 @@ async def api_security_middleware(request: Request, call_next):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.middleware("http")
+async def observability_middleware(request: Request, call_next):
+    tokens = set_request_context(
+        request.headers.get("x-request-id"),
+        request.headers.get("x-trace-id"),
+    )
+    started = time.perf_counter()
+    status = "success"
+    response = None
+    try:
+        logger.info(
+            "request started",
+            extra={"event": "request.start", "status": "started"},
+        )
+        response = await call_next(request)
+        response.headers["x-request-id"] = get_request_id()
+        response.headers["x-trace-id"] = get_trace_id()
+        status = "success" if response.status_code < 500 else "error"
+        return response
+    except Exception:
+        status = "error"
+        raise
+    finally:
+        logger.info(
+            "request completed",
+            extra={
+                "event": "request.end",
+                "latency_ms": round((time.perf_counter() - started) * 1000, 2),
+                "status": status,
+            },
+        )
+        status_code = (
+            response.status_code
+            if response is not None
+            else (500 if status == "error" else 200)
+        )
+        MetricsCollector.record_http(
+            request.method,
+            request.url.path,
+            status_code,
+            round((time.perf_counter() - started) * 1000, 2),
+        )
+        clear_request_context(tokens)
+
+
+@app.get("/metrics")
+def metrics_endpoint():
+    return MetricsCollector.snapshot()
 
 
 @app.get("/ready")
