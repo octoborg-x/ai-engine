@@ -19,3 +19,15 @@ Failed attempts emit status: error. Retry scheduling emits a separate llm.retry 
 Prompt contents are intentionally excluded from telemetry.
 
 Streaming calls are also timed, but token counts remain null when the provider does not expose usage through the current streaming path. Missing usage is not reported as zero.
+
+## Metrics endpoint (Day 4)
+
+GET /metrics returns aggregated, machine-readable production metrics.
+- http_requests_total: by (method, path, status)
+- http_latency_ms_avg: by (method, path) in ms
+- llm_calls_total: by (model, status)
+- llm_latency_ms_avg: by model in ms
+- llm_input/output/total_tokens_total: aggregated
+- llm_estimated_cost_usd_total: aggregated USD
+
+Safe: only counts/avg/model names; no prompts/auth/user data.

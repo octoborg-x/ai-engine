@@ -20,6 +20,7 @@ from app.telemetry.logging import (
     get_trace_id,
     set_request_context,
 )
+from app.telemetry.metrics import MetricsCollector
 
 configure_logging()
 logger = logging.getLogger("app.request")
@@ -34,6 +35,7 @@ async def observability_middleware(request: Request, call_next):
     )
     started = time.perf_counter()
     status = "success"
+    response = None
     try:
         logger.info(
             "request started",
@@ -55,6 +57,17 @@ async def observability_middleware(request: Request, call_next):
                 "latency_ms": round((time.perf_counter() - started) * 1000, 2),
                 "status": status,
             },
+        )
+        status_code = (
+            response.status_code
+            if response is not None
+            else (500 if status == "error" else 200)
+        )
+        MetricsCollector.record_http(
+            request.method,
+            request.url.path,
+            status_code,
+            round((time.perf_counter() - started) * 1000, 2),
         )
         clear_request_context(tokens)
 
@@ -82,6 +95,11 @@ async def api_security_middleware(request: Request, call_next):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/metrics")
+def metrics_endpoint():
+    return MetricsCollector.snapshot()
 
 
 @app.get("/ready")
