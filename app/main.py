@@ -28,6 +28,31 @@ app = FastAPI(title="AI API Project")
 
 
 @app.middleware("http")
+async def api_security_middleware(request: Request, call_next):
+    """Enforce rate limit -> authentication -> validation -> LLM."""
+    if request.url.path in ["/chat", "/ask"] and request.method == "POST":
+        try:
+            remaining, window = rate_limiter.check(client_key(request))
+            authenticate(request)
+        except HTTPException as exc:
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={"detail": exc.detail},
+                headers=exc.headers,
+            )
+        response = await call_next(request)
+        response.headers["X-RateLimit-Remaining"] = str(remaining)
+        response.headers["X-RateLimit-Window"] = str(window)
+        return response
+    return await call_next(request)
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+@app.middleware("http")
 async def observability_middleware(request: Request, call_next):
     tokens = set_request_context(
         request.headers.get("x-request-id"),
@@ -70,31 +95,6 @@ async def observability_middleware(request: Request, call_next):
             round((time.perf_counter() - started) * 1000, 2),
         )
         clear_request_context(tokens)
-
-
-@app.middleware("http")
-async def api_security_middleware(request: Request, call_next):
-    """Enforce rate limit -> authentication -> validation -> LLM."""
-    if request.url.path in ["/chat", "/ask"] and request.method == "POST":
-        try:
-            remaining, window = rate_limiter.check(client_key(request))
-            authenticate(request)
-        except HTTPException as exc:
-            return JSONResponse(
-                status_code=exc.status_code,
-                content={"detail": exc.detail},
-                headers=exc.headers,
-            )
-        response = await call_next(request)
-        response.headers["X-RateLimit-Remaining"] = str(remaining)
-        response.headers["X-RateLimit-Window"] = str(window)
-        return response
-    return await call_next(request)
-
-
-@app.get("/health")
-def health():
-    return {"status": "ok"}
 
 
 @app.get("/metrics")

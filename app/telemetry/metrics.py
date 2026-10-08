@@ -82,9 +82,13 @@ class MetricsCollector:
     @staticmethod
     def snapshot() -> dict:
         result = {
-            "http_requests_total": dict(_METRICS["http_requests_total"]),
+            "http_requests_total": {
+                str(k): v for k, v in _METRICS["http_requests_total"].items()
+            },
             "http_latency_ms_avg": {},
-            "llm_calls_total": dict(_METRICS["llm_calls_total"]),
+            "llm_calls_total": {
+                str(k): v for k, v in _METRICS["llm_calls_total"].items()
+            },
             "llm_latency_ms_avg": {},
             "llm_input_tokens_total": _METRICS["llm_input_tokens_total"],
             "llm_output_tokens_total": _METRICS["llm_output_tokens_total"],

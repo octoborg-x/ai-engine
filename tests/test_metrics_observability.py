@@ -35,7 +35,7 @@ def test_failed_llm_increments_error_metrics():
     MetricsCollector.reset()
     MetricsCollector.record_llm(model="test/model", status="error", latency_ms=100.0)
     metrics = MetricsCollector.snapshot()
-    assert metrics["llm_calls_total"].get(("test/model", "error"), 0) >= 1
+    assert metrics["llm_calls_total"].get("('test/model', 'error')", 0) >= 1
 
 
 def test_token_cost_aggregated():
