@@ -24,6 +24,24 @@ logger = logging.getLogger(__name__)
 _client: AsyncOpenAI | None = None
 
 
+class _LazyCompletions:
+    async def create(self, **kwargs):
+        return await _get_client().chat.completions.create(**kwargs)
+
+
+class _LazyChat:
+    def __init__(self) -> None:
+        self.completions = _LazyCompletions()
+
+
+class _LazyClient:
+    def __init__(self) -> None:
+        self.chat = _LazyChat()
+
+
+client = _LazyClient()
+
+
 def _get_client() -> AsyncOpenAI:
     """Build the provider client only when an LLM call is actually needed.
 
@@ -69,7 +87,7 @@ llm_retry = retry(
 
 
 async def _completion(model: str, messages: list[dict[str, str]]):
-    return await _get_client().chat.completions.create(
+    return await client.chat.completions.create(
         model=model,
         messages=messages,
     )
@@ -118,7 +136,7 @@ async def ask_stream(prompt: str) -> AsyncGenerator[str, None]:
     started = time.perf_counter()
     status = "error"
     try:
-        stream = await _get_client().chat.completions.create(
+        stream = await client.chat.completions.create(
             model=decision.model,
             messages=[{"role": "user", "content": prompt}],
             stream=True,
