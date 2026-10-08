@@ -282,3 +282,23 @@ async def test_authenticate_rejects_invalid_token(monkeypatch):
     with pytest.raises(api.HTTPException) as exc_info:
         api.authenticate(Request(scope))
     assert exc_info.value.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_health_no_llm_secret(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    assert api.health() == {"status": "ok"}
+
+
+@pytest.mark.asyncio
+async def test_ready_with_key(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    result = api.ready()
+    assert result == {"status": "ready"}
+
+
+@pytest.mark.asyncio
+async def test_ready_without_key(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    result = api.ready()
+    assert result.status_code == 503

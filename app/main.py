@@ -1,4 +1,5 @@
 import logging
+import os
 import time
 
 from fastapi import FastAPI, HTTPException, Request
@@ -81,6 +82,16 @@ async def api_security_middleware(request: Request, call_next):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/ready")
+def ready():
+    if os.getenv("OPENROUTER_API_KEY"):
+        return {"status": "ready"}
+    return JSONResponse(
+        status_code=503,
+        content={"status": "not ready", "detail": "OPENROUTER_API_KEY missing"},
+    )
 
 
 def _provider_error(e: Exception) -> HTTPException:
