@@ -19,13 +19,49 @@ from app.telemetry.metrics import calculate_cost, record_call
 
 load_dotenv()
 
-client = AsyncOpenAI(
-    api_key=os.environ["OPENROUTER_API_KEY"],
-    base_url="https://openrouter.ai/api/v1",
-    timeout=30.0,
-)
-
 logger = logging.getLogger(__name__)
+
+_client: AsyncOpenAI | None = None
+
+
+class _LazyCompletions:
+    async def create(self, **kwargs):
+        return await _get_client().chat.completions.create(**kwargs)
+
+
+class _LazyChat:
+    def __init__(self) -> None:
+        self.completions = _LazyCompletions()
+
+
+class _LazyClient:
+    def __init__(self) -> None:
+        self.chat = _LazyChat()
+
+
+client = _LazyClient()
+
+
+def _get_client() -> AsyncOpenAI:
+    """Build the provider client only when an LLM call is actually needed.
+
+    This keeps non-LLM endpoints such as /health importable without secrets.
+    The OpenAI-compatible base URL is configurable for deployment portability.
+    """
+    global _client
+
+    if _client is None:
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            raise RuntimeError("OPENROUTER_API_KEY is not configured")
+
+        _client = AsyncOpenAI(
+            api_key=api_key,
+            base_url=os.getenv("LLM_BASE_URL", "https://openrouter.ai/api/v1"),
+            timeout=float(os.getenv("LLM_TIMEOUT_SECONDS", "30")),
+        )
+
+    return _client
 
 
 def _log_retry(retry_state) -> None:
@@ -51,7 +87,10 @@ llm_retry = retry(
 
 
 async def _completion(model: str, messages: list[dict[str, str]]):
-    return await client.chat.completions.create(model=model, messages=messages)
+    return await client.chat.completions.create(
+        model=model,
+        messages=messages,
+    )
 
 
 @llm_retry
