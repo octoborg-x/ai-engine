@@ -13,12 +13,14 @@ def infer(input_data):
         preds = (probs >= 0.5).float()
     result = []
     for i in range(len(input_data)):
-        result.append({
-            "input": input_data[i],
-            "probability": round(probs[i].item(), 4),
-            "prediction": int(preds[i].item()),
-            "label": "positive" if preds[i].item() == 1 else "negative",
-        })
+        result.append(
+            {
+                "input": input_data[i],
+                "probability": round(probs[i].item(), 4),
+                "prediction": int(preds[i].item()),
+                "label": "positive" if preds[i].item() == 1 else "negative",
+            }
+        )
     return result
 
 

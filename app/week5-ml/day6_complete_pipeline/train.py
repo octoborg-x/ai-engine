@@ -1,8 +1,9 @@
 import csv
+
 import torch
-import torch.nn as nn
-from model import BinaryClassifier
 from data import get_loaders
+from model import BinaryClassifier
+from torch import nn
 
 
 def train(hidden=16, lr=0.05, epochs=20, log_path="metrics.csv"):
@@ -45,7 +46,9 @@ def train(hidden=16, lr=0.05, epochs=20, log_path="metrics.csv"):
             avg_val = sum(val_losses) / len(val_losses)
             acc = correct / total
             writer.writerow([epoch, f"{avg_train:.4f}", f"{avg_val:.4f}", f"{acc:.4f}"])
-            print(f"epoch={epoch} train_loss={avg_train:.4f} val_loss={avg_val:.4f} val_acc={acc:.4f}")
+            print(
+                f"epoch={epoch} train_loss={avg_train:.4f} val_loss={avg_val:.4f} val_acc={acc:.4f}"
+            )
 
             if acc > best_acc:
                 best_acc = acc
