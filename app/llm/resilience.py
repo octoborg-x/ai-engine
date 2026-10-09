@@ -40,7 +40,7 @@ class CircuitBreaker:
         await self._acquire_permission()
         try:
             result = await asyncio.wait_for(operation(), timeout=timeout_seconds)
-        except BaseException as exc:
+        except Exception as exc:
             await self._record_failure(exc)
             raise
         await self._record_success()
