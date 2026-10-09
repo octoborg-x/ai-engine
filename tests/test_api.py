@@ -302,3 +302,64 @@ async def test_ready_without_key(monkeypatch):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     result = api.ready()
     assert result.status_code == 503
+
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("method", "path"),
+    [
+        ("POST", "/chat"),
+        ("POST", "/ask"),
+        ("POST", "/chat/stream"),
+        ("POST", "/extract-ticket"),
+        ("POST", "/jobs"),
+        ("GET", "/jobs/job-123"),
+        ("GET", "/metrics"),
+    ],
+)
+async def test_protected_endpoints_reject_missing_token(
+    monkeypatch, method, path
+):
+    monkeypatch.setenv("API_AUTH_TOKEN", "secret-token")
+    monkeypatch.setattr(api, "rate_limiter", InMemoryRateLimiter(100, 60))
+    scope = {
+        "type": "http",
+        "method": method,
+        "path": path,
+        "headers": [],
+        "client": ("test-client", 1234),
+        "query_string": b"",
+        "scheme": "http",
+        "server": ("test", 80),
+        "root_path": "",
+        "http_version": "1.1",
+    }
+    called = False
+
+    async def call_next(_request):
+        nonlocal called
+        called = True
+        return Response("ok")
+
+    response = await api.api_security_middleware(Request(scope), call_next)
+    assert response.status_code == 401
+    assert called is False
+
+
+def test_health_and_readiness_probes_remain_public():
+    health_scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/health",
+        "headers": [],
+        "client": ("test-client", 1234),
+        "query_string": b"",
+        "scheme": "http",
+        "server": ("test", 80),
+        "root_path": "",
+        "http_version": "1.1",
+    }
+    ready_scope = {**health_scope, "path": "/ready"}
+    assert api._requires_authentication(Request(health_scope)) is False
+    assert api._requires_authentication(Request(ready_scope)) is False
