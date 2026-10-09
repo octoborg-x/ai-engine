@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.telemetry.metrics import MetricsCollector
 
-os.environ.setdefault("API_AUTH_TOKEN", "test-auth-token")
+os.environ["API_AUTH_TOKEN"] = "test-auth-token"
 
 client = TestClient(app)
 auth_headers = {"Authorization": "Bearer test-auth-token"}
