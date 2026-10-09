@@ -166,7 +166,8 @@ async def extract_ticket(req: TicketRequest):
 
 
 # Background jobs are isolated from the synchronous LLM endpoints above.
-from app.jobs import router as jobs_router, start_workers, stop_workers  # noqa: E402
+from app.jobs import router as jobs_router
+from app.jobs import start_workers, stop_workers
 
 app.include_router(jobs_router)
 app.add_event_handler("startup", start_workers)

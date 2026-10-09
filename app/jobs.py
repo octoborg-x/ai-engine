@@ -3,6 +3,7 @@
 This first implementation is intentionally in-memory: jobs are not durable across
 process restarts and should not be used as a multi-worker production queue.
 """
+
 import asyncio
 import logging
 import time
@@ -78,7 +79,7 @@ async def _worker() -> None:
             if job is not None:
                 job.status = "queued"
             raise
-        except Exception as exc:  # isolate failures so the worker keeps running
+        except Exception:  # isolate failures so the worker keeps running
             if job is not None:
                 job.status = "failed"
                 job.error = "Job processing failed"

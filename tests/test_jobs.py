@@ -1,8 +1,12 @@
 """Focused tests for bounded background job submission and execution."""
+
 import asyncio
+
 import pytest
 from fastapi import HTTPException
-import app.jobs as jobs
+
+from app import jobs
+
 
 @pytest.fixture(autouse=True)
 async def clean_job_state():
@@ -18,10 +22,12 @@ async def clean_job_state():
         jobs._queue.get_nowait()
         jobs._queue.task_done()
 
+
 @pytest.mark.asyncio
 async def test_submit_returns_queued_job_and_worker_completes(monkeypatch):
     async def fake_process(prompt: str) -> str:
         return f"test result: {prompt}"
+
     monkeypatch.setattr(jobs, "process_prompt", fake_process)
     await jobs.start_workers()
     accepted = await jobs.submit_job(jobs.JobSubmission(prompt="summarize"))
@@ -32,15 +38,18 @@ async def test_submit_returns_queued_job_and_worker_completes(monkeypatch):
     assert result.result == "test result: summarize"
     assert result.duration_ms is not None
 
+
 @pytest.mark.asyncio
 async def test_failed_job_does_not_kill_worker(monkeypatch):
     calls = 0
+
     async def flaky_process(prompt: str) -> str:
         nonlocal calls
         calls += 1
         if prompt == "fail":
             raise RuntimeError("private provider detail")
         return "ok"
+
     monkeypatch.setattr(jobs, "process_prompt", flaky_process)
     await jobs.start_workers()
     failed = await jobs.submit_job(jobs.JobSubmission(prompt="fail"))
@@ -54,11 +63,13 @@ async def test_failed_job_does_not_kill_worker(monkeypatch):
     assert succeeded_view.status == "succeeded"
     assert calls == 2
 
+
 @pytest.mark.asyncio
 async def test_missing_job_returns_404():
     with pytest.raises(HTTPException) as exc:
         await jobs.get_job("missing")
     assert exc.value.status_code == 404
+
 
 @pytest.mark.asyncio
 async def test_full_queue_returns_503(monkeypatch):
