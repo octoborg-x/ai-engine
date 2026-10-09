@@ -55,7 +55,10 @@ async def test_successful_half_open_probe_closes_circuit():
         await breaker.call(lambda: _fail(), timeout_seconds=0.1)
 
     await asyncio.sleep(0.005)
-    assert await breaker.call(lambda: _value("recovered"), timeout_seconds=0.1) == "recovered"
+    assert (
+        await breaker.call(lambda: _value("recovered"), timeout_seconds=0.1)
+        == "recovered"
+    )
     assert breaker.state == "CLOSED"
     assert breaker.failure_count == 0
 

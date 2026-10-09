@@ -82,7 +82,9 @@ def _log_retry(retry_state) -> None:
 llm_retry = retry(
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=2, max=10),
-    retry=retry_if_exception_type((APITimeoutError, RateLimitError, APIError, asyncio.TimeoutError)),
+    retry=retry_if_exception_type(
+        (APITimeoutError, RateLimitError, APIError, asyncio.TimeoutError)
+    ),
     before_sleep=_log_retry,
     reraise=True,
 )
