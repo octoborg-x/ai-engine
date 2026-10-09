@@ -170,5 +170,10 @@ from app.jobs import router as jobs_router
 from app.jobs import start_workers, stop_workers
 
 app.include_router(jobs_router)
-app.add_event_handler("startup", start_workers)
-app.add_event_handler("shutdown", stop_workers)
+@app.on_event("startup")
+async def startup_event():
+    await start_workers()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await stop_workers()
