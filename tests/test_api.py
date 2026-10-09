@@ -304,7 +304,6 @@ async def test_ready_without_key(monkeypatch):
     assert result.status_code == 503
 
 
-
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("method", "path"),
@@ -318,9 +317,7 @@ async def test_ready_without_key(monkeypatch):
         ("GET", "/metrics"),
     ],
 )
-async def test_protected_endpoints_reject_missing_token(
-    monkeypatch, method, path
-):
+async def test_protected_endpoints_reject_missing_token(monkeypatch, method, path):
     monkeypatch.setenv("API_AUTH_TOKEN", "secret-token")
     monkeypatch.setattr(api, "rate_limiter", InMemoryRateLimiter(100, 60))
     scope = {
