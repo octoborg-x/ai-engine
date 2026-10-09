@@ -1,14 +1,19 @@
+import os
+
 from fastapi.testclient import TestClient
 
 from app.main import app
 from app.telemetry.metrics import MetricsCollector
 
+os.environ["API_AUTH_TOKEN"] = "test-auth-token"
+
 client = TestClient(app)
+auth_headers = {"Authorization": "Bearer test-auth-token"}
 
 
 def test_metrics_endpoint_available():
     MetricsCollector.reset()
-    response = client.get("/metrics")
+    response = client.get("/metrics", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert "http_requests_total" in data
@@ -18,7 +23,7 @@ def test_metrics_endpoint_available():
 def test_chat_increments_http_metrics():
     MetricsCollector.reset()
     client.post("/chat", json={"prompt": "hello"})
-    metrics = client.get("/metrics").json()
+    metrics = client.get("/metrics", headers=auth_headers).json()
     assert any(
         "POST" in str(k) and "/chat" in str(k)
         for k in metrics.get("http_requests_total", {})
