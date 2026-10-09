@@ -13,6 +13,7 @@ from tenacity import (
     wait_exponential,
 )
 
+from app.llm.resilience import llm_circuit_breaker
 from app.llm.router import route
 from app.llm.schemas import TicketExtraction
 from app.telemetry.metrics import calculate_cost, record_call
@@ -87,9 +88,11 @@ llm_retry = retry(
 
 
 async def _completion(model: str, messages: list[dict[str, str]]):
-    return await client.chat.completions.create(
-        model=model,
-        messages=messages,
+    """Call the provider through the shared timeout and circuit-breaker layer."""
+    timeout_seconds = float(os.getenv("LLM_TIMEOUT_SECONDS", "30"))
+    return await llm_circuit_breaker.call(
+        lambda: client.chat.completions.create(model=model, messages=messages),
+        timeout_seconds=timeout_seconds,
     )
 
 
@@ -136,10 +139,14 @@ async def ask_stream(prompt: str) -> AsyncGenerator[str, None]:
     started = time.perf_counter()
     status = "error"
     try:
-        stream = await client.chat.completions.create(
-            model=decision.model,
-            messages=[{"role": "user", "content": prompt}],
-            stream=True,
+        timeout_seconds = float(os.getenv("LLM_TIMEOUT_SECONDS", "30"))
+        stream = await llm_circuit_breaker.call(
+            lambda: client.chat.completions.create(
+                model=decision.model,
+                messages=[{"role": "user", "content": prompt}],
+                stream=True,
+            ),
+            timeout_seconds=timeout_seconds,
         )
         async for chunk in stream:
             delta = chunk.choices[0].delta.content
