@@ -26,11 +26,38 @@ configure_logging()
 logger = logging.getLogger("app.request")
 app = FastAPI(title="AI API Project")
 
+# Health/readiness probes stay public for deployment platforms. Every endpoint
+# that can invoke AI work, enqueue work, expose job results, or reveal metrics is
+# protected by the same bearer-token boundary and per-client rate limiter.
+PROTECTED_ROUTES = {
+    ("POST", "/chat"),
+    ("POST", "/ask"),
+    ("POST", "/chat/stream"),
+    ("POST", "/extract-ticket"),
+    ("POST", "/jobs"),
+    ("GET", "/metrics"),
+}
+
+
+def _requires_authentication(request: Request) -> bool:
+    route = (request.method.upper(), request.url.path.rstrip("/") or "/")
+    if route in PROTECTED_ROUTES:
+        return True
+
+    # Job IDs are dynamic paths, so protect reads without matching unrelated URLs.
+    segments = request.url.path.strip("/").split("/")
+    return (
+        request.method.upper() == "GET"
+        and len(segments) == 2
+        and segments[0] == "jobs"
+        and bool(segments[1])
+    )
+
 
 @app.middleware("http")
 async def api_security_middleware(request: Request, call_next):
-    """Enforce rate limit -> authentication -> validation -> LLM."""
-    if request.url.path in ["/chat", "/ask"] and request.method == "POST":
+    """Apply abuse protection and authentication before protected operations."""
+    if _requires_authentication(request):
         try:
             remaining, window = rate_limiter.check(client_key(request))
             authenticate(request)
