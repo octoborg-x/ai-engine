@@ -163,3 +163,11 @@ async def extract_ticket(req: TicketRequest):
         return await extract_ticket_info(req.message)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e)) from e
+
+
+# Background jobs are isolated from the synchronous LLM endpoints above.
+from app.jobs import router as jobs_router, start_workers, stop_workers  # noqa: E402
+
+app.include_router(jobs_router)
+app.add_event_handler("startup", start_workers)
+app.add_event_handler("shutdown", stop_workers)
