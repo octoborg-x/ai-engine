@@ -10,17 +10,16 @@ from app import jobs
 
 @pytest.fixture(autouse=True)
 async def clean_job_state():
+    # asyncio.Queue's internal Event can bind to the loop that first awaits join().
+    # Give each test a fresh queue so function-scoped pytest loops never share it.
     await jobs.stop_workers()
+    jobs._queue = asyncio.Queue(maxsize=jobs.QUEUE_CAPACITY)
     jobs._jobs.clear()
-    while not jobs._queue.empty():
-        jobs._queue.get_nowait()
-        jobs._queue.task_done()
     yield
     await jobs.stop_workers()
     jobs._jobs.clear()
-    while not jobs._queue.empty():
-        jobs._queue.get_nowait()
-        jobs._queue.task_done()
+    # Also discard queues modified by tests (e.g. the queue-capacity test).
+    jobs._queue = asyncio.Queue(maxsize=jobs.QUEUE_CAPACITY)
 
 
 @pytest.mark.asyncio
