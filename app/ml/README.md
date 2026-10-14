@@ -16,11 +16,12 @@ training loop, best-checkpoint selection, CSV metrics, and inference.
 
 ## Run
 
-Requires the optional PyTorch dependency.
+Requires the optional PyTorch dependency. Run from the repository root as a
+module so package imports resolve consistently:
 
 ```bash
-python app/ml/train.py
-python app/ml/inference.py
+python -m app.ml.train
+python -m app.ml.inference
 ```
 
 Training writes metrics to `app/ml/results/metrics.csv` and the best model to
