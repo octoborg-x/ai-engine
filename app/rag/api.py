@@ -1,4 +1,5 @@
 """Standalone retrieval-only API for local demos and integration tests."""
+
 from fastapi import FastAPI, HTTPException
 
 from app.rag.schemas import AskRequest, RetrievalResponse

@@ -2,9 +2,10 @@ import csv
 from pathlib import Path
 
 import torch
+from torch import nn
+
 from app.ml.data import get_loaders
 from app.ml.model import BinaryClassifier
-from torch import nn
 
 
 def train(hidden=16, lr=0.05, epochs=20, log_path=None):

@@ -1,7 +1,13 @@
 """Production RAG pipeline: hybrid recall, reranking, and citation grounding."""
+
 import numpy as np
+
 from app.rag.bm25 import BM25
-from app.rag.citations import build_sources, format_context_with_citations, validate_citations
+from app.rag.citations import (
+    build_sources,
+    format_context_with_citations,
+    validate_citations,
+)
 from app.rag.models import Chunk, SearchResult
 from app.rag.recall import fuse_candidates
 from app.rag.reranker import CrossEncoderReranker
@@ -26,7 +32,11 @@ class RAGPipeline:
     def _vector_recall(self, query: str, top_k: int) -> list[SearchResult]:
         qv = self.embedder.get_embedding(query)
         scored = [
-            SearchResult(chunk=c, score=_cosine_similarity(qv, c.embedding or []), search_type="vector")
+            SearchResult(
+                chunk=c,
+                score=_cosine_similarity(qv, c.embedding or []),
+                search_type="vector",
+            )
             for c in self.chunks
         ]
         scored.sort(key=lambda item: item.score, reverse=True)

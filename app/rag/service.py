@@ -1,4 +1,5 @@
 """Knowledge Assistant RAG service: hybrid retrieve -> rerank -> grounded answer."""
+
 from collections.abc import Awaitable, Callable
 from functools import lru_cache
 
@@ -30,8 +31,14 @@ def build_prompt(query: str, context: str) -> str:
 def sources_out(result: dict) -> list[SourceOut]:
     """Convert pipeline sources plus reranker scores into API source records."""
     return [
-        SourceOut(source_id=s.source_id, chunk_id=s.chunk_id, source=s.source,
-                  page=s.page, section=s.section, score=score)
+        SourceOut(
+            source_id=s.source_id,
+            chunk_id=s.chunk_id,
+            source=s.source,
+            page=s.page,
+            section=s.section,
+            score=score,
+        )
         for s, score in zip(result["sources"], result["source_scores"], strict=False)
     ]
 
@@ -41,15 +48,21 @@ def retrieve(query: str, recall_k: int = 10, final_k: int = 3):
     return get_pipeline().ask(query, recall_k=recall_k, final_k=final_k)
 
 
-async def answer(query: str, llm_call: LlmCall, recall_k: int = 10, final_k: int = 3) -> AskResponse:
+async def answer(
+    query: str, llm_call: LlmCall, recall_k: int = 10, final_k: int = 3
+) -> AskResponse:
     """Retrieve context, ask the LLM, and validate citations in the answer."""
     pipeline = get_pipeline()
     result = pipeline.ask(query, recall_k=recall_k, final_k=final_k)
     completion = await llm_call(build_prompt(query, result["context"]))
     return AskResponse(
-        query=result["query"], answer=completion["response"], context=result["context"],
-        sources=sources_out(result), retrieved_ids=result["retrieved_ids"],
-        model=completion["model"], route=completion["route"],
+        query=result["query"],
+        answer=completion["response"],
+        context=result["context"],
+        sources=sources_out(result),
+        retrieved_ids=result["retrieved_ids"],
+        model=completion["model"],
+        route=completion["route"],
         prompt_tokens=completion["prompt_tokens"],
         completion_tokens=completion["completion_tokens"],
         estimated_cost_usd=completion["estimated_cost_usd"],

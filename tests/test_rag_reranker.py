@@ -19,7 +19,9 @@ def _mk(chunk_id: str, text: str, score: float) -> SearchResult:
 
 def test_reranker_prefers_high_coverage():
     query = "refund policy within 30 days"
-    full = _mk("full", "Our refund policy allows returns within 30 days of purchase.", 0.60)
+    full = _mk(
+        "full", "Our refund policy allows returns within 30 days of purchase.", 0.60
+    )
     partial = _mk("partial", "We have a policy. It was updated 30 days ago.", 0.95)
     ranked = CrossEncoderReranker().rerank(query, [partial, full], top_k=2)
     assert ranked[0].chunk.id == "full"
@@ -28,7 +30,9 @@ def test_reranker_prefers_high_coverage():
 
 def test_reranker_penalizes_bloated_chunks():
     query = "error code ERR_PAYMENT_403"
-    focused = _mk("focused", "Error code ERR_PAYMENT_403 means forbidden transaction.", 0.80)
+    focused = _mk(
+        "focused", "Error code ERR_PAYMENT_403 means forbidden transaction.", 0.80
+    )
     bloated = _mk("bloated", "Error code ERR_PAYMENT_403. " + "lorem ipsum " * 60, 0.80)
     ranked = CrossEncoderReranker().rerank(query, [bloated, focused], top_k=2)
     assert ranked[0].chunk.id == "focused"

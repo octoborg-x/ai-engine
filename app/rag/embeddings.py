@@ -1,5 +1,7 @@
 """Embedding provider adapter shared by corpus indexing and query retrieval."""
+
 import os
+
 from dotenv import load_dotenv
 from openai import OpenAI
 

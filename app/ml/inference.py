@@ -1,5 +1,6 @@
-import torch
 from pathlib import Path
+
+import torch
 
 from app.ml.model import BinaryClassifier
 
