@@ -3,5 +3,20 @@
 __pycache__
 *.pyc
 .env
+.env.*
+!.env.example
 *.egg-info
 .pytest_cache
+
+# The backend image only needs app/ and pyproject.toml; the frontend
+# microservice lives in web/ and is built separately with its own context.
+web
+node_modules
+web/.next
+tests
+docs
+evals
+corpus
+Dockerfile.dist
+docker-compose.yaml
+render.yaml
