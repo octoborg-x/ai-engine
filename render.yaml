@@ -1,0 +1,49 @@
+# Render Blueprint for the FastAPI backend microservice.
+#
+# The repo root is simultaneously the backend microservice root: app/ holds the
+# Python package, pyproject.toml pins its dependencies, and the root Dockerfile
+# builds a single uvicorn image. The Next.js frontend (web/) is deployed on
+# Vercel and needs no Render service.
+#
+# To use: create a new Blueprint from this repo in the Render dashboard, then
+# set the following secret values in the dashboard (sync: false below keeps
+# real values out of the blueprint file):
+#   OPENROUTER_API_KEY (required — /ready returns 503 without it)
+#   API_AUTH_TOKEN     (required for POST /chat and /ask)
+#   MODEL_NAME / MODEL_CHEAP / MODEL_BALANCED / MODEL_POWERFUL
+#   OPENAI_API_KEY / OPENAI_MODEL / OPENAI_BASE_URL (optional embedding overrides)
+
+services:
+  - type: web
+    name: ai-engine-backend
+    runtime: docker
+    repo: https://github.com/octoborg-x/ai-engine
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: MODEL_NAME
+        sync: false
+      - key: MODEL_CHEAP
+        sync: false
+      - key: MODEL_BALANCED
+        sync: false
+      - key: MODEL_POWERFUL
+        sync: false
+      - key: API_AUTH_TOKEN
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: text-embedding-3-small
+      - key: OPENAI_BASE_URL
+        sync: false
+      - key: OPENROUTER_BASE_URL
+        sync: false
+      - key: RATE_LIMIT_REQUESTS
+        value: "10"
+      - key: RATE_LIMIT_WINDOW_SECONDS
+        value: "60"

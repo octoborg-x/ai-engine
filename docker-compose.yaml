@@ -1,0 +1,52 @@
+# Two-microservice orchestration for the ai-engine monorepo.
+# - web:     Next.js frontend (nginx edge + Next standalone server)
+# - backend: FastAPI backend (uvicorn on 8000)
+#
+# Usage: cp .env.example .env && docker compose up --build
+name: ai-engine
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    restart: unless-stopped
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - ai-engine
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        BACKEND_URL: http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - BACKEND_URL=http://backend:8000
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - ai-engine
+
+networks:
+  ai-engine:
+    driver: bridge

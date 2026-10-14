@@ -33,5 +33,9 @@ jobs:
       - name: Run tests
         run: pytest -q
 
-      - name: Build Docker image
+      - name: Build backend microservice image
         run: docker build -t ai-backend:ci .
+
+      - name: Build frontend microservice image
+        working-directory: web
+        run: docker build -t ai-web:ci .
