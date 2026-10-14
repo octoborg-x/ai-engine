@@ -1,0 +1,23 @@
+"""Integration tests for retrieval-only RAG /ask endpoint."""
+
+from fastapi.testclient import TestClient
+
+from app.rag.api import app
+
+client = TestClient(app)
+
+
+def test_ask_endpoint_returns_200():
+    """POST /ask should return 200 with valid query."""
+    response = client.post("/ask", json={"query": "what is the refund policy?"})
+    assert response.status_code == 200
+    data = response.json()
+    assert "answer" in data
+    assert "sources" in data
+    assert len(data["sources"]) > 0
+
+
+def test_ask_endpoint_rejects_empty_query():
+    """POST /ask with empty query should return 400."""
+    response = client.post("/ask", json={"query": "   "})
+    assert response.status_code == 400
