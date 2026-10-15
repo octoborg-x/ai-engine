@@ -300,8 +300,17 @@ async def test_ready_with_key(monkeypatch):
 @pytest.mark.asyncio
 async def test_ready_without_key(monkeypatch):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     result = api.ready()
     assert result.status_code == 503
+
+
+@pytest.mark.asyncio
+async def test_ready_with_openai_fallback_key(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.setenv("OPENAI_API_KEY", "test-openai-key")
+    result = api.ready()
+    assert result == {"status": "ready"}
 
 
 @pytest.mark.asyncio

@@ -1,0 +1,13 @@
+{
+  "name": "ai-engine-tool-agent",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Framework-free LLM tool-calling agent with validation, bounded execution, and tests.",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "start": "node run.ts",
+    "demo": "node run.ts",
+    "test": "node --test"
+  }
+}

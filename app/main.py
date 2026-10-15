@@ -131,11 +131,14 @@ def metrics_endpoint():
 
 @app.get("/ready")
 def ready():
-    if os.getenv("OPENROUTER_API_KEY"):
+    if os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY"):
         return {"status": "ready"}
     return JSONResponse(
         status_code=503,
-        content={"status": "not ready", "detail": "OPENROUTER_API_KEY missing"},
+        content={
+            "status": "not ready",
+            "detail": "OPENROUTER_API_KEY or OPENAI_API_KEY missing",
+        },
     )
 
 

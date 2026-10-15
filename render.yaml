@@ -8,10 +8,10 @@
 # To use: create a new Blueprint from this repo in the Render dashboard, then
 # set the following secret values in the dashboard (sync: false below keeps
 # real values out of the blueprint file):
-#   OPENROUTER_API_KEY (required — /ready returns 503 without it)
+#   OPENROUTER_API_KEY (primary provider — /ready returns 503 without it)
 #   API_AUTH_TOKEN     (required for POST /chat and /ask)
 #   MODEL_NAME / MODEL_CHEAP / MODEL_BALANCED / MODEL_POWERFUL
-#   OPENAI_API_KEY / OPENAI_MODEL / OPENAI_BASE_URL (optional embedding overrides)
+#   OPENAI_API_KEY / OPENAI_MODEL / OPENAI_BASE_URL (fallback provider and embeddings)
 
 services:
   - type: web

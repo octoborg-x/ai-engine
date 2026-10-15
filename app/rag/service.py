@@ -1,21 +1,14 @@
-"""Knowledge Assistant RAG service: hybrid retrieve -> rerank -> grounded answer.
-
-The corpus is indexed once per process. The answer step takes the LLM callable
-as an argument so callers control the provider, and so the retrieval half can be
-tested without touching the network.
-"""
+"""Knowledge Assistant RAG service: hybrid retrieve -> rerank -> grounded answer."""
 
 from collections.abc import Awaitable, Callable
 from functools import lru_cache
 
+from app.rag.corpus import build_corpus
+from app.rag.embeddings import EmbeddingModel
+from app.rag.pipeline import RAGPipeline
 from app.rag.schemas import AskResponse, SourceOut
-from app.week2.day5.corpus import build_corpus
-from app.week2.day5.embeddings import EmbeddingModel
-from app.week2.day5.pipeline import Day5RAGPipeline
 
 LlmCall = Callable[[str], Awaitable[dict]]
-
-# pylint: disable=invalid-name
 SYSTEM_PROMPT = (
     "You are a support assistant. Answer using only the provided context. "
     "Cite the sources you use as [S1], [S2], and so on. If the context does "
@@ -24,10 +17,10 @@ SYSTEM_PROMPT = (
 
 
 @lru_cache(maxsize=1)
-def get_pipeline() -> Day5RAGPipeline:
+def get_pipeline() -> RAGPipeline:
     """Build the RAG pipeline over the canonical corpus, once per process."""
     embedder = EmbeddingModel()
-    return Day5RAGPipeline(build_corpus(embedder), embedder)
+    return RAGPipeline(build_corpus(embedder), embedder)
 
 
 def build_prompt(query: str, context: str) -> str:
@@ -56,10 +49,7 @@ def retrieve(query: str, recall_k: int = 10, final_k: int = 3):
 
 
 async def answer(
-    query: str,
-    llm_call: LlmCall,
-    recall_k: int = 10,
-    final_k: int = 3,
+    query: str, llm_call: LlmCall, recall_k: int = 10, final_k: int = 3
 ) -> AskResponse:
     """Retrieve context, ask the LLM, and validate citations in the answer."""
     pipeline = get_pipeline()

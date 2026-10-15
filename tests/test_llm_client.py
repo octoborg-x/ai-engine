@@ -21,6 +21,48 @@ def completion_response(content, prompt_tokens=10, completion_tokens=5):
     )
 
 
+@pytest.mark.parametrize(
+    ("or_key", "oa_key", "expected_key", "expected_url"),
+    [
+        # OpenRouter is the primary provider when both are configured.
+        ("or-key", "oa-key", "or-key", "https://openrouter.ai/api/v1"),
+        # OpenAI is used only as a fallback when OpenRouter is absent.
+        (None, "oa-key", "oa-key", "https://api.openai.com/v1"),
+    ],
+)
+def test_provider_config_prefers_openrouter_then_openai(
+    monkeypatch, or_key, oa_key, expected_key, expected_url
+):
+    if or_key is None:
+        monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    else:
+        monkeypatch.setenv("OPENROUTER_API_KEY", or_key)
+    if oa_key is None:
+        monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    else:
+        monkeypatch.setenv("OPENAI_API_KEY", oa_key)
+
+    key, url = llm_client._provider_config()
+    assert key == expected_key
+    assert url == expected_url
+
+
+def test_provider_config_requires_at_least_one_key(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    with pytest.raises(RuntimeError, match="OPENROUTER_API_KEY or OPENAI_API_KEY"):
+        llm_client._provider_config()
+
+
+def test_provider_config_respects_explicit_base_urls(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-key")
+    monkeypatch.setenv("OPENAI_API_KEY", "oa-key")
+    monkeypatch.setenv("LLM_BASE_URL", "https://custom.example/v1")
+    key, url = llm_client._provider_config()
+    assert key == "or-key"
+    assert url == "https://custom.example/v1"
+
+
 @pytest.mark.asyncio
 async def test_ask_returns_content_usage_and_cost(monkeypatch):
     async def fake_create(**_kwargs):
