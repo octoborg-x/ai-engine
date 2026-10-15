@@ -74,6 +74,11 @@ async def api_security_middleware(request: Request, call_next):
     return await call_next(request)
 
 
+@app.get("/")
+def root():
+    return {"status": "ok", "service": "ai-engine"}
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
