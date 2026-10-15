@@ -25,7 +25,8 @@ node --test
 ```
 
 Offline mode uses a scripted model and does not require credentials. Live mode
-reads `OPENROUTER_API_KEY`, `OPENAI_BASE_URL`, and `MODEL_NAME`.
+reads `OPENROUTER_API_KEY` (primary) or `OPENAI_API_KEY` (fallback),
+`OPENROUTER_BASE_URL`/`OPENAI_BASE_URL`, and `MODEL_NAME`.
 
 ## Safety and design
 

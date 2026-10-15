@@ -7,6 +7,7 @@ from openai import OpenAI
 
 load_dotenv()
 DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small"
+OPENROUTER_EMBEDDING_MODEL = "openai/text-embedding-3-small"
 
 
 def default_embedding_model() -> str:
@@ -14,19 +15,44 @@ def default_embedding_model() -> str:
     return os.getenv("OPENAI_MODEL", DEFAULT_EMBEDDING_MODEL)
 
 
+def _offline_mode() -> bool:
+    """True when tests/CI force deterministic zero-vector embeddings."""
+    return os.getenv("EMBEDDINGS_OFFLINE", "0") == "1"
+
+
+def _embedding_model(openrouter: bool) -> str:
+    """Pick an embedding-capable model for the active provider.
+
+    `OPENAI_MODEL` is a general-purpose (often chat) model, so OpenRouter
+    embeddings default to the OpenRouter-compatible text-embedding model
+    unless ``OPENROUTER_EMBEDDING_MODEL`` is set explicitly.
+    """
+    if openrouter:
+        return os.getenv("OPENROUTER_EMBEDDING_MODEL") or OPENROUTER_EMBEDDING_MODEL
+    return os.getenv("OPENAI_EMBEDDING_MODEL") or default_embedding_model()
+
+
 def generate_embedding(text: str, model: str | None = None) -> list[float]:
-    """Generate a provider embedding, using a zero vector for offline runs."""
-    api_key = os.getenv("OPENAI_API_KEY") or os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
+    """Generate a provider embedding, using a zero vector for offline runs.
+
+    Provider precedence is OpenRouter first, OpenAI (or any OpenAI-compatible
+    endpoint such as Gemini) as a fallback. When neither a real key nor an
+    explicit ``EMBEDDINGS_OFFLINE=1`` flag is present, a deterministic zero
+    vector is returned so tests and local demos never hit the network.
+    """
+    api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
+    if _offline_mode() or not api_key:
         return [0.0] * 1536
-    client = OpenAI(
-        api_key=api_key,
-        base_url=os.getenv("OPENAI_BASE_URL")
-        or os.getenv("OPENROUTER_BASE_URL")
-        or "https://api.openai.com/v1",
+    openrouter = bool(os.getenv("OPENROUTER_API_KEY"))
+    base_url = (
+        os.getenv("OPENROUTER_BASE_URL")
+        or os.getenv("OPENAI_BASE_URL")
+        or "https://openrouter.ai/api/v1"
     )
+    client = OpenAI(api_key=api_key, base_url=base_url)
     response = client.embeddings.create(
-        input=[text], model=model or default_embedding_model()
+        input=[text],
+        model=model or _embedding_model(openrouter),
     )
     return response.data[0].embedding
 

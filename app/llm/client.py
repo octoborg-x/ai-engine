@@ -44,22 +44,43 @@ class _LazyClient:
 client = _LazyClient()
 
 
+def _provider_config() -> tuple[str, str]:
+    """Resolve (api_key, base_url) with OpenRouter first, OpenAI as fallback."""
+    openrouter_key = os.getenv("OPENROUTER_API_KEY")
+    if openrouter_key:
+        base_url = (
+            os.getenv("LLM_BASE_URL")
+            or os.getenv("OPENROUTER_BASE_URL")
+            or "https://openrouter.ai/api/v1"
+        )
+        return openrouter_key, base_url
+
+    openai_key = os.getenv("OPENAI_API_KEY")
+    if openai_key:
+        base_url = (
+            os.getenv("LLM_BASE_URL")
+            or os.getenv("OPENAI_BASE_URL")
+            or "https://api.openai.com/v1"
+        )
+        return openai_key, base_url
+
+    raise RuntimeError("Configure OPENROUTER_API_KEY or OPENAI_API_KEY to run live")
+
+
 def _get_client() -> AsyncOpenAI:
     """Build the provider client only when an LLM call is actually needed.
 
     This keeps non-LLM endpoints such as /health importable without secrets.
-    The OpenAI-compatible base URL is configurable for deployment portability.
+    Provider precedence is OpenRouter first, OpenAI (or any OpenAI-compatible
+    endpoint such as Gemini) as a fallback.
     """
     global _client
 
     if _client is None:
-        api_key = os.getenv("OPENROUTER_API_KEY")
-        if not api_key:
-            raise RuntimeError("OPENROUTER_API_KEY is not configured")
-
+        api_key, base_url = _provider_config()
         _client = AsyncOpenAI(
             api_key=api_key,
-            base_url=os.getenv("LLM_BASE_URL", "https://openrouter.ai/api/v1"),
+            base_url=base_url,
             timeout=float(os.getenv("LLM_TIMEOUT_SECONDS", "30")),
         )
 

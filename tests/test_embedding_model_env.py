@@ -29,3 +29,31 @@ def test_embedding_generation_works_offline(monkeypatch):
     vector = embeddings.generate_embedding("offline query")
     assert len(vector) == 1536
     assert set(vector) == {0.0}
+
+
+def test_embedding_generation_offline_flag_beats_keys(monkeypatch):
+    monkeypatch.setenv("EMBEDDINGS_OFFLINE", "1")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-key")
+    monkeypatch.setenv("OPENAI_API_KEY", "oa-key")
+    vector = embeddings.generate_embedding("offline forced query")
+    assert len(vector) == 1536
+    assert set(vector) == {0.0}
+
+
+def test_embedding_model_is_openrouter_specific_by_default(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-key")
+    monkeypatch.delenv("OPENROUTER_EMBEDDING_MODEL", raising=False)
+    assert embeddings._embedding_model(True) == "openai/text-embedding-3-small"
+
+
+def test_embedding_model_uses_openai_model_for_fallback_provider(monkeypatch):
+    monkeypatch.setenv("OPENAI_MODEL", "custom/embed-model")
+    monkeypatch.delenv("OPENAI_EMBEDDING_MODEL", raising=False)
+    assert embeddings._embedding_model(False) == "custom/embed-model"
+
+
+def test_embedding_model_env_overrides_apply_per_provider(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_EMBEDDING_MODEL", "vendor/special-embed")
+    monkeypatch.setenv("OPENAI_EMBEDDING_MODEL", "fallback/embed")
+    assert embeddings._embedding_model(True) == "vendor/special-embed"
+    assert embeddings._embedding_model(False) == "fallback/embed"

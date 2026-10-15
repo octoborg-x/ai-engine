@@ -14,10 +14,11 @@ app for local tests; it shares the same retrieval service.
 
 ## Configuration
 
-Set `OPENAI_API_KEY` or `OPENROUTER_API_KEY` to enable remote embeddings.
-`OPENAI_MODEL` selects the embedding model (default:
-`text-embedding-3-small`). Without a key, embedding requests return a zero
-vector so local development and BM25 retrieval remain available.
+Set `OPENROUTER_API_KEY` (primary) or `OPENAI_API_KEY` (fallback) to enable
+remote embeddings. `OPENAI_MODEL` selects the embedding model (default:
+`text-embedding-3-small`). Without a key — or with `EMBEDDINGS_OFFLINE=1` —
+embedding requests return a zero vector so local development, tests, and BM25
+retrieval remain available.
 
 Run the repository tests with `pytest`. RAG-specific tests cover retrieval,
 fusion, reranking, citations, API contracts, and model configuration.
