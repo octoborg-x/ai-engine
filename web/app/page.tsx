@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Section = "overview" | "playground" | "models" | "compare" | "tests" | "evals" | "auth" | "rate" | "logs" | "settings";
 
@@ -29,6 +29,18 @@ function Card({ children, className = "" }: { children: React.ReactNode; classNa
 
 function Badge({ children, tone = "green" }: { children: React.ReactNode; tone?: string }) {
   return <span className={`badge badge-${tone}`}>{children}</span>;
+}
+
+const TOKEN_KEY = "apiToken";
+
+function storedToken(): string {
+  if (typeof window === "undefined") return "";
+  return (localStorage.getItem(TOKEN_KEY) ?? "").trim();
+}
+
+function authHeaders(): Record<string, string> {
+  const token = storedToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 function Overview({ setSection }: { setSection: (s: Section) => void }) {
@@ -82,9 +94,12 @@ function Playground() {
     try {
       const res = await fetch("/api/backend/chat/stream", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...(localStorage.getItem("apiToken") ? { Authorization: `Bearer ${localStorage.getItem("apiToken")}` } : {}) },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({ prompt }),
       });
+      if (res.status === 401) {
+        throw new Error("401 Unauthorized — open the Auth tab and save an API token, then retry.");
+      }
       if (!res.ok || !res.body) throw new Error(`Request failed: ${res.status}`);
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -136,7 +151,14 @@ function Evals() {
 
 function Auth() {
   const [token,setToken]=useState("");
-  return <div className="stack"><div className="hero"><div><p className="eyebrow">SECURITY</p><h1>Authentication</h1><p className="muted">Bearer-token authentication is enforced by the FastAPI middleware for chat.</p></div><Badge>server enforced</Badge></div><Card><div className="grid two"><label>API token<input type="password" value={token} onChange={e=>setToken(e.target.value)} placeholder="Paste dev token" /></label><div><p className="label">Session state</p><strong>{token ? "Configured for this tab" : "No token configured"}</strong><p className="muted">Stored only in memory until the page reloads.</p></div></div><button onClick={()=>localStorage.setItem("apiToken",token)}>Use token for API calls</button></Card></div>;
+  const [saved,setSaved]=useState(false);
+  useEffect(()=>{ const t=storedToken(); if(t){ setToken(t); setSaved(true); } },[]);
+  function save(){
+    const t=token.trim();
+    if(t){ localStorage.setItem(TOKEN_KEY,t); } else { localStorage.removeItem(TOKEN_KEY); }
+    setToken(t); setSaved(Boolean(t));
+  }
+  return <div className="stack"><div className="hero"><div><p className="eyebrow">SECURITY</p><h1>Authentication</h1><p className="muted">Bearer-token authentication is enforced by the FastAPI middleware for chat.</p></div><Badge tone={saved ? "green" : "amber"}>{saved ? "token saved" : "no token"}</Badge></div><Card><div className="grid two"><label>API token<input type="password" value={token} onChange={e=>{setToken(e.target.value); setSaved(false);}} placeholder="Paste the API_AUTH_TOKEN value" /></label><div><p className="label">Session state</p><strong>{saved ? "Saved for this browser" : token ? "Not saved yet" : "No token configured"}</strong><p className="muted">The Playground sends this as a Bearer token on every request. It is stored in this browser&apos;s local storage.</p></div></div><button onClick={save}>Save token for API calls</button></Card></div>;
 }
 
 function Rate() {
