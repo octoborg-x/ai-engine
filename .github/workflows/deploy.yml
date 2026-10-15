@@ -2,6 +2,9 @@ name: Deploy to FastAPI Cloud
 on:
   push:
     branches: [main]
+concurrency:
+  group: deploy-fastapi-cloud
+  cancel-in-progress: false
 jobs:
   deploy:
     runs-on: ubuntu-latest
