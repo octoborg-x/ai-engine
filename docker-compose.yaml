@@ -28,8 +28,6 @@ services:
     build:
       context: ./web
       dockerfile: Dockerfile
-      args:
-        BACKEND_URL: http://backend:8000
     depends_on:
       backend:
         condition: service_healthy
@@ -38,6 +36,8 @@ services:
       - "3000:3000"
     environment:
       - BACKEND_URL=http://backend:8000
+      # Shared token the proxy injects server-side; supplied via the root .env.
+      - API_AUTH_TOKEN=${API_AUTH_TOKEN:?set API_AUTH_TOKEN in .env}
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/ || exit 1"]
       interval: 30s

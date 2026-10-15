@@ -9,9 +9,8 @@ RUN npm ci
 
 COPY . .
 
-# BACKEND_URL is baked into the Next.js rewrites at build time. Inside the
-# Docker network the backend container is reachable at http://backend:8000.
-ARG BACKEND_URL=http://backend:8000
+# BACKEND_URL and API_AUTH_TOKEN are read at request time by the proxy route
+# handler, so they are runtime environment variables rather than build args.
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
