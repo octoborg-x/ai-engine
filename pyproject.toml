@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "ai-engine"
 version = "0.1.0"
 description = "Production-style FastAPI backend for LLM integration."
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi==0.141.1",
     "numpy==1.26.4",
@@ -32,6 +32,9 @@ dev = [
 
 [tool.setuptools.packages.find]
 include = ["app*"]
+
+[tool.fastapi]
+entrypoint = "app.main:app"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
