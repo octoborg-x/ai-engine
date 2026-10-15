@@ -26,16 +26,52 @@ def _model_for(tier: str) -> str:
     return os.environ["MODEL_NAME"]
 
 
-def route(task: str, prompt: str) -> RouteDecision:
+def model_catalog() -> list[dict]:
+    """Describe each tier and the model actually resolved from the environment.
+
+    Never returns secrets — only the tier, its env var name, and the model id.
+    """
+    catalog = []
+    for tier in ("cheap", "balanced", "powerful"):
+        env_var = f"MODEL_{tier.upper()}"
+        try:
+            model = _model_for(tier)
+            configured = bool(os.getenv(env_var))
+        except KeyError:
+            model = "unconfigured"
+            configured = False
+        catalog.append(
+            {
+                "tier": tier,
+                "env_var": env_var,
+                "model": model,
+                "configured": configured,
+                "fallback": not configured and model != "unconfigured",
+            }
+        )
+    return catalog
+
+
+def route(task: str, prompt: str, force_tier: str | None = None) -> RouteDecision:
     """Select a free-model tier without an additional LLM request.
 
     Task mapping:
     - classification/extraction -> cheap
     - normal chat -> balanced
     - complex reasoning -> powerful
+
+    When ``force_tier`` is one of the known tiers, that tier is used verbatim
+    and the reason records that the caller pinned the route.
     """
     normalized_task = task.lower().strip()
     text = prompt.lower()
+
+    if force_tier in {"cheap", "balanced", "powerful"}:
+        return RouteDecision(
+            tier=force_tier,
+            model=_model_for(force_tier),
+            reason="tier pinned by request",
+        )
 
     if normalized_task in {"classification", "extraction"}:
         tier = "cheap"

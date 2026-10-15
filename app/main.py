@@ -9,8 +9,9 @@ from pydantic import BaseModel
 
 from app.llm.client import ask, ask_stream, extract_ticket_info
 from app.llm.schemas import ChatRequest, ChatResponse, TicketExtraction
-from app.rag.schemas import AskRequest, AskResponse
-from app.rag.service import answer
+from app.rag.schemas import AskRequest, AskResponse, RetrievalResponse
+from app.rag.service import answer, retrieval_response
+from app.recruitment.screening import ScreeningReport, ScreenRequest, screen
 from app.security.auth import authenticate
 from app.security.rate_limit import client_key, rate_limiter
 from app.telemetry.logging import (
@@ -21,6 +22,7 @@ from app.telemetry.logging import (
     set_request_context,
 )
 from app.telemetry.metrics import MetricsCollector
+from app.telemetry.records import recent_llm_calls, recent_requests, record_request
 
 configure_logging()
 logger = logging.getLogger("app.request")
@@ -36,6 +38,14 @@ PROTECTED_ROUTES = {
     ("POST", "/extract-ticket"),
     ("POST", "/jobs"),
     ("GET", "/metrics"),
+    ("GET", "/observability/requests"),
+    ("GET", "/compare"),
+    ("GET", "/evals/suites"),
+    ("POST", "/evals/run"),
+    ("GET", "/security/policy"),
+    ("GET", "/models"),
+    ("POST", "/rag/retrieve"),
+    ("POST", "/recruitment/screen"),
 }
 
 
@@ -120,18 +130,33 @@ async def observability_middleware(request: Request, call_next):
             if response is not None
             else (500 if status == "error" else 200)
         )
+        latency_ms = round((time.perf_counter() - started) * 1000, 2)
         MetricsCollector.record_http(
             request.method,
             request.url.path,
             status_code,
-            round((time.perf_counter() - started) * 1000, 2),
+            latency_ms,
         )
+        record_request(request.method, request.url.path, status_code, latency_ms)
         clear_request_context(tokens)
 
 
 @app.get("/metrics")
 def metrics_endpoint():
     return MetricsCollector.snapshot()
+
+
+@app.get("/observability/requests")
+def observability_requests(limit: int = 50):
+    """Recent request and LLM-call records with correlation IDs.
+
+    Metadata only: no prompt or completion content is stored or returned.
+    """
+    bounded = max(1, min(limit, 200))
+    return {
+        "requests": recent_requests(bounded),
+        "llm_calls": recent_llm_calls(bounded),
+    }
 
 
 @app.get("/ready")
@@ -163,10 +188,119 @@ def _provider_error(e: Exception) -> HTTPException:
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
     try:
-        result = await ask(req.prompt)
+        result = await ask(req.prompt, tier=req.tier)
         return ChatResponse(**result)
     except Exception as e:
         raise _provider_error(e) from e
+
+
+@app.post("/recruitment/screen", response_model=ScreeningReport)
+async def recruitment_screen(req: ScreenRequest):
+    """Screen one candidate against one job description, end to end."""
+    try:
+        return await screen(req)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+    except Exception as e:
+        raise _provider_error(e) from e
+
+
+@app.get("/compare")
+async def compare(limit: int = 5):
+    """Benchmark each routing tier over the same labeled prompt set."""
+    from app.evals.compare import compare_tiers
+
+    bounded = max(1, min(limit, 10))
+    try:
+        return await compare_tiers(bounded)
+    except Exception as e:
+        raise _provider_error(e) from e
+
+
+@app.get("/evals/suites")
+def eval_suites():
+    """Index of available evaluation suites and their case counts."""
+    from app.evals.engine import suite_sizes
+
+    sizes = suite_sizes()
+    return {
+        "suites": [
+            {"name": name, "cases": count, "file": f"{name}_cases.json"}
+            for name, count in sizes.items()
+        ]
+    }
+
+
+class EvalRunRequest(BaseModel):
+    """Optional body for /evals/run; omitted fields fall back to defaults."""
+
+    suites: list[str] | None = None
+    limit: int = 5
+
+
+@app.post("/evals/run")
+async def evals_run(req: EvalRunRequest | None = None):
+    """Run a bounded evaluation over the requested suites.
+
+    Body: {"suites": ["chat","extraction",...], "limit": 5}. Results are
+    measured against labeled cases; nothing is fabricated.
+    """
+    from app.evals.engine import SUITE_FILES, run_suites
+
+    requested = (req.suites if req else None) or list(SUITE_FILES)
+    suites = [s for s in requested if s in SUITE_FILES] or list(SUITE_FILES)
+    limit = req.limit if req else 5
+    bounded = max(1, min(limit, 10))
+    try:
+        return await run_suites(suites, bounded)
+    except Exception as e:
+        raise _provider_error(e) from e
+
+
+@app.get("/models")
+def models():
+    """The routing tiers and the model each tier resolves to from the environment."""
+    from app.llm.router import model_catalog
+
+    return {"tiers": model_catalog()}
+
+
+@app.post("/rag/retrieve", response_model=RetrievalResponse)
+async def rag_retrieve(req: AskRequest):
+    """Retrieval only: fused candidates, rerank scores, and citations.
+
+    No LLM answer is generated, so this exposes the RAG workflow (hybrid
+    recall -> rerank -> citations) without provider cost.
+    """
+    if not req.query.strip():
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
+    return retrieval_response(req.query, recall_k=req.recall_k, final_k=req.final_k)
+
+
+@app.get("/security/policy")
+def security_policy():
+    """Non-secret facts about the auth and rate-limit boundary.
+
+    Lets the console show the real enforced policy (and prove protected routes
+    reject unauthenticated requests) without exposing any secret value.
+    """
+    return {
+        "auth": {
+            "scheme": "bearer",
+            "enabled": bool(os.getenv("API_AUTH_TOKEN")),
+            "header": "Authorization: Bearer <token>",
+        },
+        "rate_limit": {
+            "limit": rate_limiter.limit,
+            "window_seconds": rate_limiter.window_seconds,
+            "key": "direct peer address (forwarding headers ignored)",
+            "headers": ["X-RateLimit-Remaining", "X-RateLimit-Window", "Retry-After"],
+        },
+        "protected_routes": sorted(
+            f"{method} {path}" for method, path in PROTECTED_ROUTES
+        ),
+        "public_routes": ["GET /health", "GET /ready", "GET /"],
+    }
 
 
 @app.post("/ask", response_model=AskResponse)

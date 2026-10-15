@@ -22,6 +22,20 @@ class SourceOut(BaseModel):
     score: float
 
 
+class CandidateOut(BaseModel):
+    """A recalled chunk shown for retrieval transparency (pre-rerank)."""
+
+    chunk_id: str
+    source: str
+    page: int | None = None
+    section: str | None = None
+    text: str
+    recall_score: float
+    recall_type: str
+    rerank_score: float | None = None
+    kept: bool
+
+
 class RetrievalResponse(BaseModel):
     """Retrieved context and sources, without an LLM answer."""
 
@@ -30,6 +44,7 @@ class RetrievalResponse(BaseModel):
     context: str
     sources: list[SourceOut]
     retrieved_ids: list[str]
+    candidates: list[CandidateOut] = Field(default_factory=list)
 
 
 class AskResponse(RetrievalResponse):
