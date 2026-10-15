@@ -16,7 +16,7 @@ import pytest
 class _FakeCompletions:
     """Deterministic completion stub so endpoint tests never hit a provider."""
 
-    async def create(self, **kwargs):  # noqa: ARG001
+    async def create(self, **kwargs):
         return SimpleNamespace(
             choices=[SimpleNamespace(message=SimpleNamespace(content="ok"))],
             usage=SimpleNamespace(prompt_tokens=1, completion_tokens=1),
