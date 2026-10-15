@@ -11,14 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v7
-      - name: Diagnose token (no secret exposed)
-        run: |
-          echo "token chars: ${#FASTAPI_CLOUD_TOKEN}"
-          echo "$FASTAPI_CLOUD_TOKEN" | sha256sum | cut -c1-12
-        env:
-          FASTAPI_CLOUD_TOKEN: ${{ secrets.FASTAPI_CLOUD_TOKEN }}
-          FASTAPI_CLOUD_APP_ID: ${{ secrets.FASTAPI_CLOUD_APP_ID }}
       - run: uv run fastapi deploy
         env:
           FASTAPI_CLOUD_TOKEN: ${{ secrets.FASTAPI_CLOUD_TOKEN }}
-          FASTAPI_CLOUD_APP_ID: ${{ secrets.FASTAPI_CLOUD_APP_ID }}
