@@ -114,17 +114,13 @@ def _breaker_backend(tier: str | None) -> str:
 _llm_circuit_breakers: dict[str, CircuitBreaker] = {}
 
 
-def llm_circuit_breaker(backend: str = None) -> CircuitBreaker:
+def llm_circuit_breaker(backend: str | None = None) -> CircuitBreaker:
     """Return the circuit breaker for a provider backend, creating it lazily."""
     key = backend or _breaker_backend(None)
     if key not in _llm_circuit_breakers:
         _llm_circuit_breakers[key] = CircuitBreaker(
-            failure_threshold=int(
-                os.getenv("LLM_CIRCUIT_FAILURE_THRESHOLD", "5")
-            ),
-            reset_timeout_seconds=float(
-                os.getenv("LLM_CIRCUIT_RESET_SECONDS", "30")
-            ),
+            failure_threshold=int(os.getenv("LLM_CIRCUIT_FAILURE_THRESHOLD", "5")),
+            reset_timeout_seconds=float(os.getenv("LLM_CIRCUIT_RESET_SECONDS", "30")),
         )
     return _llm_circuit_breakers[key]
 

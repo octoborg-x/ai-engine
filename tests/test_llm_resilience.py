@@ -5,9 +5,8 @@ import pytest
 from app.llm.resilience import (
     CircuitBreaker,
     CircuitOpenError,
-    breaker_for_tier,
-    llm_circuit_breaker,
     _llm_circuit_breakers,
+    breaker_for_tier,
 )
 
 
@@ -96,6 +95,7 @@ async def _fail():
 
 
 def _reset_breaker_registry():
+    """Forget lazily created breakers so tests run in isolation."""
     _llm_circuit_breakers.clear()
 
 
