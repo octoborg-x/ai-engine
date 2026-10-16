@@ -1,0 +1,649 @@
+[
+  {
+    "id": "extract_001",
+    "input": "John Smith from Acme says the production API is completely down. His email is john@acme.com and this is blocking customers.",
+    "expected": {
+      "summary_keywords": [
+        "API",
+        "outage"
+      ],
+      "category": "technical",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_002",
+    "input": "Sarah from Globex says the dashboard is a little slow sometimes. No email was provided.",
+    "expected": {
+      "summary_keywords": [
+        "dashboard",
+        "performance"
+      ],
+      "category": "technical",
+      "urgency": "medium",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_003",
+    "input": "Everything works perfectly. Thanks for the excellent service!",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "reports",
+        "no",
+        "issue"
+      ],
+      "category": "other",
+      "urgency": "low",
+      "customer_sentiment": "positive"
+    }
+  },
+  {
+    "id": "extract_004",
+    "input": "I was charged twice for the same subscription. Please refund the duplicate payment. Email: maria@example.com",
+    "expected": {
+      "summary_keywords": [
+        "duplicate",
+        "subscription",
+        "charge"
+      ],
+      "category": "billing",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_005",
+    "input": "I forgot my password and cannot log into my account. Please help.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "cannot",
+        "access",
+        "account"
+      ],
+      "category": "account",
+      "urgency": "medium",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_006",
+    "input": "Can you tell me how much the premium plan costs? I am considering upgrading.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "asks",
+        "about",
+        "premium",
+        "plan",
+        "pricing"
+      ],
+      "category": "billing",
+      "urgency": "low",
+      "customer_sentiment": "neutral"
+    }
+  },
+  {
+    "id": "extract_007",
+    "input": "The app crashes every time I open the settings screen. This has happened five times today.",
+    "expected": {
+      "summary_keywords": [
+        "app",
+        "crashes",
+        "when",
+        "opening",
+        "settings"
+      ],
+      "category": "technical",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_008",
+    "input": "Please change the email address on my account from old@example.com to new@example.com.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "requests",
+        "an",
+        "account",
+        "email",
+        "change"
+      ],
+      "category": "account",
+      "urgency": "medium",
+      "customer_sentiment": "neutral"
+    }
+  },
+  {
+    "id": "extract_009",
+    "input": "My invoice has the wrong company name and tax amount.",
+    "expected": {
+      "summary_keywords": [
+        "invoice",
+        "contains",
+        "incorrect",
+        "company",
+        "and",
+        "tax",
+        "information"
+      ],
+      "category": "billing",
+      "urgency": "medium",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_010",
+    "input": "I cannot upload a PDF. The upload stays at 0% and then times out.",
+    "expected": {
+      "summary_keywords": [
+        "PDF",
+        "upload",
+        "times",
+        "out"
+      ],
+      "category": "technical",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_011",
+    "input": "Thanks, the support team solved my issue quickly.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "thanks",
+        "support",
+        "for",
+        "resolving",
+        "the",
+        "issue"
+      ],
+      "category": "other",
+      "urgency": "low",
+      "customer_sentiment": "positive"
+    }
+  },
+  {
+    "id": "extract_012",
+    "input": "I need a copy of my last three invoices for accounting.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "requests",
+        "copies",
+        "of",
+        "invoices"
+      ],
+      "category": "billing",
+      "urgency": "low",
+      "customer_sentiment": "neutral"
+    }
+  },
+  {
+    "id": "extract_013",
+    "input": "My account was locked after too many login attempts.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "account",
+        "is",
+        "locked"
+      ],
+      "category": "account",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_014",
+    "input": "The API returns 500 when I send a valid JSON payload.",
+    "expected": {
+      "summary_keywords": [
+        "API",
+        "returns",
+        "a",
+        "server",
+        "error",
+        "for",
+        "valid",
+        "JSON"
+      ],
+      "category": "technical",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_015",
+    "input": "Where can I find the receipt for my last payment?",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "asks",
+        "where",
+        "to",
+        "find",
+        "a",
+        "payment",
+        "receipt"
+      ],
+      "category": "billing",
+      "urgency": "low",
+      "customer_sentiment": "neutral"
+    }
+  },
+  {
+    "id": "extract_016",
+    "input": "I changed my phone and now the two-factor authentication code goes to my old number.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "cannot",
+        "complete",
+        "two-factor",
+        "authentication"
+      ],
+      "category": "account",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_017",
+    "input": "The export button does nothing when I click it.",
+    "expected": {
+      "summary_keywords": [
+        "export",
+        "button",
+        "does",
+        "not",
+        "respond"
+      ],
+      "category": "technical",
+      "urgency": "medium",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_018",
+    "input": "I was charged $49 instead of the advertised $29.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "was",
+        "overcharged"
+      ],
+      "category": "billing",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_019",
+    "input": "Can you add another user to our workspace?",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "requests",
+        "adding",
+        "a",
+        "workspace",
+        "user"
+      ],
+      "category": "account",
+      "urgency": "low",
+      "customer_sentiment": "neutral"
+    }
+  },
+  {
+    "id": "extract_020",
+    "input": "The response from your API is extremely slow, around 20 seconds.",
+    "expected": {
+      "summary_keywords": [
+        "API",
+        "response",
+        "is",
+        "very",
+        "slow"
+      ],
+      "category": "technical",
+      "urgency": "medium",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_021",
+    "input": "I want to cancel my subscription before the next renewal.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "requests",
+        "subscription",
+        "cancellation"
+      ],
+      "category": "billing",
+      "urgency": "medium",
+      "customer_sentiment": "neutral"
+    }
+  },
+  {
+    "id": "extract_022",
+    "input": "I love the new dashboard. It is much easier to use now.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "praises",
+        "the",
+        "new",
+        "dashboard"
+      ],
+      "category": "other",
+      "urgency": "low",
+      "customer_sentiment": "positive"
+    }
+  },
+  {
+    "id": "extract_023",
+    "input": "My username is not recognized even though it is correct.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "username",
+        "is",
+        "not",
+        "recognized"
+      ],
+      "category": "account",
+      "urgency": "medium",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_024",
+    "input": "The webhook signature validation fails for every event.",
+    "expected": {
+      "summary_keywords": [
+        "webhook",
+        "signature",
+        "validation",
+        "fails"
+      ],
+      "category": "technical",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_025",
+    "input": "Why was I billed for an annual plan when I selected monthly?",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "was",
+        "billed",
+        "for",
+        "the",
+        "wrong",
+        "billing",
+        "period"
+      ],
+      "category": "billing",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_026",
+    "input": "I need to update the legal name associated with our organization.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "requests",
+        "an",
+        "organization",
+        "name",
+        "update"
+      ],
+      "category": "account",
+      "urgency": "medium",
+      "customer_sentiment": "neutral"
+    }
+  },
+  {
+    "id": "extract_027",
+    "input": "The mobile app shows a blank screen after the latest update.",
+    "expected": {
+      "summary_keywords": [
+        "mobile",
+        "app",
+        "shows",
+        "a",
+        "blank",
+        "screen"
+      ],
+      "category": "technical",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_028",
+    "input": "Please send me the invoice for order 10492.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "requests",
+        "an",
+        "invoice"
+      ],
+      "category": "billing",
+      "urgency": "low",
+      "customer_sentiment": "neutral"
+    }
+  },
+  {
+    "id": "extract_029",
+    "input": "My password reset link expired immediately.",
+    "expected": {
+      "summary_keywords": [
+        "password",
+        "reset",
+        "link",
+        "expires"
+      ],
+      "category": "account",
+      "urgency": "medium",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_030",
+    "input": "The server is returning 502 errors intermittently.",
+    "expected": {
+      "summary_keywords": [
+        "server",
+        "returns",
+        "intermittent",
+        "502",
+        "errors"
+      ],
+      "category": "technical",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_031",
+    "input": "I do not recognize this charge on my card.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "disputes",
+        "an",
+        "unknown",
+        "charge"
+      ],
+      "category": "billing",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_032",
+    "input": "Can I change the name displayed on my profile?",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "asks",
+        "to",
+        "change",
+        "profile",
+        "name"
+      ],
+      "category": "account",
+      "urgency": "low",
+      "customer_sentiment": "neutral"
+    }
+  },
+  {
+    "id": "extract_033",
+    "input": "The CSV export contains duplicated rows.",
+    "expected": {
+      "summary_keywords": [
+        "CSV",
+        "export",
+        "contains",
+        "duplicated",
+        "rows"
+      ],
+      "category": "technical",
+      "urgency": "medium",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_034",
+    "input": "Please explain why my renewal price increased.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "asks",
+        "about",
+        "an",
+        "increased",
+        "renewal",
+        "price"
+      ],
+      "category": "billing",
+      "urgency": "medium",
+      "customer_sentiment": "neutral"
+    }
+  },
+  {
+    "id": "extract_035",
+    "input": "I cannot invite my colleague because the invite button is disabled.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "cannot",
+        "invite",
+        "a",
+        "colleague"
+      ],
+      "category": "account",
+      "urgency": "medium",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_036",
+    "input": "Your API documentation was very helpful. Thank you.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "praises",
+        "the",
+        "API",
+        "documentation"
+      ],
+      "category": "other",
+      "urgency": "low",
+      "customer_sentiment": "positive"
+    }
+  },
+  {
+    "id": "extract_037",
+    "input": "Requests started timing out after we increased traffic.",
+    "expected": {
+      "summary_keywords": [
+        "API",
+        "requests",
+        "time",
+        "out",
+        "under",
+        "increased",
+        "traffic"
+      ],
+      "category": "technical",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_038",
+    "input": "I need a VAT invoice for my company.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "requests",
+        "a",
+        "VAT",
+        "invoice"
+      ],
+      "category": "billing",
+      "urgency": "low",
+      "customer_sentiment": "neutral"
+    }
+  },
+  {
+    "id": "extract_039",
+    "input": "The verification email never arrives.",
+    "expected": {
+      "summary_keywords": [
+        "account",
+        "verification",
+        "email",
+        "is",
+        "not",
+        "received"
+      ],
+      "category": "account",
+      "urgency": "high",
+      "customer_sentiment": "negative"
+    }
+  },
+  {
+    "id": "extract_040",
+    "input": "The integration works now after your team fixed it.",
+    "expected": {
+      "summary_keywords": [
+        "customer",
+        "confirms",
+        "the",
+        "integration",
+        "is",
+        "working"
+      ],
+      "category": "other",
+      "urgency": "low",
+      "customer_sentiment": "positive"
+    }
+  }
+]

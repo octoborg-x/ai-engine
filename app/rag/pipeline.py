@@ -54,13 +54,45 @@ class RAGPipeline:
         candidates = fuse_candidates(vector_hits, keyword_hits, limit=recall_k * 2)
         reranked = self.reranker.rerank(query, candidates, top_k=final_k)
         sources = build_sources(reranked)
+        rerank_by_id = {result.chunk.id: result.score for result in reranked}
         return {
             "query": query,
             "context": format_context_with_citations(sources),
             "sources": sources,
             "source_scores": [result.score for result in reranked],
             "retrieved_ids": [source.chunk_id for source in sources],
+            "candidates": self._describe_candidates(candidates, rerank_by_id),
         }
+
+    @staticmethod
+    def _describe_candidates(
+        candidates: list[SearchResult], rerank_by_id: dict[str, float]
+    ) -> list[dict]:
+        """Describe fused candidates with their recall and rerank scores.
+
+        Makes the two-stage retrieval auditable: which chunks were recalled,
+        how each was scored, and which ones survived reranking into context.
+        """
+        described = []
+        for candidate in candidates:
+            chunk = candidate.chunk
+            rerank_score = rerank_by_id.get(chunk.id)
+            described.append(
+                {
+                    "chunk_id": chunk.id,
+                    "source": chunk.metadata.source,
+                    "page": chunk.metadata.page,
+                    "section": chunk.metadata.section,
+                    "text": chunk.text,
+                    "recall_score": round(candidate.score, 4),
+                    "recall_type": candidate.search_type,
+                    "rerank_score": (
+                        round(rerank_score, 4) if rerank_score is not None else None
+                    ),
+                    "kept": rerank_score is not None,
+                }
+            )
+        return described
 
     def validate_answer(self, answer: str, sources) -> dict:
         return validate_citations(answer, sources)

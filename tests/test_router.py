@@ -1,4 +1,4 @@
-from app.llm.router import route
+from app.llm.router import model_catalog, route
 
 
 def test_extraction_uses_cheap_tier(monkeypatch):
@@ -33,3 +33,31 @@ def test_router_falls_back_to_existing_model(monkeypatch):
     monkeypatch.delenv("MODEL_CHEAP", raising=False)
     decision = route("classification", "billing")
     assert decision.model == "existing/model"
+
+
+def test_main_tier_pins_to_model_name(monkeypatch):
+    monkeypatch.setenv("MODEL_NAME", "main/model")
+    monkeypatch.setenv("MODEL_CHEAP", "cheap/model")
+    decision = route("chat", "debug this architecture tradeoff", force_tier="main")
+    assert decision.tier == "main"
+    assert decision.model == "main/model"
+    assert decision.reason == "tier pinned by request"
+
+
+def test_catalog_lists_main_first_with_model_name(monkeypatch):
+    monkeypatch.setenv("MODEL_NAME", "main/model")
+    monkeypatch.delenv("MODEL_CHEAP", raising=False)
+    catalog = model_catalog()
+    assert [entry["tier"] for entry in catalog] == [
+        "main",
+        "cheap",
+        "balanced",
+        "powerful",
+    ]
+    main = catalog[0]
+    assert main["model"] == "main/model"
+    assert main["env_var"] == "MODEL_NAME"
+    assert main["configured"] is True
+    # cheap is unset, so it falls back to MODEL_NAME and is flagged as fallback.
+    assert catalog[1]["model"] == "main/model"
+    assert catalog[1]["fallback"] is True

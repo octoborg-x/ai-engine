@@ -137,6 +137,39 @@ async def test_ask_stream_yields_only_non_empty_deltas(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_ask_stream_honors_pinned_tier(monkeypatch):
+    """The streaming path must use the requested tier, not the router default."""
+    monkeypatch.setenv("MODEL_NAME", "main/model")
+    monkeypatch.setenv("MODEL_CHEAP", "cheap/model")
+    seen = {}
+
+    class FakeStream:
+        def __aiter__(self):
+            return self._iterator()
+
+        async def _iterator(self):
+            yield SimpleNamespace(
+                choices=[SimpleNamespace(delta=SimpleNamespace(content="ok"))]
+            )
+
+    async def fake_create(**kwargs):
+        seen["model"] = kwargs["model"]
+        return FakeStream()
+
+    monkeypatch.setattr(llm_client.client.chat.completions, "create", fake_create)
+    # A complexity-marked prompt would normally route to "powerful"; pinning
+    # "cheap" must win.
+    result = [
+        chunk
+        async for chunk in llm_client.ask_stream(
+            "debug this architecture tradeoff", tier="cheap"
+        )
+    ]
+    assert result == ["ok"]
+    assert seen["model"] == "cheap/model"
+
+
+@pytest.mark.asyncio
 async def test_extract_ticket_accepts_plain_json(monkeypatch):
     payload = {
         "summary": "Customer cannot log in.",

@@ -121,8 +121,8 @@ async def _completion(model: str, messages: list[dict[str, str]]):
 
 
 @llm_retry
-async def ask(prompt: str) -> dict:
-    decision = route("chat", prompt)
+async def ask(prompt: str, tier: str | None = None) -> dict:
+    decision = route("chat", prompt, force_tier=tier)
     started = time.perf_counter()
     usage = None
     status = "error"
@@ -138,6 +138,7 @@ async def ask(prompt: str) -> dict:
             "response": response.choices[0].message.content,
             "model": decision.model,
             "route": decision.tier,
+            "route_reason": decision.reason,
             "prompt_tokens": usage.prompt_tokens,
             "completion_tokens": usage.completion_tokens,
             "estimated_cost_usd": calculate_cost(
@@ -158,8 +159,59 @@ async def ask(prompt: str) -> dict:
         )
 
 
-async def ask_stream(prompt: str) -> AsyncGenerator[str, None]:
-    decision = route("chat", prompt)
+@llm_retry
+async def complete_json(prompt: str, task: str = "extraction") -> tuple[dict, dict]:
+    """Run a structured-output call and return (parsed_json, metadata).
+
+    Shared by extraction-style features (ticket extraction, candidate
+    screening). Uses the router's task mapping so structured work lands on the
+    cheap tier, and records the same telemetry as the other LLM entry points.
+    """
+    decision = route(task, prompt)
+    started = time.perf_counter()
+    usage = None
+    status = "error"
+    raw = ""
+
+    try:
+        response = await _completion(
+            decision.model,
+            [{"role": "user", "content": prompt}],
+        )
+        usage = response.usage
+        raw = response.choices[0].message.content.strip()
+        if raw.startswith(chr(96) * 3):
+            raw = raw.strip(chr(96)).removeprefix("json").strip()
+        data = json.loads(raw)
+        status = "success"
+        meta = {
+            "model": decision.model,
+            "route": decision.tier,
+            "route_reason": decision.reason,
+            "prompt_tokens": usage.prompt_tokens,
+            "completion_tokens": usage.completion_tokens,
+            "estimated_cost_usd": calculate_cost(
+                decision.model, usage.prompt_tokens, usage.completion_tokens
+            ),
+            "latency_ms": round((time.perf_counter() - started) * 1000, 2),
+        }
+        return data, meta
+    except (json.JSONDecodeError, ValueError) as exc:
+        raise ValueError(f"Model returned invalid structured output: {raw}") from exc
+    finally:
+        record_call(
+            model=decision.model,
+            tier=decision.tier,
+            prompt_tokens=getattr(usage, "prompt_tokens", None),
+            completion_tokens=getattr(usage, "completion_tokens", None),
+            latency_ms=round((time.perf_counter() - started) * 1000, 2),
+            status=status,
+            attempt=1,
+        )
+
+
+async def ask_stream(prompt: str, tier: str | None = None) -> AsyncGenerator[str, None]:
+    decision = route("chat", prompt, force_tier=tier)
     started = time.perf_counter()
     status = "error"
     try:

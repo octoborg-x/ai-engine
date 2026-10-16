@@ -31,7 +31,7 @@ async def test_health_returns_ok():
 
 @pytest.mark.asyncio
 async def test_chat_returns_validated_response(monkeypatch):
-    async def fake_ask(prompt):
+    async def fake_ask(prompt, tier=None):
         assert prompt == "hello"
         return {
             "response": "Hi!",
@@ -65,7 +65,7 @@ async def test_chat_returns_validated_response(monkeypatch):
 async def test_chat_maps_provider_failures_to_http_errors(
     monkeypatch, exception_type, expected_status, expected_detail
 ):
-    async def failing_ask(_prompt):
+    async def failing_ask(_prompt, tier=None):
         message = (
             "upstream failure"
             if exception_type is FakeAPIError
@@ -87,7 +87,7 @@ async def test_chat_maps_provider_failures_to_http_errors(
 
 @pytest.mark.asyncio
 async def test_stream_endpoint_returns_streaming_response(monkeypatch):
-    async def fake_stream(prompt):
+    async def fake_stream(prompt, tier=None):
         assert prompt == "hello"
         yield "Hel"
         yield "lo"
@@ -97,6 +97,21 @@ async def test_stream_endpoint_returns_streaming_response(monkeypatch):
     assert isinstance(response, api.StreamingResponse)
     assert response.media_type == "text/event-stream"
     assert response.body_iterator is not None
+
+
+@pytest.mark.asyncio
+async def test_stream_endpoint_forwards_selected_tier(monkeypatch):
+    seen = {}
+
+    async def fake_stream(prompt, tier=None):
+        seen["tier"] = tier
+        yield "ok"
+
+    monkeypatch.setattr(api, "ask_stream", fake_stream)
+    response = await api.chat_stream(api.ChatRequest(prompt="hello", tier="main"))
+    async for _ in response.body_iterator:
+        pass
+    assert seen["tier"] == "main"
 
 
 @pytest.mark.asyncio
@@ -192,7 +207,7 @@ async def test_chat_security_middleware_returns_401_not_500(monkeypatch):
 async def test_ask_returns_grounded_answer_with_sources(monkeypatch):
     seen_prompt = {}
 
-    async def fake_ask(prompt):
+    async def fake_ask(prompt, tier=None):
         seen_prompt["value"] = prompt
         return {
             "response": "Refunds are allowed within 30 days [S1].",
@@ -220,7 +235,7 @@ async def test_ask_returns_grounded_answer_with_sources(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_ask_maps_provider_failures_to_http_errors(monkeypatch):
-    async def failing_ask(_prompt):
+    async def failing_ask(_prompt, tier=None):
         raise FakeAPIError("upstream failure")
 
     monkeypatch.setattr(api, "APIError", FakeAPIError)

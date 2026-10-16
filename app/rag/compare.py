@@ -17,6 +17,27 @@ def precision_at_k(retrieved_ids: list[str], relevant_ids: set[str], k: int) -> 
     return hits / len(top_k)
 
 
+def recall_at_k(retrieved_ids: list[str], relevant_ids: set[str], k: int) -> float:
+    """Fraction of relevant items found in the top-k results."""
+    if not relevant_ids:
+        return 0.0
+    top_k = set(retrieved_ids[:k])
+    return len(top_k & relevant_ids) / len(relevant_ids)
+
+
+def hit_rate_at_k(retrieved_ids: list[str], relevant_ids: set[str], k: int) -> float:
+    """1.0 if any relevant item is in the top-k results, else 0.0."""
+    return 1.0 if set(retrieved_ids[:k]) & relevant_ids else 0.0
+
+
+def reciprocal_rank(retrieved_ids: list[str], relevant_ids: set[str]) -> float:
+    """Reciprocal rank of the first relevant result (0.0 if none)."""
+    for rank, item in enumerate(retrieved_ids, start=1):
+        if item in relevant_ids:
+            return 1 / rank
+    return 0.0
+
+
 def _cosine_similarity(v1: list[float], v2: list[float]) -> float:
     """Compute cosine similarity between two vectors."""
     dot = np.dot(v1, v2)

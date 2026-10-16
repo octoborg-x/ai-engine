@@ -1,0 +1,72 @@
+[
+  {
+    "id": "class_001",
+    "input": "I was charged twice for the same order.",
+    "expected": {
+      "category": "billing"
+    }
+  },
+  {
+    "id": "class_002",
+    "input": "The mobile app crashes every time I open it.",
+    "expected": {
+      "category": "technical"
+    }
+  },
+  {
+    "id": "class_003",
+    "input": "I forgot my password and cannot sign in.",
+    "expected": {
+      "category": "account"
+    }
+  },
+  {
+    "id": "class_004",
+    "input": "I want to know what your company does.",
+    "expected": {
+      "category": "other"
+    }
+  },
+  {
+    "id": "class_005",
+    "input": "My invoice has the wrong amount.",
+    "expected": {
+      "category": "billing"
+    }
+  },
+  {
+    "id": "class_006",
+    "input": "The API returns a 500 error in production.",
+    "expected": {
+      "category": "technical"
+    }
+  },
+  {
+    "id": "class_007",
+    "input": "Please change the email address on my account.",
+    "expected": {
+      "category": "account"
+    }
+  },
+  {
+    "id": "class_008",
+    "input": "Can you tell me your support hours?",
+    "expected": {
+      "category": "other"
+    }
+  },
+  {
+    "id": "class_009",
+    "input": "My subscription payment was declined.",
+    "expected": {
+      "category": "billing"
+    }
+  },
+  {
+    "id": "class_010",
+    "input": "The dashboard is stuck loading forever.",
+    "expected": {
+      "category": "technical"
+    }
+  }
+]

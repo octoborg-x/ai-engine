@@ -37,7 +37,7 @@ Open http://localhost:3000.
 The Week 1 console exposes:
 
 - streaming playground
-- three configured model tiers
+- four selectable models (main + three routed tiers)
 - custom OpenAI-compatible provider UX boundary
 - model comparison indices
 - test suite indices
@@ -47,17 +47,40 @@ The Week 1 console exposes:
 - structured observability/log readiness
 - environment/configuration view
 
-The UI intentionally does not calculate domain metrics or invent benchmark values. It is a thin presentation/control layer over backend APIs.
+The console is a thin control layer over backend APIs: every panel reads live
+backend state. It does not calculate domain metrics or invent benchmark values.
+
+The console surfaces:
+
+- streaming playground with a four-model selector (enforced by the backend router)
+- live model list from `GET /models`
+- tier comparison benchmarks from `GET /compare`
+- packaged evaluation suites and runs from `GET /evals/suites` / `POST /evals/run`
+- retrieval transparency (recall candidates + rerank scores) from `POST /rag/retrieve`
+- grounded Knowledge Assistant answers with validated citations from `POST /ask`
+- recruitment screening from `POST /recruitment/screen`
+- auth and rate-limit policy from `GET /security/policy`
+- request and LLM-call telemetry from `GET /observability/requests`
+- a retrieval-quality dashboard at `/dashboard` backed by the retrieval suite
 
 ## Backend
 
 Existing Python setup and `app/main.py` endpoints:
 
 - `GET /health`
-- `POST /chat` — single-turn chat
+- `POST /chat` — single-turn chat (accepts optional `tier`)
+- `POST /chat/stream` — streaming chat (accepts optional `tier`)
 - `POST /ask` — Knowledge Assistant: hybrid retrieve -> rerank -> grounded, cited answer
-- `POST /chat/stream`
-- `POST /extract-ticket`
+- `POST /extract-ticket` — structured JSON extraction
+- `GET /metrics` — aggregated HTTP/LLM counters and latency
+- `GET /models` — routing tiers and the model each resolves to
+- `POST /rag/retrieve` — retrieval only: candidates, rerank scores, citations
+- `GET /compare` — measured per-tier benchmark across labeled chat cases
+- `GET /evals/suites` — packaged evaluation suites and case counts
+- `POST /evals/run` — run model-quality and retrieval suites
+- `POST /recruitment/screen` — JD + resume screening with an auditable rubric
+- `GET /security/policy` — non-secret auth and rate-limit policy
+- `GET /observability/requests` — recent request and LLM-call records
 
 ## Existing backend capabilities
 
@@ -66,9 +89,10 @@ Existing Python setup and `app/main.py` endpoints:
 - Structured JSON extraction
 - Retry logic with exponential backoff
 - Differentiated 429/504/502/500 errors
-- Deterministic cheap/balanced/powerful routing
+- Deterministic cheap/balanced/powerful routing with request-level model override
 - Per-call model/token/latency/cost/success telemetry
-- Bearer-token authentication on `POST /chat` and `POST /ask`
+- In-process request and LLM-call records for observability
+- Bearer-token authentication on every LLM-invoking route
 - Process-local rate limiting and `Retry-After`
 
 ## Knowledge Assistant (`/ask`)
@@ -96,6 +120,7 @@ Routing is deterministic and adds no extra LLM call.
 
 | Request | Tier |
 |---|---|
+| Explicit `tier` on the request (`main`/`cheap`/`balanced`/`powerful`) | that tier, pinned |
 | Classification / extraction | `cheap` |
 | Normal chat | `balanced` |
 | Complex reasoning, architecture, debugging, long prompts | `powerful` |
@@ -108,3 +133,6 @@ MODEL_CHEAP=your_free_cheap_model
 MODEL_BALANCED=your_free_balanced_model
 MODEL_POWERFUL=your_free_powerful_model
 ```
+
+`MODEL_NAME` is exposed as the `main` model and is the default selection in the
+streaming playground; the other three are the router's tiers.

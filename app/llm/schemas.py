@@ -5,12 +5,14 @@ from pydantic import BaseModel
 
 class ChatRequest(BaseModel):
     prompt: str
+    tier: Literal["main", "cheap", "balanced", "powerful"] | None = None
 
 
 class ChatResponse(BaseModel):
     response: str
     model: str
-    route: Literal["cheap", "balanced", "powerful"]
+    route: Literal["main", "cheap", "balanced", "powerful"]
+    route_reason: str = ""
     prompt_tokens: int
     completion_tokens: int
     estimated_cost_usd: float

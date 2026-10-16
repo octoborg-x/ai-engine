@@ -6,7 +6,7 @@ from functools import lru_cache
 from app.rag.corpus import build_corpus
 from app.rag.embeddings import EmbeddingModel
 from app.rag.pipeline import RAGPipeline
-from app.rag.schemas import AskResponse, SourceOut
+from app.rag.schemas import AskResponse, RetrievalResponse, SourceOut
 
 LlmCall = Callable[[str], Awaitable[dict]]
 SYSTEM_PROMPT = (
@@ -48,6 +48,21 @@ def retrieve(query: str, recall_k: int = 10, final_k: int = 3):
     return get_pipeline().ask(query, recall_k=recall_k, final_k=final_k)
 
 
+def retrieval_response(
+    query: str, recall_k: int = 10, final_k: int = 3
+) -> RetrievalResponse:
+    """Retrieval-only response: candidates, rerank scores, and citations."""
+    result = retrieve(query, recall_k=recall_k, final_k=final_k)
+    return RetrievalResponse(
+        query=result["query"],
+        answer="",
+        context=result["context"],
+        sources=sources_out(result),
+        retrieved_ids=result["retrieved_ids"],
+        candidates=result["candidates"],
+    )
+
+
 async def answer(
     query: str, llm_call: LlmCall, recall_k: int = 10, final_k: int = 3
 ) -> AskResponse:
@@ -61,6 +76,7 @@ async def answer(
         context=result["context"],
         sources=sources_out(result),
         retrieved_ids=result["retrieved_ids"],
+        candidates=result["candidates"],
         model=completion["model"],
         route=completion["route"],
         prompt_tokens=completion["prompt_tokens"],

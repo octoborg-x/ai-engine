@@ -1,6 +1,8 @@
 # Prices per 1M tokens, in USD. Update if you switch models.
 import logging
 
+from app.telemetry.records import record_llm_call
+
 # Free models are $0 — but structure this to work for paid models too.
 MODEL_PRICING = {
     "cohere/north-mini-code:free": {"input": 0.0, "output": 0.0},
@@ -155,6 +157,16 @@ def record_call(
         model=model,
         status=status,
         latency_ms=latency_ms,
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        cost_usd=cost,
+    )
+    record_llm_call(
+        model=model,
+        tier=tier,
+        status=status,
+        latency_ms=latency_ms,
+        attempt=attempt,
         input_tokens=input_tokens,
         output_tokens=output_tokens,
         cost_usd=cost,

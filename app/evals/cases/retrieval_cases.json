@@ -1,0 +1,52 @@
+[
+  {
+    "id": "ret_001",
+    "query": "How long do I have to return an item for a refund?",
+    "relevant_ids": ["refund-001"]
+  },
+  {
+    "id": "ret_002",
+    "query": "What does error code ERR_PAYMENT_403 mean?",
+    "relevant_ids": ["payment-001"]
+  },
+  {
+    "id": "ret_003",
+    "query": "How long does standard delivery take?",
+    "relevant_ids": ["shipping-003"]
+  },
+  {
+    "id": "ret_004",
+    "query": "How do I reset my forgotten password?",
+    "relevant_ids": ["account-005"]
+  },
+  {
+    "id": "ret_005",
+    "query": "My package arrived damaged, what should I do?",
+    "relevant_ids": ["shipping-010", "returns-001"]
+  },
+  {
+    "id": "ret_006",
+    "query": "What information do I need to create an account?",
+    "relevant_ids": ["account-001", "account-002"]
+  },
+  {
+    "id": "ret_007",
+    "query": "What happens if I provide an incorrect shipping address?",
+    "relevant_ids": ["shipping-005", "shipping-006"]
+  },
+  {
+    "id": "ret_008",
+    "query": "What circumstances can delay my delivery?",
+    "relevant_ids": ["shipping-004", "shipping-011"]
+  },
+  {
+    "id": "ret_009",
+    "query": "How can I track the progress of my order?",
+    "relevant_ids": ["shipping-007"]
+  },
+  {
+    "id": "ret_010",
+    "query": "How do I sign in to my account?",
+    "relevant_ids": ["account-003", "account-004"]
+  }
+]

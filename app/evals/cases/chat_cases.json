@@ -1,0 +1,525 @@
+[
+  {
+    "id": "chat_001",
+    "category": "basic",
+    "input": "What is an API? Explain it to a non-technical product manager.",
+    "expected": {
+      "must_contain_concepts": [
+        "request",
+        "response",
+        "software"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_002",
+    "category": "technical",
+    "input": "What is the difference between retry and idempotency?",
+    "expected": {
+      "must_contain_concepts": [
+        "retry",
+        "duplicate",
+        "side effect"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_003",
+    "category": "technical",
+    "input": "Explain why a database index can make reads faster but writes slower.",
+    "expected": {
+      "must_contain_concepts": [
+        "index",
+        "read",
+        "write"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_004",
+    "category": "architecture",
+    "input": "What is the purpose of a queue between an API and a worker?",
+    "expected": {
+      "must_contain_concepts": [
+        "queue",
+        "worker",
+        "asynchronous"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_005",
+    "category": "architecture",
+    "input": "Explain the difference between horizontal and vertical scaling.",
+    "expected": {
+      "must_contain_concepts": [
+        "horizontal",
+        "vertical",
+        "server"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_006",
+    "category": "python",
+    "input": "What is async/await useful for in an API server?",
+    "expected": {
+      "must_contain_concepts": [
+        "async",
+        "await",
+        "I/O"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_007",
+    "category": "security",
+    "input": "What is least privilege in an application?",
+    "expected": {
+      "must_contain_concepts": [
+        "least privilege",
+        "permission",
+        "access"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_008",
+    "category": "reliability",
+    "input": "What is a timeout and why should an HTTP client have one?",
+    "expected": {
+      "must_contain_concepts": [
+        "timeout",
+        "request",
+        "failure"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_009",
+    "category": "llm",
+    "input": "What is a token in an LLM?",
+    "expected": {
+      "must_contain_concepts": [
+        "token",
+        "text",
+        "model"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_010",
+    "category": "llm",
+    "input": "Why can a longer prompt increase LLM cost?",
+    "expected": {
+      "must_contain_concepts": [
+        "prompt",
+        "tokens",
+        "cost"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_011",
+    "category": "rag",
+    "input": "What is retrieval-augmented generation?",
+    "expected": {
+      "must_contain_concepts": [
+        "retrieval",
+        "context",
+        "generation"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_012",
+    "category": "rag",
+    "input": "Why can bad chunking hurt a RAG system?",
+    "expected": {
+      "must_contain_concepts": [
+        "chunk",
+        "retrieval",
+        "context"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_013",
+    "category": "agents",
+    "input": "What is tool calling in an AI agent?",
+    "expected": {
+      "must_contain_concepts": [
+        "tool",
+        "model",
+        "action"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_014",
+    "category": "agents",
+    "input": "Why should an agent have limited permissions?",
+    "expected": {
+      "must_contain_concepts": [
+        "permission",
+        "risk",
+        "action"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_015",
+    "category": "evaluation",
+    "input": "Why do we need an evaluation dataset for an LLM application?",
+    "expected": {
+      "must_contain_concepts": [
+        "evaluation",
+        "dataset",
+        "regression"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_016",
+    "category": "evaluation",
+    "input": "What is the difference between latency and throughput?",
+    "expected": {
+      "must_contain_concepts": [
+        "latency",
+        "throughput",
+        "time"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_017",
+    "category": "evaluation",
+    "input": "Why is P95 latency more informative than average latency for tail behavior?",
+    "expected": {
+      "must_contain_concepts": [
+        "P95",
+        "latency",
+        "tail"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_018",
+    "category": "evaluation",
+    "input": "What is a regression test for an LLM application?",
+    "expected": {
+      "must_contain_concepts": [
+        "previous",
+        "current",
+        "behavior"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_019",
+    "category": "uncertainty",
+    "input": "Which database is definitely the fastest for every application?",
+    "expected": {
+      "must_contain_concepts": [
+        "workload",
+        "trade-off"
+      ],
+      "must_not_contain": [
+        "always fastest",
+        "definitely fastest"
+      ]
+    }
+  },
+  {
+    "id": "chat_020",
+    "category": "uncertainty",
+    "input": "Why did our API fail yesterday?",
+    "expected": {
+      "must_contain_concepts": [
+        "logs",
+        "evidence"
+      ],
+      "must_not_contain": [
+        "invent",
+        "know exactly"
+      ]
+    }
+  },
+  {
+    "id": "chat_021",
+    "category": "clarification",
+    "input": "Make the system faster.",
+    "expected": {
+      "must_contain_concepts": [
+        "clarify",
+        "performance"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_022",
+    "category": "multilingual",
+    "input": "Explique simplement ce qu'est une API à un responsable produit.",
+    "expected": {
+      "must_contain_concepts": [
+        "API",
+        "requête",
+        "réponse"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_023",
+    "category": "multilingual",
+    "input": "اشرح لي ببساطة ما هي واجهة API.",
+    "expected": {
+      "must_contain_concepts": [
+        "API",
+        "طلب",
+        "استجابة"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_024",
+    "category": "business",
+    "input": "What is the difference between a proof of concept and a production system?",
+    "expected": {
+      "must_contain_concepts": [
+        "prototype",
+        "production",
+        "reliability"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_025",
+    "category": "observability",
+    "input": "What is distributed tracing?",
+    "expected": {
+      "must_contain_concepts": [
+        "trace",
+        "request",
+        "service"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_026",
+    "category": "observability",
+    "input": "What is the difference between logs and metrics?",
+    "expected": {
+      "must_contain_concepts": [
+        "logs",
+        "metrics",
+        "events"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_027",
+    "category": "security",
+    "input": "What is prompt injection?",
+    "expected": {
+      "must_contain_concepts": [
+        "instructions",
+        "model",
+        "untrusted"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_028",
+    "category": "security",
+    "input": "Why should secrets not be hard-coded in source code?",
+    "expected": {
+      "must_contain_concepts": [
+        "secret",
+        "source code",
+        "environment"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_029",
+    "category": "http",
+    "input": "What does HTTP status 429 usually mean?",
+    "expected": {
+      "must_contain_concepts": [
+        "rate",
+        "limit",
+        "request"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_030",
+    "category": "http",
+    "input": "What is the difference between 401 and 403?",
+    "expected": {
+      "must_contain_concepts": [
+        "authentication",
+        "authorization",
+        "permission"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_031",
+    "category": "testing",
+    "input": "What is the difference between unit and integration tests?",
+    "expected": {
+      "must_contain_concepts": [
+        "unit",
+        "integration",
+        "component"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_032",
+    "category": "architecture",
+    "input": "What is hexagonal architecture trying to protect?",
+    "expected": {
+      "must_contain_concepts": [
+        "domain",
+        "adapter",
+        "dependency"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_033",
+    "category": "data",
+    "input": "Why should user input be validated before processing it?",
+    "expected": {
+      "must_contain_concepts": [
+        "validation",
+        "input",
+        "error"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_034",
+    "category": "reliability",
+    "input": "Why can retries make an outage worse?",
+    "expected": {
+      "must_contain_concepts": [
+        "retry",
+        "load",
+        "failure"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_035",
+    "category": "caching",
+    "input": "What is caching and what trade-off does it introduce?",
+    "expected": {
+      "must_contain_concepts": [
+        "cache",
+        "stale",
+        "memory"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_036",
+    "category": "streaming",
+    "input": "What is the benefit of streaming an LLM response?",
+    "expected": {
+      "must_contain_concepts": [
+        "stream",
+        "token",
+        "latency"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_037",
+    "category": "cost",
+    "input": "Give three ways to reduce LLM inference cost.",
+    "expected": {
+      "must_contain_concepts": [
+        "tokens",
+        "model",
+        "caching"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_038",
+    "category": "privacy",
+    "input": "Why should an AI application minimize the data it sends to an external model?",
+    "expected": {
+      "must_contain_concepts": [
+        "privacy",
+        "data",
+        "exposure"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_039",
+    "category": "classification",
+    "input": "How would you distinguish a technical support ticket from a billing ticket?",
+    "expected": {
+      "must_contain_concepts": [
+        "technical",
+        "billing",
+        "issue"
+      ],
+      "must_not_contain": []
+    }
+  },
+  {
+    "id": "chat_040",
+    "category": "quality",
+    "input": "Why should an LLM application fail safely when structured output is invalid?",
+    "expected": {
+      "must_contain_concepts": [
+        "validation",
+        "fallback",
+        "error"
+      ],
+      "must_not_contain": []
+    }
+  }
+]
