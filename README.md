@@ -37,7 +37,7 @@ Open http://localhost:3000.
 The Week 1 console exposes:
 
 - streaming playground
-- three configured model tiers
+- four selectable models (main + three routed tiers)
 - custom OpenAI-compatible provider UX boundary
 - model comparison indices
 - test suite indices
@@ -52,8 +52,8 @@ backend state. It does not calculate domain metrics or invent benchmark values.
 
 The console surfaces:
 
-- streaming playground with real tier selection (enforced by the backend router)
-- live model tiers from `GET /models`
+- streaming playground with a four-model selector (enforced by the backend router)
+- live model list from `GET /models`
 - tier comparison benchmarks from `GET /compare`
 - packaged evaluation suites and runs from `GET /evals/suites` / `POST /evals/run`
 - retrieval transparency (recall candidates + rerank scores) from `POST /rag/retrieve`
@@ -89,7 +89,7 @@ Existing Python setup and `app/main.py` endpoints:
 - Structured JSON extraction
 - Retry logic with exponential backoff
 - Differentiated 429/504/502/500 errors
-- Deterministic cheap/balanced/powerful routing with request-level tier override
+- Deterministic cheap/balanced/powerful routing with request-level model override
 - Per-call model/token/latency/cost/success telemetry
 - In-process request and LLM-call records for observability
 - Bearer-token authentication on every LLM-invoking route
@@ -120,6 +120,7 @@ Routing is deterministic and adds no extra LLM call.
 
 | Request | Tier |
 |---|---|
+| Explicit `tier` on the request (`main`/`cheap`/`balanced`/`powerful`) | that tier, pinned |
 | Classification / extraction | `cheap` |
 | Normal chat | `balanced` |
 | Complex reasoning, architecture, debugging, long prompts | `powerful` |
@@ -132,3 +133,6 @@ MODEL_CHEAP=your_free_cheap_model
 MODEL_BALANCED=your_free_balanced_model
 MODEL_POWERFUL=your_free_powerful_model
 ```
+
+`MODEL_NAME` is exposed as the `main` model and is the default selection in the
+streaming playground; the other three are the router's tiers.

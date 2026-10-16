@@ -25,7 +25,7 @@ renders tokens incrementally.
 |---|---|---|
 | `GET /health` | liveness | public |
 | `GET /metrics` | aggregated HTTP/LLM counters | public |
-| `GET /models` | routing tiers and resolved model | protected |
+| `GET /models` | selectable models (main + tiers) and resolved model | protected |
 | `GET /security/policy` | non-secret auth + rate-limit policy | protected |
 | `POST /chat`, `POST /chat/stream` | chat, optional `tier` | protected |
 | `POST /ask` | grounded answer with citations | protected |

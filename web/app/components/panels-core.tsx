@@ -101,8 +101,16 @@ export function Playground() {
   const [prompt, setPrompt] = useState("Explain dependency inversion in one paragraph.");
   const [output, setOutput] = useState("");
   const [running, setRunning] = useState(false);
-  const [tier, setTier] = useState<Tier | "">("");
+  const [tier, setTier] = useState<Tier>("main");
   const [meta, setMeta] = useState("Ready");
+  const models = useAsync<{ tiers: ModelTier[] }>();
+
+  useEffect(() => {
+    models.run(() => api.models());
+  }, [models]);
+
+  const catalog = models.data?.tiers ?? [];
+  const label = (t: ModelTier) => (t.tier === "main" ? `${t.model} (main)` : `${t.model} — ${t.tier}`);
 
   async function run() {
     setRunning(true);
@@ -112,9 +120,7 @@ export function Playground() {
     try {
       await streamChat(prompt, tier, setOutput);
       setMeta(
-        `Completed · ${Math.round(performance.now() - started)} ms · ${
-          tier ? `tier pinned to ${tier}` : "tier chosen by backend router"
-        }`,
+        `Completed · ${Math.round(performance.now() - started)} ms · tier pinned to ${tier}`,
       );
     } catch (e) {
       setMeta(e instanceof Error ? e.message : "Request failed");
@@ -128,7 +134,7 @@ export function Playground() {
       <Hero
         eyebrow="PLAYGROUND"
         title="Streaming chat"
-        blurb="Streams /chat/stream through the server-side proxy. Pin a tier to force routing, or leave it automatic."
+        blurb="Streams /chat/stream through the server-side proxy. Pick one of the four configured models; the backend enforces the choice."
         right={
           <Badge tone={running ? "blue" : "green"}>
             {running ? "● streaming" : "● idle"}
@@ -138,15 +144,17 @@ export function Playground() {
       <Card>
         <div className="toolbar">
           <label>
-            Model tier
-            <select value={tier} onChange={(e) => setTier(e.target.value as Tier | "")}>
-              <option value="">Auto (backend router)</option>
-              <option value="cheap">Cheap</option>
-              <option value="balanced">Balanced</option>
-              <option value="powerful">Powerful</option>
+            Model
+            <select value={tier} onChange={(e) => setTier(e.target.value as Tier)}>
+              {catalog.map((t) => (
+                <option key={t.tier} value={t.tier}>
+                  {label(t)}
+                </option>
+              ))}
+              {!catalog.length && <option value="main">Loading…</option>}
             </select>
           </label>
-          <span className="muted">The selected tier is enforced by the backend.</span>
+          <span className="muted">The selected model is enforced by the backend.</span>
         </div>
         <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={5} />
         <div className="toolbar">
@@ -171,7 +179,13 @@ export function Models() {
   }, [models]);
 
   const tone = (tier: string) =>
-    tier === "cheap" ? "green" : tier === "balanced" ? "blue" : "violet";
+    tier === "main"
+      ? "violet"
+      : tier === "cheap"
+        ? "green"
+        : tier === "balanced"
+          ? "blue"
+          : "amber";
 
   return (
     <div className="stack">

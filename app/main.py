@@ -317,7 +317,7 @@ async def ask_endpoint(req: AskRequest):
 @app.post("/chat/stream")
 async def chat_stream(req: ChatRequest):
     return StreamingResponse(
-        ask_stream(req.prompt),
+        ask_stream(req.prompt, tier=req.tier),
         media_type="text/event-stream",
     )
 

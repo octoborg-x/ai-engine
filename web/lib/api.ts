@@ -2,7 +2,7 @@
 // at /api/backend/*, which attaches the API token before forwarding upstream,
 // so the browser never handles credentials.
 
-export type Tier = "cheap" | "balanced" | "powerful";
+export type Tier = "main" | "cheap" | "balanced" | "powerful";
 
 export interface Health {
   status: string;
@@ -253,13 +253,13 @@ export const api = {
 // they arrive; the proxy passes the stream through untouched.
 export async function streamChat(
   prompt: string,
-  tier: Tier | "",
+  tier: Tier,
   onChunk: (text: string) => void,
 ): Promise<void> {
   const res = await fetch(`${BASE}/chat/stream`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(tier ? { prompt, tier } : { prompt }),
+    body: JSON.stringify({ prompt, tier }),
     cache: "no-store",
   });
   if (res.status === 503) {

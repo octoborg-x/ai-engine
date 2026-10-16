@@ -87,7 +87,7 @@ async def test_chat_maps_provider_failures_to_http_errors(
 
 @pytest.mark.asyncio
 async def test_stream_endpoint_returns_streaming_response(monkeypatch):
-    async def fake_stream(prompt):
+    async def fake_stream(prompt, tier=None):
         assert prompt == "hello"
         yield "Hel"
         yield "lo"
@@ -97,6 +97,21 @@ async def test_stream_endpoint_returns_streaming_response(monkeypatch):
     assert isinstance(response, api.StreamingResponse)
     assert response.media_type == "text/event-stream"
     assert response.body_iterator is not None
+
+
+@pytest.mark.asyncio
+async def test_stream_endpoint_forwards_selected_tier(monkeypatch):
+    seen = {}
+
+    async def fake_stream(prompt, tier=None):
+        seen["tier"] = tier
+        yield "ok"
+
+    monkeypatch.setattr(api, "ask_stream", fake_stream)
+    response = await api.chat_stream(api.ChatRequest(prompt="hello", tier="main"))
+    async for _ in response.body_iterator:
+        pass
+    assert seen["tier"] == "main"
 
 
 @pytest.mark.asyncio

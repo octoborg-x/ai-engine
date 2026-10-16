@@ -257,11 +257,14 @@ def test_screen_requires_auth():
 
 
 def test_models_lists_tiers_without_secrets(monkeypatch):
+    monkeypatch.setenv("MODEL_NAME", "main/model")
     monkeypatch.setenv("MODEL_CHEAP", "cheap/model")
     response = client.get("/models", headers=auth_headers)
     assert response.status_code == 200
     tiers = {t["tier"]: t for t in response.json()["tiers"]}
-    assert set(tiers) == {"cheap", "balanced", "powerful"}
+    assert set(tiers) == {"main", "cheap", "balanced", "powerful"}
+    assert tiers["main"]["model"] == "main/model"
+    assert tiers["main"]["env_var"] == "MODEL_NAME"
     assert tiers["cheap"]["model"] == "cheap/model"
     assert "API_AUTH_TOKEN" not in str(response.json())
 

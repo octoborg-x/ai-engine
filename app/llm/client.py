@@ -210,8 +210,8 @@ async def complete_json(prompt: str, task: str = "extraction") -> tuple[dict, di
         )
 
 
-async def ask_stream(prompt: str) -> AsyncGenerator[str, None]:
-    decision = route("chat", prompt)
+async def ask_stream(prompt: str, tier: str | None = None) -> AsyncGenerator[str, None]:
+    decision = route("chat", prompt, force_tier=tier)
     started = time.perf_counter()
     status = "error"
     try:

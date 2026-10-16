@@ -17,7 +17,16 @@ class RouteDecision:
     reason: str
 
 
+# "main" is the default model (MODEL_NAME); the other three are the routed
+# tiers. Ordering here is the order the console renders.
+TIERS = ("main", "cheap", "balanced", "powerful")
+
+
 def _model_for(tier: str) -> str:
+    # MODEL_NAME is the primary/default model, exposed as the "main" tier.
+    if tier == "main":
+        return os.environ["MODEL_NAME"]
+
     configured = os.getenv(f"MODEL_{tier.upper()}")
     if configured:
         return configured
@@ -32,8 +41,8 @@ def model_catalog() -> list[dict]:
     Never returns secrets — only the tier, its env var name, and the model id.
     """
     catalog = []
-    for tier in ("cheap", "balanced", "powerful"):
-        env_var = f"MODEL_{tier.upper()}"
+    for tier in TIERS:
+        env_var = "MODEL_NAME" if tier == "main" else f"MODEL_{tier.upper()}"
         try:
             model = _model_for(tier)
             configured = bool(os.getenv(env_var))
@@ -66,7 +75,7 @@ def route(task: str, prompt: str, force_tier: str | None = None) -> RouteDecisio
     normalized_task = task.lower().strip()
     text = prompt.lower()
 
-    if force_tier in {"cheap", "balanced", "powerful"}:
+    if force_tier in TIERS:
         return RouteDecision(
             tier=force_tier,
             model=_model_for(force_tier),
