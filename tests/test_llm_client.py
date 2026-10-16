@@ -137,6 +137,88 @@ async def test_ask_stream_yields_only_non_empty_deltas(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_ask_stream_captures_usage_with_include_usage(monkeypatch):
+    """Streamed responses must feed token usage into telemetry aggregates.
+
+    The stream emits content chunks, then a final chunk carrying the usage that
+    the provider only sends when stream_options.include_usage is requested.
+    """
+    from app.telemetry.metrics import MetricsCollector
+
+    MetricsCollector.reset()
+    content_chunks = [
+        SimpleNamespace(
+            choices=[SimpleNamespace(delta=SimpleNamespace(content="Hel"))]
+        ),
+        SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content="lo"))]),
+    ]
+    usage_chunk = SimpleNamespace(
+        choices=[],
+        usage=SimpleNamespace(prompt_tokens=100, completion_tokens=25),
+    )
+
+    class FakeStream:
+        def __aiter__(self):
+            return self._iterator()
+
+        async def _iterator(self):
+            for c in [*content_chunks, usage_chunk]:
+                yield c
+
+    seen = {}
+
+    async def fake_create(**kwargs):
+        seen["stream_options"] = kwargs.get("stream_options")
+        assert kwargs["stream"] is True
+        return FakeStream()
+
+    monkeypatch.setattr(llm_client.client.chat.completions, "create", fake_create)
+    result = [chunk async for chunk in llm_client.ask_stream("hello")]
+    assert result == ["Hel", "lo"]
+    assert seen["stream_options"] == {"include_usage": True}
+
+    snapshot = MetricsCollector.snapshot()
+    assert (
+        snapshot["llm_calls_total"].get("('cohere/north-mini-code:free', 'success')", 0)
+        >= 1
+    )
+    assert snapshot["llm_input_tokens_total"] == 100
+    assert snapshot["llm_output_tokens_total"] == 25
+    assert snapshot["llm_total_tokens_total"] == 125
+
+
+@pytest.mark.asyncio
+async def test_ask_stream_keeps_working_when_provider_omits_usage(monkeypatch):
+    """Without a final usage chunk, tokens stay null but streaming still works."""
+    from app.telemetry.metrics import MetricsCollector
+
+    MetricsCollector.reset()
+
+    class FakeStream:
+        def __aiter__(self):
+            return self._iterator()
+
+        async def _iterator(self):
+            yield SimpleNamespace(
+                choices=[SimpleNamespace(delta=SimpleNamespace(content="ok"))]
+            )
+            yield SimpleNamespace(choices=[], usage=None)
+
+    async def fake_create(**kwargs):
+        assert kwargs["stream_options"] == {"include_usage": True}
+        return FakeStream()
+
+    monkeypatch.setattr(llm_client.client.chat.completions, "create", fake_create)
+    result = [chunk async for chunk in llm_client.ask_stream("hello")]
+    assert result == ["ok"]
+
+    snapshot = MetricsCollector.snapshot()
+    assert snapshot["llm_input_tokens_total"] == 0
+    assert snapshot["llm_output_tokens_total"] == 0
+    assert snapshot["llm_total_tokens_total"] == 0
+
+
+@pytest.mark.asyncio
 async def test_ask_stream_honors_pinned_tier(monkeypatch):
     """The streaming path must use the requested tier, not the router default."""
     monkeypatch.setenv("MODEL_NAME", "main/model")

@@ -18,7 +18,12 @@ Failed attempts emit status: error. Retry scheduling emits a separate llm.retry 
 
 Prompt contents are intentionally excluded from telemetry.
 
-Streaming calls are also timed, but token counts remain null when the provider does not expose usage through the current streaming path. Missing usage is not reported as zero.
+Streaming calls request `stream_options: {"include_usage": true}` and
+capture usage from the final chunk the same way as non-streaming calls, so
+streamed responses are counted in the token and cost aggregates too. If a
+provider never emits the final usage chunk (stream interrupted, or provider
+does not support the option), token counts stay null rather than being
+reported as zero.
 
 ## Metrics endpoint (Day 4)
 
