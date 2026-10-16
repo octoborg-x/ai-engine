@@ -202,7 +202,35 @@ export interface SecurityPolicy {
   public_routes: string[];
 }
 
+export type ResultsTab = "compare" | "evals" | "retrieval";
+
+export interface SavedResultEntry {
+  tab: ResultsTab;
+  slot: number;
+  key: string;
+  url: string;
+  timestamp: number;
+}
+
+export interface ResultsIndex {
+  results: Record<ResultsTab, SavedResultEntry[]>;
+}
+
+// The backend tags saved payloads with a `_meta` block (tab, slot, key).
+export type SavedResult<T = unknown> = T & { _meta?: SavedResultEntry };
+
 const BASE = "/api/backend";
+
+// HTTP error with the status attached so callers can tell "the model blew up"
+// (4xx/5xx on a real run) from network/transport failures.
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
@@ -211,7 +239,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     cache: "no-store",
   });
   if (res.status === 503) {
-    throw new Error("Backend is unavailable — the server is missing its API token.");
+    throw new ApiError(
+      "Backend is unavailable — the server is missing its API token or is overloaded.",
+      503,
+    );
   }
   if (!res.ok) {
     let detail = `Request failed: ${res.status}`;
@@ -221,7 +252,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       /* non-JSON error body */
     }
-    throw new Error(detail);
+    throw new ApiError(detail, res.status);
   }
   return (await res.json()) as T;
 }
@@ -240,6 +271,16 @@ export const api = {
   evalSuites: () => get<SuiteIndex>("/evals/suites"),
   runEvals: (suites: string[], limit = 5) =>
     post<EvalReport>("/evals/run", { suites, limit }),
+  resultsIndex: () => get<ResultsIndex>("/results"),
+  resultsSaved: <T,>(tab: ResultsTab, slot?: number) =>
+    get<SavedResult<T>>(
+      `/results/saved?tab=${tab}${slot != null ? `&slot=${slot}` : ""}`,
+    ),
+  resultsSave: <T,>(tab: ResultsTab, result: T) =>
+    post<{ tab: ResultsTab; slot: number; key: string }>("/results/save", {
+      tab,
+      result,
+    }),
   ragRetrieve: (query: string, recall_k = 6, final_k = 3) =>
     post<RagAnswer>("/rag/retrieve", { query, recall_k, final_k }),
   ask: (query: string, recall_k = 6, final_k = 3) =>

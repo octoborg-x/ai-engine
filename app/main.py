@@ -42,6 +42,9 @@ PROTECTED_ROUTES = {
     ("GET", "/compare"),
     ("GET", "/evals/suites"),
     ("POST", "/evals/run"),
+    ("GET", "/results"),
+    ("GET", "/results/saved"),
+    ("POST", "/results/save"),
     ("GET", "/security/policy"),
     ("GET", "/models"),
     ("POST", "/rag/retrieve"),
@@ -255,6 +258,49 @@ async def evals_run(req: EvalRunRequest | None = None):
         return await run_suites(suites, bounded)
     except Exception as e:
         raise _provider_error(e) from e
+
+
+class SaveResultRequest(BaseModel):
+    """Persist one measured result under a tab (e.g. ``compare`` or ``evals``)."""
+
+    tab: str
+    result: dict
+
+
+@app.get("/results")
+def results_index():
+    """Every saved result grouped by tab, newest slot first.
+
+    The console uses this to render the dashboard from previously executed
+    runs without triggering a new (expensive) evaluation.
+    """
+    from app.evals import results_store
+
+    return {"results": results_store.list_results()}
+
+
+@app.get("/results/saved")
+def results_saved(tab: str = "compare", slot: int | None = None):
+    """One saved result as JSON so the console can load files deterministically."""
+    from app.evals import results_store
+
+    if tab not in results_store.TABS:
+        raise HTTPException(status_code=404, detail=f"unknown tab: {tab}")
+    saved = results_store.load_result(tab, slot)
+    if saved is None:
+        raise HTTPException(status_code=404, detail="no saved result for that tab")
+    return saved
+
+
+@app.post("/results/save")
+def results_save(req: SaveResultRequest):
+    """Persist a measured result into the file-backed store."""
+    from app.evals import results_store
+
+    try:
+        return results_store.save_result(req.tab, req.result)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
 
 
 @app.get("/models")
