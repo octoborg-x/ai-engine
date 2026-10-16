@@ -306,7 +306,6 @@ def test_security_policy_exposes_no_secrets():
 
 def test_results_index_lists_saved_slots(monkeypatch, tmp_path):
     monkeypatch.setenv("RESULTS_DIR", str(tmp_path))
-    from app.evals import results_store
 
     (tmp_path / "compare-example-1.json").write_text(
         '{"timestamp": "t", "cases_per_tier": 3, "results": []}',
