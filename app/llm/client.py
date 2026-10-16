@@ -14,6 +14,7 @@ from tenacity import (
     wait_exponential,
 )
 
+from app.llm.providers import resolve_provider
 from app.llm.resilience import llm_circuit_breaker
 from app.llm.router import route
 from app.llm.schemas import TicketExtraction
@@ -45,26 +46,9 @@ client = _LazyClient()
 
 
 def _provider_config() -> tuple[str, str]:
-    """Resolve (api_key, base_url) with OpenRouter first, OpenAI as fallback."""
-    openrouter_key = os.getenv("OPENROUTER_API_KEY")
-    if openrouter_key:
-        base_url = (
-            os.getenv("LLM_BASE_URL")
-            or os.getenv("OPENROUTER_BASE_URL")
-            or "https://openrouter.ai/api/v1"
-        )
-        return openrouter_key, base_url
-
-    openai_key = os.getenv("OPENAI_API_KEY")
-    if openai_key:
-        base_url = (
-            os.getenv("LLM_BASE_URL")
-            or os.getenv("OPENAI_BASE_URL")
-            or "https://api.openai.com/v1"
-        )
-        return openai_key, base_url
-
-    raise RuntimeError("Configure OPENROUTER_API_KEY or OPENAI_API_KEY to run live")
+    """Resolve (api_key, base_url): OpenRouter first, OpenAI next, generic last."""
+    provider = resolve_provider()
+    return provider.api_key, provider.base_url
 
 
 def _get_client() -> AsyncOpenAI:

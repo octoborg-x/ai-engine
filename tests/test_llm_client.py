@@ -50,8 +50,20 @@ def test_provider_config_prefers_openrouter_then_openai(
 def test_provider_config_requires_at_least_one_key(monkeypatch):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("LLM_API_KEY", raising=False)
     with pytest.raises(RuntimeError, match="OPENROUTER_API_KEY or OPENAI_API_KEY"):
         llm_client._provider_config()
+
+
+def test_provider_config_accepts_generic_llm_api_key(monkeypatch):
+    """LLM_API_KEY covers OpenAI-compatible endpoints such as Gemini/Groq."""
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setenv("LLM_API_KEY", "generic-key")
+    monkeypatch.setenv("LLM_BASE_URL", "https://custom.example/v1")
+    key, url = llm_client._provider_config()
+    assert key == "generic-key"
+    assert url == "https://custom.example/v1"
 
 
 def test_provider_config_respects_explicit_base_urls(monkeypatch):

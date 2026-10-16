@@ -5,6 +5,8 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
+from app.llm.providers import has_provider_key, resolve_provider
+
 load_dotenv()
 DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small"
 OPENROUTER_EMBEDDING_MODEL = "openai/text-embedding-3-small"
@@ -40,16 +42,12 @@ def generate_embedding(text: str, model: str | None = None) -> list[float]:
     explicit ``EMBEDDINGS_OFFLINE=1`` flag is present, a deterministic zero
     vector is returned so tests and local demos never hit the network.
     """
-    api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
-    if _offline_mode() or not api_key:
+    if _offline_mode() or not has_provider_key():
         return [0.0] * 1536
-    openrouter = bool(os.getenv("OPENROUTER_API_KEY"))
-    base_url = (
-        os.getenv("OPENROUTER_BASE_URL")
-        or os.getenv("OPENAI_BASE_URL")
-        or "https://openrouter.ai/api/v1"
-    )
-    client = OpenAI(api_key=api_key, base_url=base_url)
+    provider = resolve_provider()
+    base_url = os.getenv("LLM_BASE_URL") or provider.base_url
+    client = OpenAI(api_key=provider.api_key, base_url=base_url)
+    openrouter = provider.name == "openrouter"
     response = client.embeddings.create(
         input=[text],
         model=model or _embedding_model(openrouter),
