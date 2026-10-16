@@ -15,7 +15,6 @@ from tenacity import (
 )
 
 from app.llm.providers import generic_provider, resolve_provider
-from app.llm.resilience import breaker_for_tier
 from app.llm.router import route
 from app.llm.schemas import TicketExtraction
 from app.telemetry.metrics import calculate_cost, record_call
@@ -149,9 +148,11 @@ async def _completion(
         if tier == "openai-compatible"
         else client.chat.completions
     )
-    return await breaker_for_tier(tier).call(
-        lambda: completions.create(model=model, messages=messages),
-        timeout_seconds=timeout_seconds,
+    # Keep provider calls independent: a previous transient failure must not
+    # trip a shared circuit and reject later requests before they reach Gemini.
+    return await asyncio.wait_for(
+        completions.create(model=model, messages=messages),
+        timeout=timeout_seconds,
     )
 
 
@@ -262,14 +263,14 @@ async def ask_stream(prompt: str, tier: str | None = None) -> AsyncGenerator[str
             if decision.tier == "openai-compatible"
             else client.chat.completions
         )
-        stream = await breaker_for_tier(decision.tier).call(
-            lambda: completions.create(
+        stream = await asyncio.wait_for(
+            completions.create(
                 model=decision.model,
                 messages=[{"role": "user", "content": prompt}],
                 stream=True,
                 stream_options={"include_usage": True},
             ),
-            timeout_seconds=timeout_seconds,
+            timeout=timeout_seconds,
         )
         async for chunk in stream:
             # With include_usage the final chunk carries usage; capture it so
