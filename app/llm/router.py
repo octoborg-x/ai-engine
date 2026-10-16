@@ -11,7 +11,7 @@ import os
 import re
 from dataclasses import dataclass
 
-from app.llm.providers import provider_chat_model
+from app.llm.providers import generic_chat_model, provider_chat_model
 
 
 @dataclass(frozen=True)
@@ -21,16 +21,31 @@ class RouteDecision:
     reason: str
 
 
-# "main" is the default model (active provider chat model); the other three
-# are the routed tiers. Ordering here is the order the console renders.
-TIERS = ("main", "cheap", "balanced", "powerful")
+# "main" is the default model (active provider chat model); the next three
+# are the routed tiers; "openai-compatible" is the independent OpenAI-compatible
+# slot. Ordering here is the order the console renders.
+TIERS = ("main", "cheap", "balanced", "powerful", "openai-compatible")
+
+
+def _tier_env_var(tier: str) -> str:
+    if tier == "main":
+        return "MODEL_NAME"
+    if tier == "openai-compatible":
+        return "OPENAI_MODEL"
+    return f"MODEL_{tier.upper()}"
 
 
 def _model_for(tier: str) -> str:
-    # The active provider's chat model is the primary/default model, exposed
-    # as the "main" tier.
+    # "main" is the active provider's chat model.
     if tier == "main":
         return provider_chat_model()
+
+    # The OpenAI-compatible tier always resolves to the OpenAI-compatible
+    # slot (its own key + base URL + model), even when OpenRouter is the
+    # active provider. It falls back to MODEL_NAME only when no
+    # OPENAI_MODEL is configured.
+    if tier == "openai-compatible":
+        return generic_chat_model()
 
     configured = os.getenv(f"MODEL_{tier.upper()}")
     if configured:
@@ -47,7 +62,7 @@ def model_catalog() -> list[dict]:
     """
     catalog = []
     for tier in TIERS:
-        env_var = "MODEL_NAME" if tier == "main" else f"MODEL_{tier.upper()}"
+        env_var = _tier_env_var(tier)
         try:
             model = _model_for(tier)
             configured = bool(os.getenv(env_var))

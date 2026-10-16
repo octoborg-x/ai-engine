@@ -14,7 +14,7 @@ from tenacity import (
     wait_exponential,
 )
 
-from app.llm.providers import resolve_provider
+from app.llm.providers import generic_provider, resolve_provider
 from app.llm.resilience import llm_circuit_breaker
 from app.llm.router import route
 from app.llm.schemas import TicketExtraction
@@ -25,24 +25,40 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 _client: AsyncOpenAI | None = None
+_openai_compat_client: AsyncOpenAI | None = None
 
 
 class _LazyCompletions:
+    """Routes create() to the real client, lazily building it on first use.
+
+    `openai_compatible=True` targets the OpenAI-compatible slot (its own key,
+    base URL, and model) rather than the active provider, so both can be used
+    side by side and their keys never mix.
+    """
+
+    def __init__(self, openai_compatible: bool = False) -> None:
+        self._openai_compatible = openai_compatible
+
     async def create(self, **kwargs):
+        if self._openai_compatible:
+            return await _get_openai_compat_client().chat.completions.create(
+                **kwargs
+            )
         return await _get_client().chat.completions.create(**kwargs)
 
 
 class _LazyChat:
-    def __init__(self) -> None:
-        self.completions = _LazyCompletions()
+    def __init__(self, openai_compatible: bool = False) -> None:
+        self.completions = _LazyCompletions(openai_compatible=openai_compatible)
 
 
 class _LazyClient:
-    def __init__(self) -> None:
-        self.chat = _LazyChat()
+    def __init__(self, openai_compatible: bool = False) -> None:
+        self.chat = _LazyChat(openai_compatible=openai_compatible)
 
 
 client = _LazyClient()
+openai_compatible_client = _LazyClient(openai_compatible=True)
 
 
 def _provider_config() -> tuple[str, str]:
@@ -71,6 +87,32 @@ def _get_client() -> AsyncOpenAI:
     return _client
 
 
+def _get_openai_compat_client() -> AsyncOpenAI:
+    """Build the OpenAI-compatible slot client (OPENAI_API_KEY based).
+
+    Used by the "openai-compatible" tier so any OpenAI-compatible endpoint
+    (Gemini, Groq, Together, …) can be selected independently of the active
+    provider. Built lazily so secrets are only touched when actually used.
+    """
+    global _openai_compat_client
+
+    if _openai_compat_client is None:
+        provider = generic_provider()
+        _openai_compat_client = AsyncOpenAI(
+            api_key=provider.api_key,
+            base_url=provider.base_url,
+            timeout=float(os.getenv("LLM_TIMEOUT_SECONDS", "30")),
+        )
+
+    return _openai_compat_client
+
+
+def _set_openai_compat_client(provider_client: AsyncOpenAI) -> None:
+    """Inject a prebuilt client for the OpenAI-compatible slot (tests)."""
+    global _openai_compat_client
+    _openai_compat_client = provider_client
+
+
 def _log_retry(retry_state) -> None:
     exc = retry_state.outcome.exception() if retry_state.outcome else None
     logger.warning(
@@ -95,11 +137,22 @@ llm_retry = retry(
 )
 
 
-async def _completion(model: str, messages: list[dict[str, str]]):
-    """Call the provider through the shared timeout and circuit-breaker layer."""
+async def _completion(
+    model: str, messages: list[dict[str, str]], tier: str | None = None
+):
+    """Call a provider through the shared timeout and circuit-breaker layer.
+
+    The "openai-compatible" tier uses its own OpenAI-compatible client; every
+    other tier uses the active provider client.
+    """
     timeout_seconds = float(os.getenv("LLM_TIMEOUT_SECONDS", "30"))
+    completions = (
+        openai_compatible_client.chat.completions
+        if tier == "openai-compatible"
+        else client.chat.completions
+    )
     return await llm_circuit_breaker.call(
-        lambda: client.chat.completions.create(model=model, messages=messages),
+        lambda: completions.create(model=model, messages=messages),
         timeout_seconds=timeout_seconds,
     )
 
@@ -115,6 +168,7 @@ async def ask(prompt: str, tier: str | None = None) -> dict:
         response = await _completion(
             decision.model,
             [{"role": "user", "content": prompt}],
+            tier=decision.tier,
         )
         usage = response.usage
         status = "success"
@@ -164,6 +218,7 @@ async def complete_json(
         response = await _completion(
             decision.model,
             [{"role": "user", "content": prompt}],
+            tier=decision.tier,
         )
         usage = response.usage
         raw = response.choices[0].message.content.strip()
@@ -204,8 +259,13 @@ async def ask_stream(prompt: str, tier: str | None = None) -> AsyncGenerator[str
     usage = None
     try:
         timeout_seconds = float(os.getenv("LLM_TIMEOUT_SECONDS", "30"))
+        completions = (
+            openai_compatible_client.chat.completions
+            if decision.tier == "openai-compatible"
+            else client.chat.completions
+        )
         stream = await llm_circuit_breaker.call(
-            lambda: client.chat.completions.create(
+            lambda: completions.create(
                 model=decision.model,
                 messages=[{"role": "user", "content": prompt}],
                 stream=True,
@@ -260,6 +320,7 @@ Customer message: {message}"""
         response = await _completion(
             decision.model,
             [{"role": "user", "content": prompt}],
+            tier=decision.tier,
         )
         usage = response.usage
         raw = response.choices[0].message.content.strip()

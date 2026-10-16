@@ -2,16 +2,22 @@ from typing import Literal
 
 from pydantic import BaseModel
 
+# The selectable tiers. "main" is the active provider's chat model; the three
+# routed tiers are cheap/balanced/powerful; "openai-compatible" always targets
+# the OpenAI-compatible slot (OPENAI_API_KEY + OPENAI_BASE_URL + OPENAI_MODEL),
+# independent of the active provider.
+TierName = Literal["main", "cheap", "balanced", "powerful", "openai-compatible"]
+
 
 class ChatRequest(BaseModel):
     prompt: str
-    tier: Literal["main", "cheap", "balanced", "powerful"] | None = None
+    tier: TierName | None = None
 
 
 class ChatResponse(BaseModel):
     response: str
     model: str
-    route: Literal["main", "cheap", "balanced", "powerful"]
+    route: TierName
     route_reason: str = ""
     prompt_tokens: int
     completion_tokens: int

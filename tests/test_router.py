@@ -53,6 +53,7 @@ def test_catalog_lists_main_first_with_model_name(monkeypatch):
         "cheap",
         "balanced",
         "powerful",
+        "openai-compatible",
     ]
     main = catalog[0]
     assert main["model"] == "main/model"
@@ -61,3 +62,28 @@ def test_catalog_lists_main_first_with_model_name(monkeypatch):
     # cheap is unset, so it falls back to MODEL_NAME and is flagged as fallback.
     assert catalog[1]["model"] == "main/model"
     assert catalog[1]["fallback"] is True
+
+
+def test_openai_compatible_tier_resolves_to_openai_slot(monkeypatch):
+    monkeypatch.setenv("MODEL_NAME", "main/model")
+    monkeypatch.setenv("OPENAI_MODEL", "gemini-2.5-flash")
+    decision = route("chat", "hello", force_tier="openai-compatible")
+    assert decision.tier == "openai-compatible"
+    assert decision.model == "gemini-2.5-flash"
+    assert decision.reason == "tier pinned by request"
+
+
+def test_openai_compatible_falls_back_to_model_name(monkeypatch):
+    monkeypatch.setenv("MODEL_NAME", "main/model")
+    monkeypatch.delenv("OPENAI_MODEL", raising=False)
+    decision = route("chat", "hello", force_tier="openai-compatible")
+    assert decision.model == "main/model"
+
+
+def test_openai_compatible_catalog_entry_reports_its_env_var(monkeypatch):
+    monkeypatch.setenv("MODEL_NAME", "main/model")
+    monkeypatch.setenv("OPENAI_MODEL", "gemini-2.5-flash")
+    catalog = [entry for entry in model_catalog() if entry["tier"] == "openai-compatible"]
+    assert catalog[0]["model"] == "gemini-2.5-flash"
+    assert catalog[0]["env_var"] == "OPENAI_MODEL"
+    assert catalog[0]["configured"] is True

@@ -76,6 +76,7 @@ def test_compare_runs_every_tier(monkeypatch):
         "cheap",
         "balanced",
         "powerful",
+        "openai-compatible",
     ]
     for result in data["results"]:
         assert result["cases"] == 2
@@ -264,13 +265,16 @@ def test_screen_requires_auth():
 def test_models_lists_tiers_without_secrets(monkeypatch):
     monkeypatch.setenv("MODEL_NAME", "main/model")
     monkeypatch.setenv("MODEL_CHEAP", "cheap/model")
+    monkeypatch.setenv("OPENAI_MODEL", "gemini-2.5-flash")
     response = client.get("/models", headers=auth_headers)
     assert response.status_code == 200
     tiers = {t["tier"]: t for t in response.json()["tiers"]}
-    assert set(tiers) == {"main", "cheap", "balanced", "powerful"}
+    assert set(tiers) == {"main", "cheap", "balanced", "powerful", "openai-compatible"}
     assert tiers["main"]["model"] == "main/model"
     assert tiers["main"]["env_var"] == "MODEL_NAME"
     assert tiers["cheap"]["model"] == "cheap/model"
+    assert tiers["openai-compatible"]["model"] == "gemini-2.5-flash"
+    assert tiers["openai-compatible"]["env_var"] == "OPENAI_MODEL"
     assert "API_AUTH_TOKEN" not in str(response.json())
 
 

@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+from collections.abc import AsyncGenerator
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -413,17 +414,40 @@ async def ask_endpoint(req: AskRequest):
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
     try:
-        return await answer(req.query, ask, recall_k=req.recall_k, final_k=req.final_k)
+        return await answer(
+            req.query,
+            ask,
+            recall_k=req.recall_k,
+            final_k=req.final_k,
+            tier=req.tier,
+        )
     except Exception as e:
         raise _provider_error(e) from e
 
 
 @app.post("/chat/stream")
 async def chat_stream(req: ChatRequest):
-    return StreamingResponse(
-        ask_stream(req.prompt, tier=req.tier),
-        media_type="text/event-stream",
-    )
+    """Stream chat, surfacing provider failures as real HTTP errors.
+
+    The first chunk is pulled from the provider before the StreamingResponse
+    is returned, so a rate-limited or failing provider yields a normal HTTP
+    error status instead of a 200 with a body that dies on the first chunk.
+    """
+    stream = ask_stream(req.prompt, tier=req.tier)
+    try:
+        first = await stream.__anext__()
+    except StopAsyncIteration:
+        first = None
+    except Exception as e:
+        raise _provider_error(e) from e
+
+    async def buffered() -> AsyncGenerator[str, None]:
+        if first is not None:
+            yield first
+        async for chunk in stream:
+            yield chunk
+
+    return StreamingResponse(buffered(), media_type="text/event-stream")
 
 
 class TicketRequest(BaseModel):
