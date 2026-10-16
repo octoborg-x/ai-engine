@@ -71,7 +71,12 @@ def test_compare_runs_every_tier(monkeypatch):
     response = client.get("/compare?limit=2", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
-    assert [r["tier"] for r in data["results"]] == ["cheap", "balanced", "powerful"]
+    assert [r["tier"] for r in data["results"]] == [
+        "main",
+        "cheap",
+        "balanced",
+        "powerful",
+    ]
     for result in data["results"]:
         assert result["cases"] == 2
         assert result["latency_ms"]["p95"] is not None
@@ -200,7 +205,7 @@ def test_recommendation_thresholds():
 
 
 def test_screen_endpoint_end_to_end(monkeypatch):
-    async def fake_complete_json(prompt, task="extraction"):
+    async def fake_complete_json(prompt, task="extraction", tier=None):
         if "recruiter" in prompt:
             data = {
                 "role": "Backend Engineer",
@@ -218,9 +223,9 @@ def test_screen_endpoint_end_to_end(monkeypatch):
                 "highlights": [],
             }
         meta = {
-            "model": "cheap/model",
-            "route": "cheap",
-            "route_reason": "structured classification/extraction task",
+            "model": "main/model",
+            "route": tier or "main",
+            "route_reason": "candidate screening pinned to main tier",
             "prompt_tokens": 20,
             "completion_tokens": 10,
             "estimated_cost_usd": 0.0,
@@ -386,6 +391,20 @@ def test_results_retrieval_tab_served_from_bundled_seeds(monkeypatch, tmp_path):
     data = response.json()
     assert data["_meta"]["key"] == "retrieval-example-3"
     assert data["suites"][0]["suite"] == "retrieval"
+    assert "seed_results" in data["_meta"]["path"]
+
+
+def test_results_recruitment_tab_served_from_bundled_seeds(monkeypatch, tmp_path):
+    monkeypatch.setenv("RESULTS_DIR", str(tmp_path))
+    # The Recruitment panel consumes the same saved-results store.
+    response = client.get(
+        "/results/saved", params={"tab": "recruitment"}, headers=auth_headers
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["_meta"]["key"] == "recruitment-example-3"
+    assert "candidate" in data and "recommendation" in data
+    assert data["candidate"]["name"]
     assert "seed_results" in data["_meta"]["path"]
 
 

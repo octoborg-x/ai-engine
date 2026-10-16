@@ -160,14 +160,17 @@ async def ask(prompt: str, tier: str | None = None) -> dict:
 
 
 @llm_retry
-async def complete_json(prompt: str, task: str = "extraction") -> tuple[dict, dict]:
+async def complete_json(
+    prompt: str, task: str = "extraction", tier: str | None = None
+) -> tuple[dict, dict]:
     """Run a structured-output call and return (parsed_json, metadata).
 
     Shared by extraction-style features (ticket extraction, candidate
     screening). Uses the router's task mapping so structured work lands on the
-    cheap tier, and records the same telemetry as the other LLM entry points.
+    cheap tier by default; ``tier`` pins a specific routing tier when the
+    caller needs a stronger model (e.g. candidate screening).
     """
-    decision = route(task, prompt)
+    decision = route(task, prompt, force_tier=tier)
     started = time.perf_counter()
     usage = None
     status = "error"

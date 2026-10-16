@@ -1,9 +1,9 @@
 """Tier comparison benchmark.
 
-Runs the same labeled prompt set through each routing tier (cheap, balanced,
-powerful) and measures pass rate, latency percentiles, token usage, and cost.
-This is the backend behind the console's Compare view — the numbers are
-measured, not estimated.
+Runs the same labeled prompt set through each routing tier (main, cheap,
+balanced, powerful) and measures pass rate, latency percentiles, token usage,
+and cost. This is the backend behind the console's Compare view — the numbers
+are measured, not estimated.
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ from app.evals.engine import CHAT_PREFIX, _score_chat, load_cases, percentile
 from app.llm.client import ask
 from app.llm.router import _model_for
 
-TIERS = ("cheap", "balanced", "powerful")
+TIERS = ("main", "cheap", "balanced", "powerful")
 
 
 def _model_for_tier(tier: str) -> str:

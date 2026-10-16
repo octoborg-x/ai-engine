@@ -189,10 +189,10 @@ Resume:
 async def screen(request: ScreenRequest) -> ScreeningReport:
     """Run the full screening pipeline and return an auditable report."""
     requirements_data, jd_meta = await complete_json(
-        _JD_PROMPT.format(text=request.job_description)
+        _JD_PROMPT.format(text=request.job_description), tier="main"
     )
     profile_data, resume_meta = await complete_json(
-        _RESUME_PROMPT.format(text=request.resume)
+        _RESUME_PROMPT.format(text=request.resume), tier="main"
     )
 
     requirements = JobRequirements(**requirements_data)

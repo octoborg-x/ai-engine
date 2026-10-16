@@ -1,71 +1,93 @@
 {
-  "timestamp": "2026-10-15T14:30:22Z",
+  "timestamp": "2026-10-16T11:16:31Z",
   "cases_per_tier": 5,
   "results": [
     {
-      "tier": "cheap",
+      "tier": "main",
       "model": "cohere/north-mini-code:free",
+      "cases": 5,
+      "passed": 0,
+      "pass_rate": 0.0,
+      "errors": 0,
+      "latency_ms": {
+        "average": 10062.48,
+        "p50": 9318.94,
+        "p95": 14547.33
+      },
+      "tokens": {
+        "average": 1095.2,
+        "input": 225,
+        "output": 5251
+      },
+      "cost": {
+        "average_per_request_usd": 0.0,
+        "total_usd": 0.0
+      }
+    },
+    {
+      "tier": "cheap",
+      "model": "liquid/lfm-2.5-2.6b:free",
       "cases": 5,
       "passed": 4,
       "pass_rate": 0.8,
       "errors": 0,
       "latency_ms": {
-        "average": 844.48,
-        "p50": 793.81,
-        "p95": 1227.2
+        "average": 4588.46,
+        "p50": 4093.85,
+        "p95": 5432.08
       },
       "tokens": {
-        "average": 510.0,
-        "input": 1600,
-        "output": 720
+        "average": 862.6,
+        "input": 285,
+        "output": 4028
       },
       "cost": {
-        "average_per_request_usd": 0.00018,
-        "total_usd": 0.0009
+        "average_per_request_usd": 0.0,
+        "total_usd": 0.0
       }
     },
     {
       "tier": "balanced",
-      "model": "deepseek/deepseek-v3.1",
+      "model": "dots-studio/dots-3-note-preview:free",
       "cases": 5,
-      "passed": 4,
-      "pass_rate": 0.87,
+      "passed": 5,
+      "pass_rate": 1.0,
       "errors": 0,
       "latency_ms": {
-        "average": 1289.6,
-        "p50": 1212.22,
-        "p95": 1965.6
+        "average": 9665.61,
+        "p50": 8431.8,
+        "p95": 13683.66
       },
       "tokens": {
-        "average": 640.0,
-        "input": 1600,
-        "output": 720
+        "average": 546.6,
+        "input": 300,
+        "output": 2433
       },
       "cost": {
-        "average_per_request_usd": 0.0021,
-        "total_usd": 0.0105
+        "average_per_request_usd": 0.0,
+        "total_usd": 0.0
       }
     },
     {
       "tier": "powerful",
-      "model": "anthropic/claude-3.5-sonnet",
+      "model": "poolside/laguna-s-2.1:free",
       "cases": 5,
-      "passed": 5,
-      "pass_rate": 0.93,
-      "errors": 1,
+      "passed": 3,
+      "pass_rate": 0.6,
+      "errors": 0,
       "latency_ms": {
-        "average": 2402.4,
-        "p50": 2258.26,
-        "p95": 3868.8
+        "average": 7013.53,
+        "p50": 7284.35,
+        "p95": 7869.81
       },
       "tokens": {
-        "average": 980.0,
-        "input": 2000,
-        "output": 900
+        "average": 309.4,
+        "input": 444,
+        "output": 1103
       },
       "cost": {
-        "average_per_request_usd": 0.0095,
-        "total_usd": 0.0475
+        "average_per_request_usd": 0.0,
+        "total_usd": 0.0
       }
     }
   ]

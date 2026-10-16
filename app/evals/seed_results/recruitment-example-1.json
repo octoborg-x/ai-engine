@@ -1,0 +1,107 @@
+{
+  "candidate": {
+    "name": "Ada Lovelace",
+    "years_experience": 8.0,
+    "skills": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Docker",
+      "Redis",
+      "Terraform",
+      "OpenTelemetry"
+    ],
+    "education": "MSc Computer Science",
+    "highlights": [
+      "Led migration of a monolith to FastAPI microservices serving 4M requests/day",
+      "Built an internal retrieval service backed by pgvector",
+      "Mentored three engineers through promotion"
+    ]
+  },
+  "requirements": {
+    "role": "Senior Backend Engineer",
+    "required_skills": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Docker",
+      "Kubernetes"
+    ],
+    "min_years": 5.0,
+    "nice_to_have": [
+      "Experience with vector databases (pgvector or similar)",
+      "Observability tooling (OpenTelemetry)"
+    ],
+    "responsibilities": [
+      "Design and ship production APIs",
+      "Own reliability and performance",
+      "Mentor engineers"
+    ]
+  },
+  "match_score": 87.5,
+  "recommendation": "advance",
+  "matched_skills": [
+    "Python",
+    "FastAPI",
+    "PostgreSQL",
+    "Docker"
+  ],
+  "missing_skills": [
+    "Kubernetes"
+  ],
+  "evidence": [
+    {
+      "criterion": "Required skill: Python",
+      "matched": true,
+      "detail": "found in resume"
+    },
+    {
+      "criterion": "Required skill: FastAPI",
+      "matched": true,
+      "detail": "found in resume"
+    },
+    {
+      "criterion": "Required skill: PostgreSQL",
+      "matched": true,
+      "detail": "found in resume"
+    },
+    {
+      "criterion": "Required skill: Docker",
+      "matched": true,
+      "detail": "found in resume"
+    },
+    {
+      "criterion": "Required skill: Kubernetes",
+      "matched": false,
+      "detail": "not found"
+    },
+    {
+      "criterion": "Minimum experience: 5.0 years",
+      "matched": true,
+      "detail": "candidate has 8.0 years"
+    },
+    {
+      "criterion": "Nice to have: Experience with vector databases (pgvector or similar)",
+      "matched": false,
+      "detail": "not found"
+    },
+    {
+      "criterion": "Nice to have: Observability tooling (OpenTelemetry)",
+      "matched": true,
+      "detail": "found in resume"
+    }
+  ],
+  "model": "cohere/north-mini-code:free",
+  "route": "main",
+  "prompt_tokens": 300,
+  "completion_tokens": 757,
+  "estimated_cost_usd": 0.0,
+  "latency_ms": 5585.33,
+  "timestamp": "2026-10-16T11:28:51Z",
+  "_trace": [
+    "Parsing job description",
+    "Extracting candidate profile",
+    "Scoring against rubric",
+    "Preparing report"
+  ]
+}

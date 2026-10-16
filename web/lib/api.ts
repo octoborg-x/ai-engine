@@ -202,7 +202,7 @@ export interface SecurityPolicy {
   public_routes: string[];
 }
 
-export type ResultsTab = "compare" | "evals" | "retrieval";
+export type ResultsTab = "compare" | "evals" | "retrieval" | "recruitment";
 
 export interface SavedResultEntry {
   tab: ResultsTab;
