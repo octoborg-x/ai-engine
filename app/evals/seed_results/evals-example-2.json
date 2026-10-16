@@ -1,0 +1,131 @@
+{
+  "timestamp": "2026-10-15T14:31:05Z",
+  "suites": [
+    {
+      "suite": "chat",
+      "total_cases": 5,
+      "evaluated_cases": 5,
+      "passed": 4,
+      "model_failures": 0,
+      "api_errors": 1,
+      "accuracy": 0.75,
+      "api_error_rate": 0.2,
+      "structured_output_validity": null,
+      "latency_ms": {
+        "average": 1474.0,
+        "p50": 1397.0,
+        "p95": 2222.0,
+        "p99": 2684.0
+      },
+      "tokens": {
+        "input": 1680,
+        "output": 640,
+        "total": 2320
+      },
+      "cost": {
+        "total_usd": 0.00096,
+        "average_per_request_usd": 0.00024
+      }
+    },
+    {
+      "suite": "extraction",
+      "total_cases": 5,
+      "evaluated_cases": 5,
+      "passed": 5,
+      "model_failures": 0,
+      "api_errors": 0,
+      "accuracy": 0.93,
+      "api_error_rate": 0.0,
+      "structured_output_validity": 0.94,
+      "latency_ms": {
+        "average": 2662.0,
+        "p50": 2519.0,
+        "p95": 3938.0,
+        "p99": 4664.0
+      },
+      "tokens": {
+        "input": 2100,
+        "output": 800,
+        "total": 2900
+      },
+      "cost": {
+        "total_usd": 0.0012,
+        "average_per_request_usd": 0.00024
+      }
+    },
+    {
+      "suite": "classification",
+      "total_cases": 5,
+      "evaluated_cases": 5,
+      "passed": 4,
+      "model_failures": 1,
+      "api_errors": 0,
+      "accuracy": 0.9,
+      "api_error_rate": 0.0,
+      "structured_output_validity": null,
+      "latency_ms": {
+        "average": 3454.0,
+        "p50": 3267.0,
+        "p95": 5082.0,
+        "p99": 5984.0
+      },
+      "tokens": {
+        "input": 1680,
+        "output": 640,
+        "total": 2320
+      },
+      "cost": {
+        "total_usd": 0.00096,
+        "average_per_request_usd": 0.00024
+      }
+    },
+    {
+      "suite": "retrieval",
+      "total_cases": 5,
+      "evaluated_cases": 5,
+      "passed": 5,
+      "model_failures": 0,
+      "api_errors": 0,
+      "accuracy": 0.95,
+      "api_error_rate": 0.0,
+      "structured_output_validity": null,
+      "retrieval": {
+        "precision_at_k": 0.88,
+        "recall_at_k": 0.92,
+        "hit_rate_at_k": 0.95,
+        "mrr": 0.9,
+        "k": 3
+      },
+      "latency_ms": {
+        "average": 30.8,
+        "p50": 28.6,
+        "p95": 45.1,
+        "p99": 60.5
+      },
+      "tokens": {
+        "input": 0,
+        "output": 0,
+        "total": 0
+      },
+      "cost": {
+        "total_usd": 0.0,
+        "average_per_request_usd": 0.0
+      }
+    }
+  ],
+  "totals": {
+    "total_cases": 20,
+    "evaluated_cases": 20,
+    "passed": 18,
+    "accuracy": 0.9,
+    "api_errors": 1,
+    "tokens": {
+      "input": 5460,
+      "output": 2080,
+      "total": 7540
+    },
+    "cost": {
+      "total_usd": 0.00312
+    }
+  }
+}

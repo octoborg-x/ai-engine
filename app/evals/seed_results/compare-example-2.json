@@ -1,0 +1,72 @@
+{
+  "timestamp": "2026-10-15T14:30:22Z",
+  "cases_per_tier": 5,
+  "results": [
+    {
+      "tier": "cheap",
+      "model": "cohere/north-mini-code:free",
+      "cases": 5,
+      "passed": 4,
+      "pass_rate": 0.83,
+      "errors": 0,
+      "latency_ms": {
+        "average": 837.0,
+        "p50": 786.78,
+        "p95": 1231.2
+      },
+      "tokens": {
+        "average": 495.0,
+        "input": 1600,
+        "output": 720
+      },
+      "cost": {
+        "average_per_request_usd": 0.00017,
+        "total_usd": 0.00085
+      }
+    },
+    {
+      "tier": "balanced",
+      "model": "deepseek/deepseek-v3.1",
+      "cases": 5,
+      "passed": 4,
+      "pass_rate": 0.9,
+      "errors": 1,
+      "latency_ms": {
+        "average": 1285.2,
+        "p50": 1208.09,
+        "p95": 1954.8
+      },
+      "tokens": {
+        "average": 615.0,
+        "input": 1600,
+        "output": 720
+      },
+      "cost": {
+        "average_per_request_usd": 0.0019,
+        "total_usd": 0.0095
+      }
+    },
+    {
+      "tier": "powerful",
+      "model": "anthropic/claude-3.5-sonnet",
+      "cases": 5,
+      "passed": 5,
+      "pass_rate": 0.95,
+      "errors": 0,
+      "latency_ms": {
+        "average": 2386.8,
+        "p50": 2243.59,
+        "p95": 3790.8
+      },
+      "tokens": {
+        "average": 940.0,
+        "input": 2000,
+        "output": 900
+      },
+      "cost": {
+        "average_per_request_usd": 0.0087,
+        "total_usd": 0.0435
+      }
+    }
+  ]
+}

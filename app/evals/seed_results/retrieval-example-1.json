@@ -1,0 +1,54 @@
+{
+  "timestamp": "2026-10-15T16:02:00Z",
+  "suites": [
+    {
+      "suite": "retrieval",
+      "total_cases": 10,
+      "evaluated_cases": 10,
+      "passed": 9,
+      "model_failures": 1,
+      "api_errors": 0,
+      "accuracy": 0.9,
+      "api_error_rate": 0.0,
+      "structured_output_validity": null,
+      "retrieval": {
+        "precision_at_k": 0.4,
+        "recall_at_k": 0.8,
+        "hit_rate_at_k": 0.9,
+        "mrr": 0.8,
+        "k": 3
+      },
+      "latency_ms": {
+        "average": 6.47,
+        "p50": 6.63,
+        "p95": 7.74,
+        "p99": 8.4
+      },
+      "tokens": {
+        "input": 0,
+        "output": 0,
+        "total": 0
+      },
+      "cost": {
+        "total_usd": 0.0,
+        "average_per_request_usd": 0.0
+      }
+    }
+  ],
+  "totals": {
+    "total_cases": 10,
+    "evaluated_cases": 10,
+    "passed": 9,
+    "accuracy": 0.9,
+    "api_errors": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "total": 0
+    },
+    "cost": {
+      "total_usd": 0.0,
+      "average_per_request_usd": 0.0
+    }
+  }
+}

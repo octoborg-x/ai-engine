@@ -62,6 +62,13 @@ The console surfaces:
 - auth and rate-limit policy from `GET /security/policy`
 - request and LLM-call telemetry from `GET /observability/requests`
 - a retrieval-quality dashboard at `/dashboard` backed by the retrieval suite
+- saved results for Compare / Evals / dashboard, replayed by a fake-run button
+  (progress bar, no provider calls) or measured live with a real-run button
+
+Benchmark and eval tabs render from saved result files by default so opening
+them never exhausts the provider. A **Fake run** replays those files with a
+progress animation (rotating example slots); a **Real run** executes the live
+benchmark and persists the measured result back into the file store.
 
 ## Backend
 

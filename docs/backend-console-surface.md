@@ -34,6 +34,32 @@ renders tokens incrementally.
 | `GET /evals/suites`, `POST /evals/run` | packaged evaluation suites | protected |
 | `POST /recruitment/screen` | JD + resume screening | protected |
 | `GET /observability/requests` | recent request and LLM-call records | protected |
+| `GET /results`, `GET /results/saved` | inspect saved benchmark/eval results | protected |
+| `POST /results/save` | persist a measured result into the file store | protected |
+
+## Saved results and the fake run
+
+Benchmark and eval runs call the LLM for every case, so opening a results tab
+must not trigger one. The backend keeps a small file-backed results store
+(`app/evals/results_store.py`) with three slots per tab (`compare`, `evals`,
+`retrieval`). Files ship in the repo under `web/public/results/` (and mirrored
+into `app/evals/seed_results/` for backend-only deploys), so the console can
+render the dashboard purely from static files.
+
+The console exposes two run buttons:
+
+- **Fake run** (primary): plays a simulated progress animation, then loads one
+  of the saved result files. Re-pressing it rotates slot 1 → 2 → 3. It costs
+  nothing and never touches the LLM.
+- **Real run** (secondary): actually executes `/compare` or `/evals/run`
+  against the live provider, then persists the measured result through
+  `POST /results/save` so subsequent fake runs and dashboard loads include it.
+  Provider exhaustion is surfaced explicitly (429/502/503/504) and the last
+  saved result remains visible.
+
+`GET /results` lists what is saved per tab (newest first);
+`GET /results/saved?tab=&slot=` returns one saved payload;
+`POST /results/save` writes into the next free slot (newest wins).
 
 `GET /models` and `GET /security/policy` expose configuration, not secrets: tier
 names, model ids, env var names, and the enforced policy. Neither returns the

@@ -1,24 +1,69 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { api, type EvalReport } from "../../lib/api";
-import { Badge, Card, Hero, Notice, num, ms, pct, usd, useAsync } from "../components/ui";
+import { useCallback, useEffect, useState } from "react";
+import {
+  api,
+  type EvalReport,
+  type SavedResult,
+} from "../../lib/api";
+import { Badge, Card, Hero, Notice, num, ms, pct, usd } from "../components/ui";
+import { friendlyApiError, RequestRunControls } from "../components/run-controls";
 
 // Retrieval-quality dashboard. Everything shown here is measured by the
 // backend's deterministic retrieval suite (hybrid recall + rerank against
-// labeled relevant chunks). No values are hardcoded.
+// labeled relevant chunks). A fake run replays the saved result files; the
+// real run hits the (offline, provider-free) pipeline.
 export default function EvalDashboard() {
   const [limit, setLimit] = useState(10);
-  const report = useAsync<EvalReport>();
-
-  const run = () => report.run(() => api.runEvals(["retrieval"], limit));
+  const [report, setReport] = useState<SavedResult<EvalReport> | null>(null);
+  const [source, setSource] = useState<"saved" | "live">("saved");
+  const [slotLabel, setSlotLabel] = useState("saved example");
+  const [realBusy, setRealBusy] = useState(false);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
-    run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Default view comes from a saved file — opening the dashboard never
+    // triggers a new run.
+    api
+      .resultsSaved<EvalReport>("retrieval")
+      .then((r) => {
+        setReport(r);
+        setSource("saved");
+        setSlotLabel(`saved example ${r._meta?.slot ?? "—"}`);
+      })
+      .catch(() =>
+        setLoadError("No saved retrieval result yet. Use a real run once to capture one."),
+      );
   }, []);
 
-  const suite = report.data?.suites.find((s) => s.suite === "retrieval");
+  const fakeRun = useCallback((slot: number) => {
+    setLoadError("");
+    api
+      .resultsSaved<EvalReport>("retrieval", slot)
+      .then((r) => {
+        setReport(r);
+        setSource("saved");
+        setSlotLabel(`saved example ${r._meta?.slot ?? slot}`);
+      })
+      .catch((e) => setLoadError(friendlyApiError(e)));
+  }, []);
+
+  const realRun = async () => {
+    setRealBusy(true);
+    setLoadError("");
+    try {
+      // Deterministic offline pipeline: no provider calls, so this is cheap.
+      const r = await api.runEvals(["retrieval"], limit);
+      setReport({ ...r, _meta: undefined });
+      setSource("live");
+      setSlotLabel("live run");
+      await api.resultsSave("retrieval", r).catch(() => undefined);
+    } finally {
+      setRealBusy(false);
+    }
+  };
+
+  const suite = report?.suites.find((s) => s.suite === "retrieval");
   const r = suite?.retrieval;
 
   return (
@@ -29,25 +74,28 @@ export default function EvalDashboard() {
           title="RAG evaluation dashboard"
           blurb="Measured retrieval quality over labeled questions: precision@k, recall@k, hit rate, and MRR from the backend's hybrid recall + rerank pipeline."
           right={
-            <div className="toolbar">
-              <label>
-                Cases
-                <select value={limit} onChange={(e) => setLimit(Number(e.target.value))}>
-                  {[5, 10].map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button className="primary" onClick={run} disabled={report.loading}>
-                {report.loading ? "Measuring…" : "Re-run"}
-              </button>
-            </div>
+            <label>
+              Cases
+              <select value={limit} onChange={(e) => setLimit(Number(e.target.value))}>
+                {[5, 10].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </label>
           }
         />
+        <RequestRunControls
+          tab="retrieval"
+          onFakeRun={fakeRun}
+          onRealRun={realRun}
+          realBusy={realBusy}
+          realLabel="Real run"
+          fakeLabel="Fake run"
+        />
 
-        {suite && r ? (
+        {report && suite && r ? (
           <>
             <div className="grid four">
               <Card>
@@ -93,7 +141,9 @@ export default function EvalDashboard() {
             <Card>
               <div className="card-head">
                 <h2>Regression targets</h2>
-                <Badge>from evals/expected_metrics.json</Badge>
+                <Badge tone={source === "live" ? "green" : "blue"}>
+                  {source === "live" ? "● live" : slotLabel}
+                </Badge>
               </div>
               <div className="table-wrap">
                 <table>
@@ -123,23 +173,24 @@ export default function EvalDashboard() {
                 </table>
               </div>
               <p className="footnote">
-                Measured {report.data?.timestamp}. Targets are engineering
+                Measured {report.timestamp}. Targets are engineering
                 thresholds, not measured results; the dashboard shows the real
-                measurement beside them so regressions are visible.
+                measurement beside them so regressions are visible.{" "}
+                {source === "saved" ? "Source: saved result file." : "Source: live offline run."}
               </p>
             </Card>
           </>
         ) : (
           <Card>
             <p className="muted">
-              {report.loading
-                ? "Measuring retrieval quality over labeled questions…"
-                : "No measurement yet."}
+              No measurement yet. Press <em>Fake run</em> to view a saved
+              retrieval result, or <em>Real run</em> to measure the offline
+              pipeline.
             </p>
           </Card>
         )}
 
-        <Notice error={report.error} />
+        <Notice error={loadError} />
         <p className="footnote" style={{ marginTop: 18 }}>
           Retrieval is deterministic and offline, so this suite costs nothing and
           runs without a provider. Model-quality suites (chat, extraction,
