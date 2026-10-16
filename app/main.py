@@ -10,7 +10,6 @@ from pydantic import BaseModel
 
 from app.llm.client import ask, ask_stream, extract_ticket_info
 from app.llm.providers import has_provider_key
-from app.llm.resilience import CircuitOpenError
 from app.llm.schemas import ChatRequest, ChatResponse, TicketExtraction
 from app.rag.admin import delete_source, save_upload, sources_payload
 from app.rag.schemas import AskRequest, AskResponse, RetrievalResponse
@@ -201,13 +200,6 @@ def _provider_error(e: Exception) -> HTTPException:
         return HTTPException(status_code=504, detail="LLM provider timed out")
     if isinstance(e, APIError):
         return HTTPException(status_code=502, detail=f"LLM provider error: {e!s}")
-    if isinstance(e, CircuitOpenError):
-        return HTTPException(
-            status_code=503,
-            detail=(
-                "LLM provider temporarily unavailable (circuit open), try again shortly"
-            ),
-        )
     return HTTPException(status_code=500, detail=f"Unexpected error: {e!s}")
 
 
