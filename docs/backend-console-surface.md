@@ -42,20 +42,22 @@ renders tokens incrementally.
 Benchmark and eval runs call the LLM for every case, so opening a results tab
 must not trigger one. The backend keeps a small file-backed results store
 (`app/evals/results_store.py`) with three slots per tab (`compare`, `evals`,
-`retrieval`). Files ship in the repo under `web/public/results/` (and mirrored
-into `app/evals/seed_results/` for backend-only deploys), so the console can
-render the dashboard purely from static files.
+`retrieval`, `recruitment`). Files ship in the repo under
+`web/public/results/` (and mirrored into `app/evals/seed_results/` for
+backend-only deploys), so the console can render the dashboard purely from
+static files.
 
 The console exposes two run buttons:
 
-- **Fake run** (primary): plays a simulated progress animation, then loads one
-  of the saved result files. Re-pressing it rotates slot 1 → 2 → 3. It costs
-  nothing and never touches the LLM.
-- **Real run** (secondary): actually executes `/compare` or `/evals/run`
-  against the live provider, then persists the measured result through
-  `POST /results/save` so subsequent fake runs and dashboard loads include it.
-  Provider exhaustion is surfaced explicitly (429/502/503/504) and the last
-  saved result remains visible.
+- **Fake run** (primary): plays a simulated progress animation with a live
+  action trace (per-tab pipeline steps flip pending → active → done as the bar
+  advances), then loads one of the saved result files. Re-pressing it rotates
+  slot 1 → 2 → 3. It costs nothing and never touches the LLM.
+- **Real run** (secondary): actually executes `/compare`, `/evals/run`, or
+  `/recruitment/screen` against the live provider, then persists the measured
+  result through `POST /results/save` so subsequent fake runs and dashboard
+  loads include it. Provider exhaustion is surfaced explicitly
+  (429/502/503/504) and the last saved result remains visible.
 
 `GET /results` lists what is saved per tab (newest first);
 `GET /results/saved?tab=&slot=` returns one saved payload;

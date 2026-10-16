@@ -26,7 +26,7 @@ from pathlib import Path
 SLOTS = 3
 
 # Tabs that have a persisted result artifact.
-TABS = ("compare", "evals", "retrieval")
+TABS = ("compare", "evals", "retrieval", "recruitment")
 
 _PREFIX = "example"
 

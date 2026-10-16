@@ -7,18 +7,70 @@ import { Bar } from "./ui";
 // Re-export so panels can rely on the shared meter without extra imports.
 export { Bar };
 
-// Cheap saved-result simulator for the Compare/Evals tabs. A "fake run" costs
-// nothing: it plays a progress animation, then loads one of the persisted
-// result files (rotating slot 1 → 2 → 3 on every press) instead of calling an
-// LLM. The secondary "real run" button still hits the live backend, so the
-// console can measure real behavior without exhausting the provider between
-// demos — see `RequestRunControls`.
+// Cheap saved-result simulator for the Compare/Evals/Retrieval/Recruitment
+// tabs. A "fake run" costs nothing: it plays a progress animation with a live
+// action trace, then loads one of the persisted result files (rotating slot
+// 1 → 2 → 3 on every press) instead of calling an LLM. The secondary "real
+// run" button still hits the live backend, so the console can measure real
+// behavior without exhausting the provider between demos — see
+// `RequestRunControls`.
+export interface FakeRunStep {
+  label: string;
+  status: "pending" | "active" | "done";
+}
+
 export interface FakeRunState {
   active: boolean;
   progress: number; // 0..1
   label: string;
   slot: number | null;
   source: string; // "saved" | "live"
+  steps: FakeRunStep[];
+}
+
+// Per-tab pipeline the fake run pretends to execute. Each entry becomes a row
+// in the trace log; rows flip pending → active → done as the bar advances.
+const TRACES: Record<ResultsTab, string[]> = {
+  compare: [
+    "Loading labeled chat cases…",
+    "Calling tier model — cheap",
+    "Calling tier model — balanced",
+    "Calling tier model — powerful",
+    "Scoring answers against the rubric…",
+    "Aggregating pass rate, latency & cost",
+  ],
+  evals: [
+    "Loading labeled suites…",
+    "Evaluating suite — chat",
+    "Evaluating suite — extraction",
+    "Evaluating suite — classification",
+    "Evaluating suite — adversarial",
+    "Checking structured-output validity",
+    "Aggregating suite scores",
+  ],
+  retrieval: [
+    "Loading labeled retrieval questions…",
+    "Hybrid recall: BM25 + embeddings",
+    "Cross-encoder rerank…",
+    "Scoring precision@k / recall@k / MRR",
+  ],
+  recruitment: [
+    "Parsing job description…",
+    "Extracting candidate profile…",
+    "Scoring against the rubric…",
+    "Preparing screening report",
+  ],
+};
+
+const TRACE_TICKS = 40; // ×50ms ≈ 2s — long enough to read the action trace.
+const TRACE_TICK_MS = 50;
+
+function traceStatus(idx: number, progress: number, n: number): FakeRunStep["status"] {
+  const start = idx / n;
+  const end = (idx + 1) / n;
+  if (progress >= end) return "done";
+  if (progress >= start) return "active";
+  return "pending";
 }
 
 function useFakeRun(tab: ResultsTab) {
@@ -28,6 +80,7 @@ function useFakeRun(tab: ResultsTab) {
     label: "",
     slot: null,
     source: "saved",
+    steps: [],
   });
   const slotRef = useRef(0);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -43,31 +96,34 @@ function useFakeRun(tab: ResultsTab) {
     (onSlot: (slot: number) => void, onComplete?: () => void) => {
       stop();
       slotRef.current = slotRef.current >= 3 ? 1 : slotRef.current + 1;
+      const trace = TRACES[tab] ?? ["Simulating run…"];
+      const pending = trace.map((label) => ({ label, status: "pending" as const }));
       setState({
         active: true,
         progress: 0,
-        label: "Simulating run…",
+        label: trace[0] ?? "Simulating run…",
         slot: null,
         source: "saved",
+        steps: [{ ...pending[0], status: "active" }, ...pending.slice(1)],
       });
-      const steps = 40;
       let i = 0;
       timer.current = setInterval(() => {
         i += 1;
-        const progress = i / steps;
-        setState((prev) => ({
-          ...prev,
-          progress,
-          label:
-            progress < 0.25
-              ? "Loading labeled cases…"
-              : progress < 0.5
-                ? "Running retrieval pipeline…"
-                : progress < 0.75
-                  ? "Reranking candidates…"
-                  : "Scoring against ground truth…",
-        }));
-        if (i >= steps) {
+        const progress = i / TRACE_TICKS;
+        setState((prev) => {
+          const steps: FakeRunStep[] = trace.map((label, idx) => ({
+            label,
+            status: traceStatus(idx, progress, trace.length),
+          }));
+          const active = steps.find((s) => s.status === "active");
+          return {
+            ...prev,
+            progress,
+            steps,
+            label: active?.label ?? "Finalizing…",
+          };
+        });
+        if (i >= TRACE_TICKS) {
           stop();
           onSlot(slotRef.current);
           setState((prev) => ({
@@ -76,12 +132,16 @@ function useFakeRun(tab: ResultsTab) {
             progress: 1,
             slot: slotRef.current,
             label: `Loaded saved result (example ${slotRef.current})`,
+            steps: trace.map((label, idx) => ({
+              label,
+              status: traceStatus(idx, 1, trace.length),
+            })),
           }));
           onComplete?.();
         }
-      }, 25);
+      }, TRACE_TICK_MS);
     },
-    [stop],
+    [stop, tab],
   );
 
   return { state, play, stop };
@@ -148,6 +208,18 @@ export function RequestRunControls({
         <div className="run-progress">
           <Bar value={fake.state.progress} tone="blue" />
           <span className="muted">{fake.state.label}</span>
+          {fake.state.steps.length > 0 && (
+            <ol className="trace">
+              {fake.state.steps.map((step, i) => (
+                <li key={i} className={`trace-${step.status}`}>
+                  <span className="trace-dot">
+                    {step.status === "done" ? "✓" : step.status === "active" ? "›" : "·"}
+                  </span>
+                  <span>{step.label}</span>
+                </li>
+              ))}
+            </ol>
+          )}
         </div>
       )}
       {realError && <p className="notice">{realError}</p>}

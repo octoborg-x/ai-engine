@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-10-15T18:12:00Z",
+  "candidate": {
+    "name": "Ada Lovelace",
+    "years_experience": 8,
+    "skills": ["Python", "FastAPI", "PostgreSQL", "Docker", "Redis", "Terraform", "OpenTelemetry"],
+    "education": "MSc Computer Science",
+    "highlights": ["Led migration of a monolith to FastAPI microservices serving 4M requests/day", "Built an internal retrieval service backed by pgvector"]
+  },
+  "requirements": {
+    "role": "Senior Backend Engineer",
+    "required_skills": ["Python", "FastAPI", "PostgreSQL", "Docker", "Kubernetes"],
+    "min_years": 5,
+    "nice_to_have": ["pgvector", "OpenTelemetry"],
+    "responsibilities": ["Design and ship production APIs", "Own reliability and performance", "Mentor engineers"]
+  },
+  "match_score": 86,
+  "recommendation": "advance",
+  "matched_skills": ["Python", "FastAPI", "PostgreSQL", "Docker"],
+  "missing_skills": ["Kubernetes"],
+  "evidence": [
+    {"criterion": "Required skill: Python", "matched": true, "detail": "8 years of Python across production services"},
+    {"criterion": "Required skill: FastAPI", "matched": true, "detail": "Built and operated FastAPI microservices"},
+    {"criterion": "Required skill: PostgreSQL", "matched": true, "detail": "pgvector-backed retrieval service in production"},
+    {"criterion": "Required skill: Docker", "matched": true, "detail": "Containerized services for microservice fleet"},
+    {"criterion": "Required skill: Kubernetes", "matched": false, "detail": "Deploys ran on managed platform; no direct K8s ops"},
+    {"criterion": "Experience >= 5y", "matched": true, "detail": "8 years professional backend experience"}
+  ],
+  "model": "poolside/laguna-s-2.1:free",
+  "route": "main",
+  "prompt_tokens": 740,
+  "completion_tokens": 128,
+  "estimated_cost_usd": 0.00041,
+  "latency_ms": 1320.6,
+  "_trace": ["Parsing job description", "Extracting candidate profile", "Scoring against rubric", "Preparing report"]
+}

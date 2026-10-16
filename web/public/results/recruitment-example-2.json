@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-10-15T18:32:00Z",
+  "candidate": {
+    "name": "Grace Hopper",
+    "years_experience": 5,
+    "skills": ["JavaScript", "TypeScript", "Node.js", "React", "PostgreSQL", "Docker"],
+    "education": "BS Computer Science",
+    "highlights": ["Built a real-time processing pipeline in TypeScript", "On-call rotation owner for a stateless API tier"]
+  },
+  "requirements": {
+    "role": "Senior Backend Engineer",
+    "required_skills": ["Python", "FastAPI", "PostgreSQL", "Docker", "Kubernetes"],
+    "min_years": 5,
+    "nice_to_have": ["pgvector", "OpenTelemetry"],
+    "responsibilities": ["Design and ship production APIs", "Own reliability and performance", "Mentor engineers"]
+  },
+  "match_score": 52,
+  "recommendation": "hold",
+  "matched_skills": ["PostgreSQL", "Docker"],
+  "missing_skills": ["Python", "FastAPI", "Kubernetes"],
+  "evidence": [
+    {"criterion": "Required skill: Python", "matched": false, "detail": "Primarily JavaScript/TypeScript, no production Python"},
+    {"criterion": "Required skill: FastAPI", "matched": false, "detail": "No FastAPI experience; Node.js API background"},
+    {"criterion": "Required skill: PostgreSQL", "matched": true, "detail": "5 years of PostgreSQL in production"},
+    {"criterion": "Required skill: Docker", "matched": true, "detail": "Containers used daily in delivery pipeline"},
+    {"criterion": "Required skill: Kubernetes", "matched": false, "detail": "Managed platform used; no direct orchestration"},
+    {"criterion": "Experience >= 5y", "matched": true, "detail": "5 years professional experience, meets minimum"}
+  ],
+  "model": "cohere/north-mini-code:free",
+  "route": "cheap",
+  "prompt_tokens": 690,
+  "completion_tokens": 141,
+  "estimated_cost_usd": 0.00038,
+  "latency_ms": 2140.3,
+  "_trace": ["Parsing job description", "Extracting candidate profile", "Scoring against rubric", "Preparing report"]
+}
