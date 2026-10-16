@@ -183,8 +183,8 @@ def _provider_error(e: Exception) -> HTTPException:
             status_code=503,
             detail=(
                 "No LLM provider key configured. Set OPENROUTER_API_KEY "
-                "(or OPENAI_API_KEY / LLM_API_KEY + LLM_BASE_URL) in the "
-                "server environment, then restart the service."
+                "(or OPENAI_API_KEY, or LLM_API_KEY + LLM_BASE_URL for a "
+                "generic endpoint) in the server environment, then restart."
             ),
         )
     if isinstance(e, RateLimitError):

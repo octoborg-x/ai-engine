@@ -66,13 +66,46 @@ def test_provider_config_accepts_generic_llm_api_key(monkeypatch):
     assert url == "https://custom.example/v1"
 
 
-def test_provider_config_respects_explicit_base_urls(monkeypatch):
+def test_provider_config_respects_scoped_base_urls(monkeypatch):
+    """Each provider's key is scoped to its own base URL.
+
+    LLM_BASE_URL is generic-only: it must never hijack an OpenRouter or OpenAI
+    key to a different endpoint (the original cause of the Gemini 400).
+    """
     monkeypatch.setenv("OPENROUTER_API_KEY", "or-key")
+    monkeypatch.setenv("OPENROUTER_BASE_URL", "https://or.example/v1")
     monkeypatch.setenv("OPENAI_API_KEY", "oa-key")
-    monkeypatch.setenv("LLM_BASE_URL", "https://custom.example/v1")
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://oa.example/v1")
+    monkeypatch.setenv("LLM_API_KEY", "generic-key")
+    monkeypatch.setenv("LLM_BASE_URL", "https://generic.example/v1")
+
+    # OpenRouter wins, and must target OPENROUTER_BASE_URL, not LLM_BASE_URL.
     key, url = llm_client._provider_config()
-    assert key == "or-key"
-    assert url == "https://custom.example/v1"
+    assert (key, url) == ("or-key", "https://or.example/v1")
+
+    # OpenRouter falls back to its own default, never LLM_BASE_URL.
+    monkeypatch.setenv("OPENROUTER_BASE_URL", "")
+    key, url = llm_client._provider_config()
+    assert (key, url) == ("or-key", "https://openrouter.ai/api/v1")
+
+    # Without OpenRouter, OpenAI targets OPENAI_BASE_URL.
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    key, url = llm_client._provider_config()
+    assert (key, url) == ("oa-key", "https://oa.example/v1")
+
+    # Without both, LLM_API_KEY uses LLM_BASE_URL.
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    key, url = llm_client._provider_config()
+    assert (key, url) == ("generic-key", "https://generic.example/v1")
+
+
+def test_provider_config_generic_defaults_to_openai_url(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setenv("LLM_API_KEY", "generic-key")
+    monkeypatch.delenv("LLM_BASE_URL", raising=False)
+    key, url = llm_client._provider_config()
+    assert (key, url) == ("generic-key", "https://api.openai.com/v1")
 
 
 @pytest.mark.asyncio

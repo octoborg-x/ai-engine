@@ -45,8 +45,10 @@ def generate_embedding(text: str, model: str | None = None) -> list[float]:
     if _offline_mode() or not has_provider_key():
         return [0.0] * 1536
     provider = resolve_provider()
-    base_url = os.getenv("LLM_BASE_URL") or provider.base_url
-    client = OpenAI(api_key=provider.api_key, base_url=base_url)
+    # LLM_BASE_URL is generic-only (scoped in providers.py); embeddings use the
+    # resolved provider base default (OpenRouter/OpenAI default or LLM_BASE_URL
+    # for the generic provider) so a key is never sent to the wrong endpoint.
+    client = OpenAI(api_key=provider.api_key, base_url=provider.base_url)
     openrouter = provider.name == "openrouter"
     response = client.embeddings.create(
         input=[text],
