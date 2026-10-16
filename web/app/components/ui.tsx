@@ -103,13 +103,16 @@ export function useAsync<T>() {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const run = useCallback(async (fn: () => Promise<T>) => {
+  const run = useCallback(async (fn: () => Promise<T>): Promise<T | undefined> => {
     setLoading(true);
     setError("");
     try {
-      setData(await fn());
+      const result = await fn();
+      setData(result);
+      return result;
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
+      return undefined;
     } finally {
       setLoading(false);
     }

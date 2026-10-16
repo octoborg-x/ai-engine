@@ -7,6 +7,7 @@ import {
   type RagAnswer,
   type SavedResult,
   type ScreeningReport,
+  type SourcesResponse,
 } from "../../lib/api";
 import { Badge, Bar, Card, Hero, Notice, ms, pct, useAsync } from "./ui";
 import { friendlyApiError, RequestRunControls } from "./run-controls";
@@ -78,15 +79,41 @@ function Citations({ citations }: { citations?: CitationReport }) {
   );
 }
 
+function kb(bytes: number) {
+  if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)} KiB`;
+  return `${bytes} B`;
+}
+
 export function Knowledge() {
   const [query, setQuery] = useState("What is the refund policy?");
+  const [file, setFile] = useState<File | null>(null);
   const ask = useAsync<RagAnswer>();
   const retrieve = useAsync<RagAnswer>();
+  const sources = useAsync<SourcesResponse>();
+  const upload = useAsync<{ ok: boolean; name: string }>();
+  const remove = useAsync<{ ok: boolean }>();
 
+  const refresh = () => sources.run(() => api.ragSources());
   const runAsk = () => ask.run(() => api.ask(query));
   const runRetrieve = () => retrieve.run(() => api.ragRetrieve(query));
+
+  const onUpload = () => {
+    if (!file) return;
+    upload.run(() => api.ragUpload(file)).then((res) => {
+      if (res?.ok) {
+        setFile(null);
+        refresh();
+      }
+    });
+  };
+  const onRemove = (name: string) =>
+    remove.run(() => api.ragDelete(name)).then((res) => {
+      if (res?.ok) refresh();
+    });
+
   const data = ask.data;
   const cand = retrieve.data?.candidates ?? [];
+  const files = sources.data?.sources ?? [];
 
   return (
     <div className="stack">
@@ -95,6 +122,73 @@ export function Knowledge() {
         title="Knowledge assistant"
         blurb="Hybrid recall → cross-encoder rerank → grounded answer with validated citations. Inspect the retrieval stage without generating an answer."
       />
+      <Card>
+        <div className="card-head">
+          <h2>Knowledge files</h2>
+          <div className="chips">
+            <Badge tone="green">
+              {files.filter((f) => f.kind === "local").length} local
+            </Badge>
+            <Badge tone={files.some((f) => f.kind === "upload") ? "amber" : "green"}>
+              {files.filter((f) => f.kind === "upload").length} uploaded
+            </Badge>
+          </div>
+        </div>
+        <div className="rows">
+          {files.length ? (
+            files.map((f) => (
+              <div className="row" key={`${f.kind}:${f.name}`}>
+                <span>
+                  <span className={`chip ${f.kind === "upload" ? "chip-warn" : ""}`}>
+                    {f.kind}
+                  </span>{" "}
+                  <b>{f.name}</b>{" "}
+                  <span className="muted">
+                    · {f.sections} sections · {kb(f.size_bytes)}
+                  </span>
+                </span>
+                {f.kind === "upload" && (
+                  <button
+                    className="link"
+                    onClick={() => onRemove(f.name)}
+                    disabled={remove.loading}
+                  >
+                    remove
+                  </button>
+                )}
+              </div>
+            ))
+          ) : sources.data ? (
+            <p className="muted">No knowledge files found in the corpus directory.</p>
+          ) : (
+            <p className="muted">Loading files…</p>
+          )}
+        </div>
+        <div className="toolbar" style={{ marginTop: 12 }}>
+          <input
+            type="file"
+            accept=".md,.markdown,.txt"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
+          <button
+            className="primary"
+            onClick={onUpload}
+            disabled={!file || upload.loading}
+          >
+            {upload.loading ? "Uploading…" : "Upload document"}
+          </button>
+          <button onClick={refresh} disabled={sources.loading}>
+            {sources.loading ? "Refreshing…" : "Refresh"}
+          </button>
+        </div>
+        <p className="muted">
+          Supported formats: {(sources.data?.formats ?? [".md", ".txt"]).join(", ")}
+          {sources.data
+            ? ` · max ${(sources.data.max_upload_bytes / 1024).toFixed(0)} KiB`
+            : ""}
+        </p>
+        <Notice error={sources.error || upload.error || remove.error} />
+      </Card>
       <Card>
         <label>
           Question

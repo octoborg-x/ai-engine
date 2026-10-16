@@ -18,6 +18,7 @@ from .embeddings import EmbeddingModel
 from .models import Chunk, ChunkMetadata
 
 DEFAULT_CORPUS_DIR = "corpus/source_docs"
+DEFAULT_UPLOAD_DIR = "corpus/uploads"
 SUPPORTED_SUFFIXES = (".md", ".markdown", ".txt")
 TENANT_ID = "company_42"
 CREATED_AT = "2026-09-01"
@@ -36,20 +37,30 @@ class RawRecord:
     section: str | None
 
 
+def corpus_dirs() -> list[Path]:
+    """Corpus root dirs: the local source docs and the user uploads dir.
+
+    Uploaded files (``corpus/uploads``) are merged into the knowledge base
+    alongside the local sources, so the console can list and extend them
+    without touching the git-tracked corpus. Uploads win on name collisions.
+    """
+    root = Path(os.getenv("CORPUS_DIR") or DEFAULT_CORPUS_DIR)
+    uploads = Path(os.getenv("UPLOAD_DIR") or DEFAULT_UPLOAD_DIR)
+    return [root, uploads]
+
+
 def list_source_files(root: str | os.PathLike | None = None) -> list[Path]:
     """Resolve the corpus directory and list supported source files."""
-    directory = Path(root or os.getenv("CORPUS_DIR") or DEFAULT_CORPUS_DIR)
-    if not directory.is_dir():
+    root = Path(root or os.getenv("CORPUS_DIR") or DEFAULT_CORPUS_DIR)
+    if not root.is_dir():
         raise FileNotFoundError(
-            f"corpus directory not found: {directory} (set CORPUS_DIR to point "
+            f"corpus directory not found: {root} (set CORPUS_DIR to point "
             f"at a folder of .md/.txt files)"
         )
-    files = sorted(
-        p for p in directory.iterdir() if p.suffix.lower() in SUPPORTED_SUFFIXES
-    )
+    files = sorted(p for p in root.iterdir() if p.suffix.lower() in SUPPORTED_SUFFIXES)
     if not files:
         raise FileNotFoundError(
-            f"no .md/.txt files found in {directory}; add readable source "
+            f"no .md/.txt files found in {root}; add readable source "
             f"documents to the corpus"
         )
     return files
@@ -131,10 +142,26 @@ def split_sections(
 def load_documents(
     root: str | os.PathLike | None = None,
 ) -> list[tuple[Path, str]]:
-    """Read every supported source file in the corpus directory as text."""
-    return [
-        (path, path.read_text(encoding="utf-8")) for path in list_source_files(root)
-    ]
+    """Read every supported source file as text.
+
+    With an explicit ``root`` (embedding a single directory) only that
+    directory is read. With the default root, the git-tracked corpus and the
+    user-uploaded directory are merged; uploaded documents override local
+    sources by name.
+    """
+    if root is not None:
+        return [
+            (path, path.read_text(encoding="utf-8")) for path in list_source_files(root)
+        ]
+    merged: dict[str, tuple[Path, str]] = {}
+    for directory in corpus_dirs():
+        if not directory.is_dir():
+            continue
+        for path in sorted(
+            p for p in directory.iterdir() if p.suffix.lower() in SUPPORTED_SUFFIXES
+        ):
+            merged[path.name] = (path, path.read_text(encoding="utf-8"))
+    return list(merged.values())
 
 
 def _normalize_for_dedup(text: str) -> str:

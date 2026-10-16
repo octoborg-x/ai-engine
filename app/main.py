@@ -2,7 +2,7 @@ import logging
 import os
 import time
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from openai import APIError, APITimeoutError, RateLimitError
 from pydantic import BaseModel
@@ -10,8 +10,9 @@ from pydantic import BaseModel
 from app.llm.client import ask, ask_stream, extract_ticket_info
 from app.llm.providers import has_provider_key
 from app.llm.schemas import ChatRequest, ChatResponse, TicketExtraction
+from app.rag.admin import delete_source, save_upload, sources_payload
 from app.rag.schemas import AskRequest, AskResponse, RetrievalResponse
-from app.rag.service import answer, retrieval_response
+from app.rag.service import answer, rebuild_pipeline, retrieval_response
 from app.recruitment.screening import ScreeningReport, ScreenRequest, screen
 from app.security.auth import authenticate
 from app.security.rate_limit import client_key, rate_limiter
@@ -49,6 +50,9 @@ PROTECTED_ROUTES = {
     ("GET", "/security/policy"),
     ("GET", "/models"),
     ("POST", "/rag/retrieve"),
+    ("GET", "/rag/sources"),
+    ("POST", "/rag/sources"),
+    ("DELETE", "/rag/sources"),
     ("POST", "/recruitment/screen"),
 }
 
@@ -331,6 +335,50 @@ async def rag_retrieve(req: AskRequest):
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
     return retrieval_response(req.query, recall_k=req.recall_k, final_k=req.final_k)
+
+
+@app.get("/rag/sources")
+def rag_sources():
+    """The knowledge files the assistant can retrieve from.
+
+    Lists every readable source: git-tracked ``local`` files plus ``upload``
+    files added through the console. No database is involved — the corpus is a
+    plain directory of .md/.txt documents.
+    """
+    return sources_payload()
+
+
+@app.post("/rag/sources")
+async def rag_upload(file: UploadFile):
+    """Add a readable .md/.txt document to the knowledge base.
+
+    The file is persisted to the uploads directory and the retrieval pipeline
+    is rebuilt so new content is immediately searchable.
+    """
+    content = await file.read()
+    try:
+        info = save_upload(file.filename or "", content)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+    rebuild_pipeline()
+    return {
+        "name": info.name,
+        "kind": info.kind,
+        "size_bytes": info.size_bytes,
+        "sections": info.sections,
+        "modified_at": info.modified_at,
+        "ok": True,
+    }
+
+
+@app.delete("/rag/sources")
+def rag_delete(name: str):
+    """Remove an uploaded document. Git-tracked corpus files are never deleted."""
+    removed = delete_source(name)
+    if removed is None:
+        raise HTTPException(status_code=404, detail="uploaded source not found")
+    rebuild_pipeline()
+    return {"ok": True, **removed.__dict__}
 
 
 @app.get("/security/policy")
