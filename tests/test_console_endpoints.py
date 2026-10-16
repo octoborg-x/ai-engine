@@ -389,6 +389,20 @@ def test_results_retrieval_tab_served_from_bundled_seeds(monkeypatch, tmp_path):
     assert "seed_results" in data["_meta"]["path"]
 
 
+def test_results_recruitment_tab_served_from_bundled_seeds(monkeypatch, tmp_path):
+    monkeypatch.setenv("RESULTS_DIR", str(tmp_path))
+    # The Recruitment panel consumes the same saved-results store.
+    response = client.get(
+        "/results/saved", params={"tab": "recruitment"}, headers=auth_headers
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["_meta"]["key"] == "recruitment-example-3"
+    assert "candidate" in data and "recommendation" in data
+    assert data["candidate"]["name"]
+    assert "seed_results" in data["_meta"]["path"]
+
+
 def test_results_require_auth():
     assert client.get("/results").status_code == 401
     assert client.get("/results/saved").status_code == 401

@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   api,
   type CitationReport,
   type RagAnswer,
+  type SavedResult,
   type ScreeningReport,
 } from "../../lib/api";
 import { Badge, Bar, Card, Hero, Notice, ms, pct, useAsync } from "./ui";
+import { friendlyApiError, RequestRunControls } from "./run-controls";
 
 function Citations({ citations }: { citations?: CitationReport }) {
   if (!citations) return null;
@@ -201,10 +203,53 @@ Education: MSc Computer Science`;
 export function Recruitment() {
   const [jd, setJd] = useState(EXAMPLE_JD);
   const [resume, setResume] = useState(EXAMPLE_RESUME);
-  const screen = useAsync<ScreeningReport>();
+  const [report, setReport] = useState<SavedResult<ScreeningReport> | null>(null);
+  const [source, setSource] = useState<"saved" | "live">("saved");
+  const [slotLabel, setSlotLabel] = useState("saved example");
+  const [realBusy, setRealBusy] = useState(false);
+  const [loadError, setLoadError] = useState("");
 
-  const run = () => screen.run(() => api.screen(jd, resume));
-  const r = screen.data;
+  useEffect(() => {
+    // Default view comes from a saved file — opening the tab never spends
+    // provider budget on a real screening.
+    api
+      .resultsSaved<ScreeningReport>("recruitment")
+      .then((r) => {
+        setReport(r);
+        setSource("saved");
+        setSlotLabel(`saved example ${r._meta?.slot ?? "—"}`);
+      })
+      .catch(() => setLoadError("No saved screening yet. Use a real run once to capture one."));
+  }, []);
+
+  const fakeRun = useCallback((slot: number) => {
+    setLoadError("");
+    api
+      .resultsSaved<ScreeningReport>("recruitment", slot)
+      .then((r) => {
+        setReport(r);
+        setSource("saved");
+        setSlotLabel(`saved example ${r._meta?.slot ?? slot}`);
+      })
+      .catch((e) => setLoadError(friendlyApiError(e)));
+  }, []);
+
+  const realRun = async () => {
+    setRealBusy(true);
+    setLoadError("");
+    try {
+      const r = await api.screen(jd, resume);
+      setReport({ ...r, _meta: undefined });
+      setSource("live");
+      setSlotLabel("live run");
+      // Persist so subsequent fake runs rotate through this measured result.
+      await api.resultsSave("recruitment", r).catch(() => undefined);
+    } finally {
+      setRealBusy(false);
+    }
+  };
+
+  const r = report;
   const tone =
     r?.recommendation === "advance"
       ? "green"
@@ -217,12 +262,15 @@ export function Recruitment() {
       <Hero
         eyebrow="USE CASE"
         title="Recruitment screening"
-        blurb="Paste a job description and a resume. The model extracts structure; a deterministic rubric scores the match and shows the evidence."
-        right={
-          <button className="primary" onClick={run} disabled={screen.loading}>
-            {screen.loading ? "Screening…" : "Screen candidate"}
-          </button>
-        }
+        blurb="Paste a job description and a resume. The model extracts structure; a deterministic rubric scores the match and shows the evidence. Fake runs replay saved screens; real runs measure the live provider."
+      />
+      <RequestRunControls
+        tab="recruitment"
+        onFakeRun={fakeRun}
+        onRealRun={realRun}
+        realBusy={realBusy}
+        realLabel="Real run"
+        fakeLabel="Fake run"
       />
       <div className="grid two">
         <Card>
@@ -313,7 +361,9 @@ export function Recruitment() {
           <Card>
             <div className="card-head">
               <h2>Evidence</h2>
-              <Badge>auditable</Badge>
+              <Badge tone={source === "live" ? "green" : "blue"}>
+                {source === "live" ? "● live" : slotLabel}
+              </Badge>
             </div>
             <div className="rows">
               {r.evidence.map((e, i) => (
@@ -329,7 +379,7 @@ export function Recruitment() {
           </Card>
         </>
       )}
-      <Notice error={screen.error} />
+      <Notice error={loadError} />
     </div>
   );
 }
