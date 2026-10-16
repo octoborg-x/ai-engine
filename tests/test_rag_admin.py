@@ -23,7 +23,7 @@ def isolated_dirs(tmp_path, monkeypatch):
 
 
 def test_sources_lists_uploads_first_then_local(isolated_dirs):
-    corpus, uploads = isolated_dirs
+    _corpus, uploads = isolated_dirs
     uploads.mkdir()
     uploads.joinpath("added.md").write_text(
         "# Added\n\nNew content.\n", encoding="utf-8"
@@ -39,7 +39,7 @@ def test_sources_lists_uploads_first_then_local(isolated_dirs):
 
 
 def test_save_upload_writes_into_upload_dir(isolated_dirs):
-    corpus, uploads = isolated_dirs
+    _corpus, uploads = isolated_dirs
 
     info = admin.save_upload("guide.md", "# Guide\n\nHow to do things.\n")
 
@@ -89,7 +89,7 @@ def test_merge_uploads_into_corpus(isolated_dirs, monkeypatch):
     """The retrieval corpus sees both local docs and uploaded docs."""
     from app.rag.corpus_loader import load_documents
 
-    corpus, uploads = isolated_dirs
+    _corpus, uploads = isolated_dirs
     uploads.mkdir()
     uploads.joinpath("added.md").write_text(
         "# Added\n\nNew content.\n", encoding="utf-8"
