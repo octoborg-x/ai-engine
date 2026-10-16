@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api, streamChat, type MetricsSnapshot, type ModelTier, type Tier } from "../../lib/api";
-import { Badge, Card, Hero, Notice, num, ms, usd, useAsync, type Section } from "./ui";
+import { Badge, Card, Hero, Notice, num, ms, usd, useAsync, withRateLimitRetry, type Section } from "./ui";
 
 export function Overview({ setSection }: { setSection: (s: Section) => void }) {
   const health = useAsync<{ status: string }>();
@@ -10,9 +10,9 @@ export function Overview({ setSection }: { setSection: (s: Section) => void }) {
   const models = useAsync<{ tiers: ModelTier[] }>();
 
   useEffect(() => {
-    health.run(() => api.health());
-    metrics.run(() => api.metrics());
-    models.run(() => api.models());
+    health.run(withRateLimitRetry(() => api.health()));
+    metrics.run(withRateLimitRetry(() => api.metrics()));
+    models.run(withRateLimitRetry(() => api.models()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -107,7 +107,7 @@ export function Playground() {
   const models = useAsync<{ tiers: ModelTier[] }>();
 
   useEffect(() => {
-    models.run(() => api.models());
+    models.run(withRateLimitRetry(() => api.models()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -177,7 +177,7 @@ export function Playground() {
 export function Models() {
   const models = useAsync<{ tiers: ModelTier[] }>();
   useEffect(() => {
-    models.run(() => api.models());
+    models.run(withRateLimitRetry(() => api.models()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

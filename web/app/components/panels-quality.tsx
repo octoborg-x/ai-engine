@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api, type CompareResult, type EvalReport, type SuiteIndex } from "../../lib/api";
-import { Badge, Card, Hero, Notice, num, ms, pct, usd, useAsync, type Section } from "./ui";
+import { Badge, Card, Hero, Notice, num, ms, pct, usd, useAsync, withRateLimitRetry, type Section } from "./ui";
 
 export function Compare() {
   const [limit, setLimit] = useState(5);
@@ -93,7 +93,7 @@ export function Compare() {
 export function Quality({ setSection }: { setSection: (s: Section) => void }) {
   const suites = useAsync<SuiteIndex>();
   useEffect(() => {
-    suites.run(() => api.evalSuites());
+    suites.run(withRateLimitRetry(() => api.evalSuites()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -145,7 +145,7 @@ export function Evals() {
   const [limit, setLimit] = useState(5);
 
   useEffect(() => {
-    suites.run(() => api.evalSuites());
+    suites.run(withRateLimitRetry(() => api.evalSuites()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

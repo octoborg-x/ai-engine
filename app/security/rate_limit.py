@@ -40,8 +40,12 @@ def _setting(name: str, default: int) -> int:
     return value
 
 
+# The default budget is sized for an interactive console session: the web app
+# issues one protected call per panel mounted, so a single visit spans several
+# requests. The env var override still lets deployments tighten it behind a
+# public edge if the API is ever exposed beyond the console.
 rate_limiter = InMemoryRateLimiter(
-    limit=_setting("RATE_LIMIT_REQUESTS", 10),
+    limit=_setting("RATE_LIMIT_REQUESTS", 120),
     window_seconds=_setting("RATE_LIMIT_WINDOW_SECONDS", 60),
 )
 

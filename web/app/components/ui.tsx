@@ -99,6 +99,8 @@ export function Bar({ value, tone = "green" }: { value: number; tone?: string })
 
 // Small async-state hook shared by every panel: loading flag, error string,
 // and the resolved data. Callers pass a thunk so retries are trivial.
+// A failed run keeps any previously loaded data, so a transient 429 from the
+// shared rate limiter never blanks an already-rendered panel.
 export function useAsync<T>() {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState("");
@@ -115,4 +117,26 @@ export function useAsync<T>() {
     }
   }, []);
   return { data, error, loading, run };
+}
+
+// Rate-limit-aware thunk: retries a shared protected endpoint over the span of
+// the fixed-rate-limit window (60s) when the backend returns 429, so a panel
+// auto-load recovers after the window resets instead of showing a permanent
+// "Loading…". Cumulative delays reach 60s, the default rate-limit window, so
+// the final attempt runs just as the budget resets.
+const RETRY_DELAYS_MS = [3000, 6000, 9000, 12000, 15000, 15000]; // cumulative 60s
+
+export function withRateLimitRetry<T>(fn: () => Promise<T>, attempts = RETRY_DELAYS_MS.length): () => Promise<T> {
+  const attempt = (remaining: number): Promise<T> =>
+    fn().catch((e) => {
+      const limited =
+        e instanceof Error &&
+        (e.message.includes("429") || e.message.includes("Rate limit exceeded"));
+      if (!limited || remaining <= 1) throw e;
+      const delay = RETRY_DELAYS_MS[RETRY_DELAYS_MS.length - remaining] ?? RETRY_DELAYS_MS.at(-1)!;
+      return new Promise((resolve, reject) =>
+        setTimeout(() => attempt(remaining - 1).then(resolve, reject), delay),
+      );
+    });
+  return () => attempt(attempts);
 }

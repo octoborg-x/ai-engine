@@ -2,12 +2,12 @@
 
 import { useEffect } from "react";
 import { api, type Observability, type SecurityPolicy } from "../../lib/api";
-import { Badge, Bar, Card, Hero, Notice, ms, num, usd, useAsync } from "./ui";
+import { Badge, Bar, Card, Hero, Notice, ms, num, usd, useAsync, withRateLimitRetry } from "./ui";
 
 export function Auth() {
   const policy = useAsync<SecurityPolicy>();
   useEffect(() => {
-    policy.run(() => api.securityPolicy());
+    policy.run(withRateLimitRetry(() => api.securityPolicy()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const p = policy.data;
@@ -74,7 +74,7 @@ export function Auth() {
 export function Rate() {
   const policy = useAsync<SecurityPolicy>();
   useEffect(() => {
-    policy.run(() => api.securityPolicy());
+    policy.run(withRateLimitRetry(() => api.securityPolicy()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const rl = policy.data?.rate_limit;
@@ -121,7 +121,7 @@ export function Rate() {
 
 export function Logs() {
   const obs = useAsync<Observability>();
-  const load = () => obs.run(() => api.observability(30));
+  const load = () => obs.run(withRateLimitRetry(() => api.observability(30)));
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
