@@ -1,36 +1,106 @@
 {
-  "timestamp": "2026-10-15T18:32:00Z",
   "candidate": {
     "name": "Grace Hopper",
-    "years_experience": 5,
-    "skills": ["JavaScript", "TypeScript", "Node.js", "React", "PostgreSQL", "Docker"],
+    "years_experience": 6.0,
+    "skills": [
+      "JavaScript",
+      "TypeScript",
+      "Node.js",
+      "React",
+      "PostgreSQL",
+      "Docker"
+    ],
     "education": "BS Computer Science",
-    "highlights": ["Built a real-time processing pipeline in TypeScript", "On-call rotation owner for a stateless API tier"]
+    "highlights": [
+      "Built real-time dashboards used by 200k users",
+      "Migrated a Node.js monolith to serverless",
+      "Led the internal component library"
+    ]
   },
   "requirements": {
     "role": "Senior Backend Engineer",
-    "required_skills": ["Python", "FastAPI", "PostgreSQL", "Docker", "Kubernetes"],
-    "min_years": 5,
-    "nice_to_have": ["pgvector", "OpenTelemetry"],
-    "responsibilities": ["Design and ship production APIs", "Own reliability and performance", "Mentor engineers"]
+    "required_skills": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Docker",
+      "Kubernetes"
+    ],
+    "min_years": 5.0,
+    "nice_to_have": [
+      "Experience with vector databases (pgvector or similar)",
+      "Observability tooling (OpenTelemetry)"
+    ],
+    "responsibilities": [
+      "Design and ship production APIs",
+      "Own reliability and performance",
+      "Mentor engineers"
+    ]
   },
-  "match_score": 52,
+  "match_score": 55.0,
   "recommendation": "hold",
-  "matched_skills": ["PostgreSQL", "Docker"],
-  "missing_skills": ["Python", "FastAPI", "Kubernetes"],
+  "matched_skills": [
+    "PostgreSQL",
+    "Docker"
+  ],
+  "missing_skills": [
+    "Python",
+    "FastAPI",
+    "Kubernetes"
+  ],
   "evidence": [
-    {"criterion": "Required skill: Python", "matched": false, "detail": "Primarily JavaScript/TypeScript, no production Python"},
-    {"criterion": "Required skill: FastAPI", "matched": false, "detail": "No FastAPI experience; Node.js API background"},
-    {"criterion": "Required skill: PostgreSQL", "matched": true, "detail": "5 years of PostgreSQL in production"},
-    {"criterion": "Required skill: Docker", "matched": true, "detail": "Containers used daily in delivery pipeline"},
-    {"criterion": "Required skill: Kubernetes", "matched": false, "detail": "Managed platform used; no direct orchestration"},
-    {"criterion": "Experience >= 5y", "matched": true, "detail": "5 years professional experience, meets minimum"}
+    {
+      "criterion": "Required skill: Python",
+      "matched": false,
+      "detail": "not found"
+    },
+    {
+      "criterion": "Required skill: FastAPI",
+      "matched": false,
+      "detail": "not found"
+    },
+    {
+      "criterion": "Required skill: PostgreSQL",
+      "matched": true,
+      "detail": "found in resume"
+    },
+    {
+      "criterion": "Required skill: Docker",
+      "matched": true,
+      "detail": "found in resume"
+    },
+    {
+      "criterion": "Required skill: Kubernetes",
+      "matched": false,
+      "detail": "not found"
+    },
+    {
+      "criterion": "Minimum experience: 5.0 years",
+      "matched": true,
+      "detail": "candidate has 6.0 years"
+    },
+    {
+      "criterion": "Nice to have: Experience with vector databases (pgvector or similar)",
+      "matched": false,
+      "detail": "not found"
+    },
+    {
+      "criterion": "Nice to have: Observability tooling (OpenTelemetry)",
+      "matched": false,
+      "detail": "not found"
+    }
   ],
   "model": "cohere/north-mini-code:free",
-  "route": "cheap",
-  "prompt_tokens": 690,
-  "completion_tokens": 141,
-  "estimated_cost_usd": 0.00038,
-  "latency_ms": 2140.3,
-  "_trace": ["Parsing job description", "Extracting candidate profile", "Scoring against rubric", "Preparing report"]
+  "route": "main",
+  "prompt_tokens": 292,
+  "completion_tokens": 639,
+  "estimated_cost_usd": 0.0,
+  "latency_ms": 7216.68,
+  "timestamp": "2026-10-16T11:29:06Z",
+  "_trace": [
+    "Parsing job description",
+    "Extracting candidate profile",
+    "Scoring against rubric",
+    "Preparing report"
+  ]
 }

@@ -1,36 +1,102 @@
 {
-  "timestamp": "2026-10-15T18:55:00Z",
   "candidate": {
     "name": "Alan Emtage",
-    "years_experience": 2,
-    "skills": ["Java", "Spring", "MySQL", "Maven"],
+    "years_experience": 2.0,
+    "skills": [
+      "Java",
+      "Spring",
+      "MySQL",
+      "Maven"
+    ],
     "education": "BS Software Engineering",
-    "highlights": ["Internship on an internal Java tooling team", "Contributed to CI templates used by two squads"]
+    "highlights": [
+      "Internship on an internal Java tooling team",
+      "Contributed to CI templates used by two squads"
+    ]
   },
   "requirements": {
     "role": "Senior Backend Engineer",
-    "required_skills": ["Python", "FastAPI", "PostgreSQL", "Docker", "Kubernetes"],
-    "min_years": 5,
-    "nice_to_have": ["pgvector", "OpenTelemetry"],
-    "responsibilities": ["Design and ship production APIs", "Own reliability and performance", "Mentor engineers"]
+    "required_skills": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Docker",
+      "Kubernetes"
+    ],
+    "min_years": 5.0,
+    "nice_to_have": [
+      "Experience with vector databases (pgvector or similar)",
+      "Experience with observability tooling (OpenTelemetry)"
+    ],
+    "responsibilities": [
+      "Design and ship production APIs",
+      "Own reliability and performance",
+      "Mentor engineers"
+    ]
   },
-  "match_score": 31,
+  "match_score": 10.0,
   "recommendation": "reject",
   "matched_skills": [],
-  "missing_skills": ["Python", "FastAPI", "PostgreSQL", "Docker", "Kubernetes"],
+  "missing_skills": [
+    "Python",
+    "FastAPI",
+    "PostgreSQL",
+    "Docker",
+    "Kubernetes"
+  ],
   "evidence": [
-    {"criterion": "Required skill: Python", "matched": false, "detail": "No Python experience on profile"},
-    {"criterion": "Required skill: FastAPI", "matched": false, "detail": "Java/Spring background only"},
-    {"criterion": "Required skill: PostgreSQL", "matched": false, "detail": "MySQL used; no PostgreSQL"},
-    {"criterion": "Required skill: Docker", "matched": false, "detail": "No containerization experience listed"},
-    {"criterion": "Required skill: Kubernetes", "matched": false, "detail": "No orchestration experience listed"},
-    {"criterion": "Experience >= 5y", "matched": false, "detail": "2 years professional experience, below minimum"}
+    {
+      "criterion": "Required skill: Python",
+      "matched": false,
+      "detail": "not found"
+    },
+    {
+      "criterion": "Required skill: FastAPI",
+      "matched": false,
+      "detail": "not found"
+    },
+    {
+      "criterion": "Required skill: PostgreSQL",
+      "matched": false,
+      "detail": "not found"
+    },
+    {
+      "criterion": "Required skill: Docker",
+      "matched": false,
+      "detail": "not found"
+    },
+    {
+      "criterion": "Required skill: Kubernetes",
+      "matched": false,
+      "detail": "not found"
+    },
+    {
+      "criterion": "Minimum experience: 5.0 years",
+      "matched": false,
+      "detail": "candidate has 2.0 years"
+    },
+    {
+      "criterion": "Nice to have: Experience with vector databases (pgvector or similar)",
+      "matched": false,
+      "detail": "not found"
+    },
+    {
+      "criterion": "Nice to have: Experience with observability tooling (OpenTelemetry)",
+      "matched": false,
+      "detail": "not found"
+    }
   ],
   "model": "cohere/north-mini-code:free",
-  "route": "cheap",
-  "prompt_tokens": 655,
-  "completion_tokens": 133,
-  "estimated_cost_usd": 0.00035,
-  "latency_ms": 1985.1,
-  "_trace": ["Parsing job description", "Extracting candidate profile", "Scoring against rubric", "Preparing report"]
+  "route": "main",
+  "prompt_tokens": 276,
+  "completion_tokens": 771,
+  "estimated_cost_usd": 0.0,
+  "latency_ms": 7468.67,
+  "timestamp": "2026-10-16T11:29:21Z",
+  "_trace": [
+    "Parsing job description",
+    "Extracting candidate profile",
+    "Scoring against rubric",
+    "Preparing report"
+  ]
 }

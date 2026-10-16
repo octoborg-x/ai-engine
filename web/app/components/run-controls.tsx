@@ -33,6 +33,7 @@ export interface FakeRunState {
 const TRACES: Record<ResultsTab, string[]> = {
   compare: [
     "Loading labeled chat cases…",
+    "Calling tier model — main",
     "Calling tier model — cheap",
     "Calling tier model — balanced",
     "Calling tier model — powerful",

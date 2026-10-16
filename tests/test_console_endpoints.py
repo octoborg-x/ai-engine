@@ -71,7 +71,12 @@ def test_compare_runs_every_tier(monkeypatch):
     response = client.get("/compare?limit=2", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
-    assert [r["tier"] for r in data["results"]] == ["cheap", "balanced", "powerful"]
+    assert [r["tier"] for r in data["results"]] == [
+        "main",
+        "cheap",
+        "balanced",
+        "powerful",
+    ]
     for result in data["results"]:
         assert result["cases"] == 2
         assert result["latency_ms"]["p95"] is not None
@@ -200,7 +205,7 @@ def test_recommendation_thresholds():
 
 
 def test_screen_endpoint_end_to_end(monkeypatch):
-    async def fake_complete_json(prompt, task="extraction"):
+    async def fake_complete_json(prompt, task="extraction", tier=None):
         if "recruiter" in prompt:
             data = {
                 "role": "Backend Engineer",
@@ -218,9 +223,9 @@ def test_screen_endpoint_end_to_end(monkeypatch):
                 "highlights": [],
             }
         meta = {
-            "model": "cheap/model",
-            "route": "cheap",
-            "route_reason": "structured classification/extraction task",
+            "model": "main/model",
+            "route": tier or "main",
+            "route_reason": "candidate screening pinned to main tier",
             "prompt_tokens": 20,
             "completion_tokens": 10,
             "estimated_cost_usd": 0.0,

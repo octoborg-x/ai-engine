@@ -77,7 +77,7 @@ export function Compare() {
       <Hero
         eyebrow="BENCHMARKS"
         title="Model comparison"
-        blurb="Same labeled prompt set through every tier: pass rate, latency, tokens, cost. Fake runs replay saved files; real runs measure the live provider."
+        blurb="Same labeled prompt set through every tier (main, cheap, balanced, powerful): pass rate, latency, tokens, cost. Fake runs replay saved files; real runs measure the live provider."
         right={
           <label>
             Cases per tier

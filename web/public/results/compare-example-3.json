@@ -1,71 +1,93 @@
 {
-  "timestamp": "2026-10-15T14:30:22Z",
+  "timestamp": "2026-10-16T11:27:45Z",
   "cases_per_tier": 5,
   "results": [
     {
-      "tier": "cheap",
+      "tier": "main",
       "model": "cohere/north-mini-code:free",
       "cases": 5,
-      "passed": 4,
-      "pass_rate": 0.78,
-      "errors": 1,
+      "passed": 3,
+      "pass_rate": 0.6,
+      "errors": 0,
       "latency_ms": {
-        "average": 940.8,
-        "p50": 884.35,
-        "p95": 1377.6
+        "average": 6275.98,
+        "p50": 5963.97,
+        "p95": 8136.59
       },
       "tokens": {
-        "average": 525.0,
-        "input": 1600,
-        "output": 720
+        "average": 843.2,
+        "input": 212,
+        "output": 4004
       },
       "cost": {
-        "average_per_request_usd": 0.00019,
-        "total_usd": 0.00095
+        "average_per_request_usd": 0.0,
+        "total_usd": 0.0
+      }
+    },
+    {
+      "tier": "cheap",
+      "model": "liquid/lfm-2.5-2.6b:free",
+      "cases": 5,
+      "passed": 3,
+      "pass_rate": 0.6,
+      "errors": 0,
+      "latency_ms": {
+        "average": 3491.48,
+        "p50": 2825.72,
+        "p95": 5452.45
+      },
+      "tokens": {
+        "average": 642.2,
+        "input": 269,
+        "output": 2942
+      },
+      "cost": {
+        "average_per_request_usd": 0.0,
+        "total_usd": 0.0
       }
     },
     {
       "tier": "balanced",
-      "model": "deepseek/deepseek-v3.1",
+      "model": "dots-studio/dots-3-note-preview:free",
       "cases": 5,
       "passed": 4,
-      "pass_rate": 0.85,
+      "pass_rate": 0.8,
       "errors": 0,
       "latency_ms": {
-        "average": 1467.2,
-        "p50": 1379.17,
-        "p95": 2228.8
+        "average": 8682.17,
+        "p50": 8997.74,
+        "p95": 10445.09
       },
       "tokens": {
-        "average": 655.0,
-        "input": 1600,
-        "output": 720
+        "average": 316.8,
+        "input": 284,
+        "output": 1300
       },
       "cost": {
-        "average_per_request_usd": 0.0023,
-        "total_usd": 0.0115
+        "average_per_request_usd": 0.0,
+        "total_usd": 0.0
       }
     },
     {
       "tier": "powerful",
-      "model": "anthropic/claude-3.5-sonnet",
+      "model": "poolside/laguna-s-2.1:free",
       "cases": 5,
-      "passed": 5,
-      "pass_rate": 0.91,
-      "errors": 1,
+      "passed": 2,
+      "pass_rate": 0.4,
+      "errors": 0,
       "latency_ms": {
-        "average": 2744.0,
-        "p50": 2579.36,
-        "p95": 4491.2
+        "average": 6625.12,
+        "p50": 4977.89,
+        "p95": 11158.9
       },
       "tokens": {
-        "average": 1010.0,
-        "input": 2000,
-        "output": 900
+        "average": 268.4,
+        "input": 433,
+        "output": 909
       },
       "cost": {
-        "average_per_request_usd": 0.0101,
-        "total_usd": 0.0505
+        "average_per_request_usd": 0.0,
+        "total_usd": 0.0
       }
     }
   ]
