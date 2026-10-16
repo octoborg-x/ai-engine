@@ -1,7 +1,7 @@
 """Tests for canonical embedding configuration and offline behavior."""
 
-from app.rag import embeddings
 from app.llm import providers
+from app.rag import embeddings
 
 
 def test_defaults_to_text_embedding_3_small(monkeypatch):
