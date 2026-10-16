@@ -94,7 +94,8 @@ export function Quality({ setSection }: { setSection: (s: Section) => void }) {
   const suites = useAsync<SuiteIndex>();
   useEffect(() => {
     suites.run(() => api.evalSuites());
-  }, [suites]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="stack">
@@ -145,7 +146,8 @@ export function Evals() {
 
   useEffect(() => {
     suites.run(() => api.evalSuites());
-  }, [suites]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const all = suites.data?.suites.map((s) => s.name) ?? [];
   const run = () => report.run(() => api.runEvals(all, limit));
