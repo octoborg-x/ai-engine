@@ -8,7 +8,8 @@ export function Auth() {
   const policy = useAsync<SecurityPolicy>();
   useEffect(() => {
     policy.run(() => api.securityPolicy());
-  }, [policy]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const p = policy.data;
 
   return (
@@ -74,7 +75,8 @@ export function Rate() {
   const policy = useAsync<SecurityPolicy>();
   useEffect(() => {
     policy.run(() => api.securityPolicy());
-  }, [policy]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const rl = policy.data?.rate_limit;
 
   return (

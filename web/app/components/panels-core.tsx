@@ -13,7 +13,8 @@ export function Overview({ setSection }: { setSection: (s: Section) => void }) {
     health.run(() => api.health());
     metrics.run(() => api.metrics());
     models.run(() => api.models());
-  }, [health, metrics, models]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const m = metrics.data;
   const totalHttp = m
@@ -107,7 +108,8 @@ export function Playground() {
 
   useEffect(() => {
     models.run(() => api.models());
-  }, [models]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const catalog = models.data?.tiers ?? [];
   const label = (t: ModelTier) => (t.tier === "main" ? `${t.model} (main)` : `${t.model} — ${t.tier}`);
@@ -176,7 +178,8 @@ export function Models() {
   const models = useAsync<{ tiers: ModelTier[] }>();
   useEffect(() => {
     models.run(() => api.models());
-  }, [models]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const tone = (tier: string) =>
     tier === "main"
