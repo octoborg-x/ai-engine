@@ -8,6 +8,7 @@ from openai import APIError, APITimeoutError, RateLimitError
 from pydantic import BaseModel
 
 from app.llm.client import ask, ask_stream, extract_ticket_info
+from app.llm.providers import has_provider_key
 from app.llm.schemas import ChatRequest, ChatResponse, TicketExtraction
 from app.rag.schemas import AskRequest, AskResponse, RetrievalResponse
 from app.rag.service import answer, retrieval_response
@@ -164,19 +165,28 @@ def observability_requests(limit: int = 50):
 
 @app.get("/ready")
 def ready():
-    if os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY"):
+    if has_provider_key():
         return {"status": "ready"}
     return JSONResponse(
         status_code=503,
         content={
             "status": "not ready",
-            "detail": "OPENROUTER_API_KEY or OPENAI_API_KEY missing",
+            "detail": ("OPENROUTER_API_KEY, OPENAI_API_KEY, or LLM_API_KEY missing"),
         },
     )
 
 
 def _provider_error(e: Exception) -> HTTPException:
     """Map LLM provider failures onto the documented HTTP status codes."""
+    if not has_provider_key():
+        return HTTPException(
+            status_code=503,
+            detail=(
+                "No LLM provider key configured. Set OPENROUTER_API_KEY "
+                "(or OPENAI_API_KEY, or LLM_API_KEY + LLM_BASE_URL for a "
+                "generic endpoint) in the server environment, then restart."
+            ),
+        )
     if isinstance(e, RateLimitError):
         return HTTPException(
             status_code=429, detail="Rate limited by provider, try again shortly"

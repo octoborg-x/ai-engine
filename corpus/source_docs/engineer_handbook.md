@@ -535,20 +535,3 @@ The handbook should be reviewed periodically and updated when:
 Employees are responsible for reading updated policies and completing required acknowledgments or training.
 
 ---
-
-## 26. Important Disclaimer
-
-This is a fictional employee handbook created for training and RAG experimentation. It is not legal advice, does not represent the policies of a real organization, and should be adapted and reviewed before use in an actual workplace.
-
-For RAG testing, useful questions include:
-
-- How do I report a security incident?
-- Can I enter confidential documents into an external AI tool?
-- What are the rules for remote work?
-- What should I do if I experience harassment?
-- What information must be included in an expense claim?
-- Who owns the employee handbook?
-- What happens when employment ends?
-- What are the responsibilities of managers?
-- How should an employee report a conflict of interest?
-- What are the rules for using open-source software?

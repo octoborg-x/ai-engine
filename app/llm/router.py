@@ -1,13 +1,17 @@
-"""Free, deterministic model routing for OpenRouter.
+"""Free, deterministic model routing for the active provider.
 
 The router deliberately does not make a second LLM call to decide which model
 to use. It uses the request type and a small complexity heuristic, so routing
-itself adds no token cost.
+itself adds no token cost. The base model always belongs to the active
+provider (openrouter -> openai -> gemini), so the configured key, base URL,
+and model name are never mixed across providers.
 """
 
 import os
 import re
 from dataclasses import dataclass
+
+from app.llm.providers import provider_chat_model
 
 
 @dataclass(frozen=True)
@@ -17,22 +21,23 @@ class RouteDecision:
     reason: str
 
 
-# "main" is the default model (MODEL_NAME); the other three are the routed
-# tiers. Ordering here is the order the console renders.
+# "main" is the default model (active provider chat model); the other three
+# are the routed tiers. Ordering here is the order the console renders.
 TIERS = ("main", "cheap", "balanced", "powerful")
 
 
 def _model_for(tier: str) -> str:
-    # MODEL_NAME is the primary/default model, exposed as the "main" tier.
+    # The active provider's chat model is the primary/default model, exposed
+    # as the "main" tier.
     if tier == "main":
-        return os.environ["MODEL_NAME"]
+        return provider_chat_model()
 
     configured = os.getenv(f"MODEL_{tier.upper()}")
     if configured:
         return configured
 
     # Backward-compatible fallback: existing MODEL_NAME remains valid.
-    return os.environ["MODEL_NAME"]
+    return provider_chat_model()
 
 
 def model_catalog() -> list[dict]:
