@@ -41,9 +41,7 @@ class _LazyCompletions:
 
     async def create(self, **kwargs):
         if self._openai_compatible:
-            return await _get_openai_compat_client().chat.completions.create(
-                **kwargs
-            )
+            return await _get_openai_compat_client().chat.completions.create(**kwargs)
         return await _get_client().chat.completions.create(**kwargs)
 
 

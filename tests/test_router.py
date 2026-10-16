@@ -83,7 +83,9 @@ def test_openai_compatible_falls_back_to_model_name(monkeypatch):
 def test_openai_compatible_catalog_entry_reports_its_env_var(monkeypatch):
     monkeypatch.setenv("MODEL_NAME", "main/model")
     monkeypatch.setenv("OPENAI_MODEL", "gemini-2.5-flash")
-    catalog = [entry for entry in model_catalog() if entry["tier"] == "openai-compatible"]
+    catalog = [
+        entry for entry in model_catalog() if entry["tier"] == "openai-compatible"
+    ]
     assert catalog[0]["model"] == "gemini-2.5-flash"
     assert catalog[0]["env_var"] == "OPENAI_MODEL"
     assert catalog[0]["configured"] is True
