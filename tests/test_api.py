@@ -24,6 +24,10 @@ class FakeAPIError(Exception):
     pass
 
 
+class FakeCircuitOpenError(Exception):
+    pass
+
+
 @pytest.mark.asyncio
 async def test_health_returns_ok():
     assert api.health() == {"status": "ok"}
@@ -59,6 +63,11 @@ async def test_chat_returns_validated_response(monkeypatch):
         (FakeRateLimitError, 429, "Rate limited by provider, try again shortly"),
         (FakeTimeoutError, 504, "LLM provider timed out"),
         (FakeAPIError, 502, "LLM provider error: upstream failure"),
+        (
+            FakeCircuitOpenError,
+            503,
+            "LLM provider temporarily unavailable (circuit open), try again shortly",
+        ),
         (RuntimeError, 500, "Unexpected error: unexpected failure"),
     ],
 )
@@ -76,6 +85,7 @@ async def test_chat_maps_provider_failures_to_http_errors(
     monkeypatch.setattr(api, "RateLimitError", FakeRateLimitError)
     monkeypatch.setattr(api, "APITimeoutError", FakeTimeoutError)
     monkeypatch.setattr(api, "APIError", FakeAPIError)
+    monkeypatch.setattr(api, "CircuitOpenError", FakeCircuitOpenError)
     monkeypatch.setattr(api, "ask", failing_ask)
 
     with pytest.raises(api.HTTPException) as exc_info:

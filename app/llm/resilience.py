@@ -101,7 +101,42 @@ class CircuitBreaker:
                 )
 
 
-llm_circuit_breaker = CircuitBreaker(
-    failure_threshold=int(os.getenv("LLM_CIRCUIT_FAILURE_THRESHOLD", "5")),
-    reset_timeout_seconds=float(os.getenv("LLM_CIRCUIT_RESET_SECONDS", "30")),
-)
+def _breaker_backend(tier: str | None) -> str:
+    """Key isolating circuit state per provider backend.
+
+    The OpenAI-compatible slot gets its own breaker so failures on the
+    active provider (e.g. an exhausted OpenRouter free tier) never reject
+    calls routed to a healthy OpenAI-compatible endpoint.
+    """
+    return "openai-compatible" if tier == "openai-compatible" else "active"
+
+
+_llm_circuit_breakers: dict[str, CircuitBreaker] = {}
+
+
+def llm_circuit_breaker(backend: str = None) -> CircuitBreaker:
+    """Return the circuit breaker for a provider backend, creating it lazily."""
+    key = backend or _breaker_backend(None)
+    if key not in _llm_circuit_breakers:
+        _llm_circuit_breakers[key] = CircuitBreaker(
+            failure_threshold=int(
+                os.getenv("LLM_CIRCUIT_FAILURE_THRESHOLD", "5")
+            ),
+            reset_timeout_seconds=float(
+                os.getenv("LLM_CIRCUIT_RESET_SECONDS", "30")
+            ),
+        )
+    return _llm_circuit_breakers[key]
+
+
+def breaker_for_tier(tier: str | None) -> CircuitBreaker:
+    """The circuit breaker governing a routing tier."""
+    return llm_circuit_breaker(_breaker_backend(tier))
+
+
+__all__ = [
+    "CircuitBreaker",
+    "CircuitOpenError",
+    "breaker_for_tier",
+    "llm_circuit_breaker",
+]

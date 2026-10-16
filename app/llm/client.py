@@ -15,7 +15,7 @@ from tenacity import (
 )
 
 from app.llm.providers import generic_provider, resolve_provider
-from app.llm.resilience import llm_circuit_breaker
+from app.llm.resilience import breaker_for_tier
 from app.llm.router import route
 from app.llm.schemas import TicketExtraction
 from app.telemetry.metrics import calculate_cost, record_call
@@ -149,7 +149,7 @@ async def _completion(
         if tier == "openai-compatible"
         else client.chat.completions
     )
-    return await llm_circuit_breaker.call(
+    return await breaker_for_tier(tier).call(
         lambda: completions.create(model=model, messages=messages),
         timeout_seconds=timeout_seconds,
     )
@@ -262,7 +262,7 @@ async def ask_stream(prompt: str, tier: str | None = None) -> AsyncGenerator[str
             if decision.tier == "openai-compatible"
             else client.chat.completions
         )
-        stream = await llm_circuit_breaker.call(
+        stream = await breaker_for_tier(decision.tier).call(
             lambda: completions.create(
                 model=decision.model,
                 messages=[{"role": "user", "content": prompt}],
