@@ -214,6 +214,7 @@ async def ask_stream(prompt: str, tier: str | None = None) -> AsyncGenerator[str
     decision = route("chat", prompt, force_tier=tier)
     started = time.perf_counter()
     status = "error"
+    usage = None
     try:
         timeout_seconds = float(os.getenv("LLM_TIMEOUT_SECONDS", "30"))
         stream = await llm_circuit_breaker.call(
@@ -221,20 +222,27 @@ async def ask_stream(prompt: str, tier: str | None = None) -> AsyncGenerator[str
                 model=decision.model,
                 messages=[{"role": "user", "content": prompt}],
                 stream=True,
+                stream_options={"include_usage": True},
             ),
             timeout_seconds=timeout_seconds,
         )
         async for chunk in stream:
-            delta = chunk.choices[0].delta.content
-            if delta:
-                yield delta
+            # With include_usage the final chunk carries usage; capture it so
+            # token accounting works for streamed responses too. Providers vary
+            # whether that chunk also has a (final, empty) choice.
+            chunk_usage = getattr(chunk, "usage", None)
+            if chunk_usage is not None:
+                usage = chunk_usage
+            choices = chunk.choices or []
+            if choices and choices[0].delta.content:
+                yield choices[0].delta.content
         status = "success"
     finally:
         record_call(
             model=decision.model,
             tier=decision.tier,
-            prompt_tokens=None,
-            completion_tokens=None,
+            prompt_tokens=getattr(usage, "prompt_tokens", None),
+            completion_tokens=getattr(usage, "completion_tokens", None),
             latency_ms=round((time.perf_counter() - started) * 1000, 2),
             status=status,
             attempt=1,
