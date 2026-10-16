@@ -1,20 +1,27 @@
-"""Embedding provider adapter shared by corpus indexing and query retrieval."""
+"""Embedding provider adapter shared by corpus indexing and query retrieval.
+
+Embeddings come from the same unified provider as the chat model (openrouter
+-- openai -- gemini): key, base URL, chat model, and embedding model all
+belong to the active provider.
+"""
 
 import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from app.llm.providers import has_provider_key, resolve_provider
+from app.llm.providers import (
+    has_provider_key,
+    provider_embedding_model,
+    resolve_provider,
+)
 
 load_dotenv()
-DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small"
-OPENROUTER_EMBEDDING_MODEL = "openai/text-embedding-3-small"
 
 
 def default_embedding_model() -> str:
-    """Resolve the embedding model from the environment."""
-    return os.getenv("OPENAI_MODEL", DEFAULT_EMBEDDING_MODEL)
+    """Resolve the embedding model for the active provider."""
+    return provider_embedding_model()
 
 
 def _offline_mode() -> bool:
@@ -22,37 +29,22 @@ def _offline_mode() -> bool:
     return os.getenv("EMBEDDINGS_OFFLINE", "0") == "1"
 
 
-def _embedding_model(openrouter: bool) -> str:
-    """Pick an embedding-capable model for the active provider.
-
-    `OPENAI_MODEL` is a general-purpose (often chat) model, so OpenRouter
-    embeddings default to the OpenRouter-compatible text-embedding model
-    unless ``OPENROUTER_EMBEDDING_MODEL`` is set explicitly.
-    """
-    if openrouter:
-        return os.getenv("OPENROUTER_EMBEDDING_MODEL") or OPENROUTER_EMBEDDING_MODEL
-    return os.getenv("OPENAI_EMBEDDING_MODEL") or default_embedding_model()
-
-
 def generate_embedding(text: str, model: str | None = None) -> list[float]:
     """Generate a provider embedding, using a zero vector for offline runs.
 
-    Provider precedence is OpenRouter first, OpenAI (or any OpenAI-compatible
-    endpoint such as Gemini) as a fallback. When neither a real key nor an
-    explicit ``EMBEDDINGS_OFFLINE=1`` flag is present, a deterministic zero
-    vector is returned so tests and local demos never hit the network.
+    Provider precedence is OpenRouter first, OpenAI second, Gemini last.
+    When neither a real key nor an explicit ``EMBEDDINGS_OFFLINE=1`` flag is
+    present, a deterministic zero vector is returned so tests and local demos
+    never hit the network. The embedding model is always the active provider's
+    own embedding model, so it can never be a chat model from another provider.
     """
     if _offline_mode() or not has_provider_key():
         return [0.0] * 1536
     provider = resolve_provider()
-    # LLM_BASE_URL is generic-only (scoped in providers.py); embeddings use the
-    # resolved provider base default (OpenRouter/OpenAI default or LLM_BASE_URL
-    # for the generic provider) so a key is never sent to the wrong endpoint.
     client = OpenAI(api_key=provider.api_key, base_url=provider.base_url)
-    openrouter = provider.name == "openrouter"
     response = client.embeddings.create(
         input=[text],
-        model=model or _embedding_model(openrouter),
+        model=model or provider.embedding_model,
     )
     return response.data[0].embedding
 

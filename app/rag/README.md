@@ -27,22 +27,25 @@ corpus directory are ignored.
 
 ## Providers
 
-The answer LLM and the embedding provider share one resolution order:
+A single provider drives both the answer LLM and the embeddings. Precedence is
+OpenRouter first, OpenAI next, then Gemini. Each provider is fully
+self-contained — its API key, base URL, chat model, and embedding model all
+come from the same provider:
 
-1. `OPENROUTER_API_KEY` — primary (OpenRouter chat + embeddings).
-2. `OPENAI_API_KEY` — fallback (or any OpenAI-compatible endpoint via
-   `OPENAI_BASE_URL`).
-3. `LLM_API_KEY` — generic fallback for OpenAI-compatible endpoints (Gemini,
-   Groq, Hugging Face, ...) with `LLM_BASE_URL`.
+- `OPENROUTER_API_KEY` + `OPENROUTER_BASE_URL` + `OPENROUTER_MODEL` +
+  `OPENROUTER_EMBEDDING_MODEL`
+- `OPENAI_API_KEY` + `OPENAI_BASE_URL` + `OPENAI_MODEL` +
+  `OPENAI_EMBEDDING_MODEL`
+- `GEMINI_API_KEY` + `GEMINI_BASE_URL` + `GEMINI_MODEL` +
+  `GEMINI_EMBEDDING_MODEL`
 
-Base URLs are scoped to their provider: the OpenRouter key always uses
-`OPENROUTER_BASE_URL`, the OpenAI key always uses `OPENAI_BASE_URL`, and
-`LLM_BASE_URL` applies only to `LLM_API_KEY`. A key is never sent to another
-provider's endpoint.
+A key is never sent to another provider's endpoint. `MODEL_NAME` remains the
+fallback chat model for every provider. The legacy `LLM_API_KEY` /
+`LLM_BASE_URL` pair is aliased to the Gemini provider.
 
-`OPENAI_MODEL` selects the embedding model (default: `text-embedding-3-small`;
-OpenRouter uses `openai/text-embedding-3-small` unless
-`OPENROUTER_EMBEDDING_MODEL` is set). Without any key — or with
+Embedding defaults: OpenRouter `openai/text-embedding-3-small`, OpenAI
+`text-embedding-3-small`, Gemini `text-embedding-004` (each overridable with
+`<PROVIDER>_EMBEDDING_MODEL`). Without any key — or with
 `EMBEDDINGS_OFFLINE=1` — embedding requests return a zero vector so local
 development, tests, and BM25 retrieval remain available.
 
