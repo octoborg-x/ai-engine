@@ -12,18 +12,30 @@ and caches one `RAGPipeline`, calls the existing LLM callable, and returns the
 existing `AskResponse` schema. `app.rag.api:app` is a retrieval-only standalone
 app for local tests; it shares the same retrieval service.
 
-## Knowledge base (local source files)
+## Knowledge base (local source files + console uploads)
 
-The corpus is loaded from `corpus/source_docs/` at startup (override with the
-`CORPUS_DIR` environment variable). Every `.md`/`.txt` file there becomes part
-of the knowledge base — that drop-a-file workflow is the "upload" path, and it
-needs no PDF/DOCX parser. Markdown headings become logical sections; each
-section is one chunk. Documents without headings are chunked by paragraph
-windows. Adding a document requires a service restart so the chunk index is
-rebuilt.
+The corpus is loaded from `corpus/source_docs/` (override with the
+`CORPUS_DIR` environment variable) merged with `corpus/uploads/` (override
+with `UPLOAD_DIR`). Every `.md`/`.markdown`/`.txt` file there becomes part of
+the knowledge base — no PDF/DOCX parser is needed. Markdown headings become
+logical sections; each section is one chunk. Documents without headings are
+chunked by paragraph windows.
+
+- **Local sources** (`corpus/source_docs/`) are the git-tracked handbooks and
+  policies. Drop a file there to ship it with the repo.
+- **Uploaded sources** (`corpus/uploads/`) are added through the console
+  Knowledge tab (`POST /rag/sources`). They persist on disk, are merged into
+  the retrieval index, and survive restarts. This is the "no database" upload
+  path — files are the store.
+
+The console lists both via `GET /rag/sources` (name, size, kind, section
+count) and can delete uploaded files (`DELETE /rag/sources?name=...`).
+Uploading or deleting rebuilds the chunk index in place
+(`app.rag.service.rebuild_pipeline`), so new documents are searchable
+immediately and a service restart is not required.
 
 Supported formats: `.md`, `.markdown`, `.txt`. `.pdf`/`.docx` files in the
-corpus directory are ignored.
+corpus directories are ignored.
 
 ## Providers
 

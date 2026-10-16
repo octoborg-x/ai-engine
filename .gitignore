@@ -18,3 +18,5 @@ web/tsconfig.tsbuildinfo
 *.egg-info/
 build/
 dist/
+# User-uploaded knowledge documents (managed through the console)
+corpus/uploads/

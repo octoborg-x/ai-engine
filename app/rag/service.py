@@ -23,6 +23,12 @@ def get_pipeline() -> RAGPipeline:
     return RAGPipeline(build_corpus(embedder), embedder)
 
 
+def rebuild_pipeline() -> RAGPipeline:
+    """Rebuild the corpus after a knowledge file was added or removed."""
+    get_pipeline.cache_clear()
+    return get_pipeline()
+
+
 def build_prompt(query: str, context: str) -> str:
     """Combine system instructions, retrieved context, and the question."""
     return f"{SYSTEM_PROMPT}\n\nContext:\n{context}\n\nQuestion: {query}"

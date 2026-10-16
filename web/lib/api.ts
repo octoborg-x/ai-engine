@@ -151,6 +151,20 @@ export interface CitationReport {
   source_map: Record<string, string>;
 }
 
+export interface RagSource {
+  name: string;
+  kind: "local" | "upload";
+  size_bytes: number;
+  modified_at: number;
+  sections: number;
+}
+
+export interface SourcesResponse {
+  sources: RagSource[];
+  formats: string[];
+  max_upload_bytes: number;
+}
+
 export interface RagAnswer {
   query: string;
   answer: string;
@@ -261,6 +275,46 @@ const get = <T,>(path: string) => request<T>(path);
 const post = <T,>(path: string, body?: unknown) =>
   request<T>(path, { method: "POST", body: JSON.stringify(body ?? {}) });
 
+async function uploadFile<T>(path: string, file: File): Promise<T> {
+  const form = new FormData();
+  form.append("file", file, file.name);
+  const res = await fetch(`${BASE}${path}`, {
+    method: "POST",
+    body: form,
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    let detail = `Upload failed: ${res.status}`;
+    try {
+      const body = await res.json();
+      if (body?.detail) detail = `${detail} — ${body.detail}`;
+    } catch {
+      /* non-JSON error body */
+    }
+    throw new ApiError(detail, res.status);
+  }
+  return (await res.json()) as T;
+}
+
+async function del<T>(path: string): Promise<T> {
+  const res = await fetch(`${BASE}${path}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    let detail = `Request failed: ${res.status}`;
+    try {
+      const body = await res.json();
+      if (body?.detail) detail = `${detail} — ${body.detail}`;
+    } catch {
+      /* non-JSON error body */
+    }
+    throw new ApiError(detail, res.status);
+  }
+  return (await res.json()) as T;
+}
+
 export const api = {
   health: () => get<Health>("/health"),
   metrics: () => get<MetricsSnapshot>("/metrics"),
@@ -283,6 +337,11 @@ export const api = {
     }),
   ragRetrieve: (query: string, recall_k = 6, final_k = 3) =>
     post<RagAnswer>("/rag/retrieve", { query, recall_k, final_k }),
+  ragSources: () => get<SourcesResponse>("/rag/sources"),
+  ragUpload: (file: File) =>
+    uploadFile<{ name: string; ok: boolean }>("/rag/sources", file),
+  ragDelete: (name: string) =>
+    del<{ ok: boolean }>(`/rag/sources?name=${encodeURIComponent(name)}`),
   ask: (query: string, recall_k = 6, final_k = 3) =>
     post<RagAnswer>("/ask", { query, recall_k, final_k }),
   securityPolicy: () => get<SecurityPolicy>("/security/policy"),
