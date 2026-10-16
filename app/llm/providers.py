@@ -173,6 +173,49 @@ def provider_chat_model(provider: str | None = None) -> str:
     return _chat_model(_configured_provider())
 
 
+def generic_provider() -> Provider:
+    """The OpenAI-compatible slot, independent of the active provider.
+
+    Resolves OPENAI_API_KEY + OPENAI_BASE_URL + OPENAI_MODEL so any
+    OpenAI-compatible endpoint (Gemini, Groq, Together, …) can be used
+    alongside OpenRouter as a separately selectable model. Raises when the
+    key is missing.
+    """
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError(
+            "No key configured for the OpenAI-compatible provider: "
+            "set OPENAI_API_KEY (optionally OPENAI_BASE_URL and OPENAI_MODEL)"
+        )
+    return Provider(
+        name="openai",
+        api_key=api_key,
+        base_url=(os.getenv("OPENAI_BASE_URL") or OPENAI_DEFAULT_URL).rstrip("/"),
+        chat_model=_chat_model("openai"),
+        embedding_model=_openai_compat_embedding_model(),
+    )
+
+
+def _openai_compat_embedding_model() -> str:
+    """The OpenAI-compatible slot's embedding model.
+
+    OPENAI_EMBEDDING_MODEL wins; for Gemini-style endpoints the default is a
+    Gemini embedding model so retrieval works without extra configuration.
+    """
+    configured = os.getenv("OPENAI_EMBEDDING_MODEL")
+    if configured:
+        return configured
+    base_url = (os.getenv("OPENAI_BASE_URL") or "").lower()
+    if "googleapis" in base_url or "generativelanguage" in base_url:
+        return "gemini-embedding-001"
+    return _provider_embedding_model("openai")
+
+
+def generic_chat_model() -> str:
+    """The chat model for the OpenAI-compatible slot, without needing its key."""
+    return os.getenv("OPENAI_MODEL") or os.getenv("MODEL_NAME", "gpt-4o-mini")
+
+
 def provider_embedding_model(provider: str | None = None) -> str:
     """The embedding model for the active (or named) provider."""
     if provider:

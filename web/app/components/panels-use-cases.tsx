@@ -4,10 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import {
   api,
   type CitationReport,
+  type ModelTier,
   type RagAnswer,
   type SavedResult,
   type ScreeningReport,
   type SourcesResponse,
+  type Tier,
 } from "../../lib/api";
 import { Badge, Bar, Card, Hero, Notice, ms, pct, useAsync } from "./ui";
 import { friendlyApiError, RequestRunControls } from "./run-controls";
@@ -87,15 +89,29 @@ function kb(bytes: number) {
 export function Knowledge() {
   const [query, setQuery] = useState("What is the refund policy?");
   const [file, setFile] = useState<File | null>(null);
+  const [tier, setTier] = useState<Tier>("main");
+  const models = useAsync<{ tiers: ModelTier[] }>();
   const ask = useAsync<RagAnswer>();
   const retrieve = useAsync<RagAnswer>();
   const sources = useAsync<SourcesResponse>();
   const upload = useAsync<{ ok: boolean; name: string }>();
   const remove = useAsync<{ ok: boolean }>();
 
+  useEffect(() => {
+    models.run(() => api.models());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const refresh = () => sources.run(() => api.ragSources());
-  const runAsk = () => ask.run(() => api.ask(query));
+  const runAsk = () => ask.run(() => api.ask(query, { tier }));
   const runRetrieve = () => retrieve.run(() => api.ragRetrieve(query));
+
+  const modelLabel = (t: ModelTier) =>
+    t.tier === "main"
+      ? `${t.model} (main)`
+      : t.tier === "openai-compatible"
+        ? `${t.model} (openai-compatible)`
+        : `${t.model} — ${t.tier}`;
 
   const onUpload = () => {
     if (!file) return;
@@ -195,6 +211,16 @@ export function Knowledge() {
           <input value={query} onChange={(e) => setQuery(e.target.value)} />
         </label>
         <div className="toolbar" style={{ marginTop: 12 }}>
+          <label>
+            Model
+            <select value={tier} onChange={(e) => setTier(e.target.value as Tier)}>
+              {(models.data?.tiers ?? []).map((t) => (
+                <option key={t.tier} value={t.tier}>
+                  {modelLabel(t)}
+                </option>
+              ))}
+            </select>
+          </label>
           <button className="primary" onClick={runAsk} disabled={ask.loading}>
             {ask.loading ? "Answering…" : "Ask"}
           </button>
@@ -207,6 +233,7 @@ export function Knowledge() {
             </span>
           )}
         </div>
+        <Notice error={models.error} />
       </Card>
 
       {data && (

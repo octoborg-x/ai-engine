@@ -241,7 +241,7 @@ export function Settings() {
   const rows: [string, string][] = [
     ["Backend proxy", "/api/backend/*"],
     ["Backend origin", "BACKEND_URL"],
-    ["Model configuration", "MODEL_CHEAP / BALANCED / POWERFUL"],
+    ["Model configuration", "MODEL_CHEAP / BALANCED / POWERFUL · OPENAI_*"],
     ["Rate limit", "RATE_LIMIT_REQUESTS / RATE_LIMIT_WINDOW_SECONDS"],
     ["Auth", "API_AUTH_TOKEN (server-side only)"],
     ["Chat", "POST /chat · POST /chat/stream"],

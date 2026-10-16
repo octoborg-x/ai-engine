@@ -8,7 +8,9 @@ from app.rag.embeddings import EmbeddingModel
 from app.rag.pipeline import RAGPipeline
 from app.rag.schemas import AskResponse, RetrievalResponse, SourceOut
 
-LlmCall = Callable[[str], Awaitable[dict]]
+# The Knowledge Assistant still resolves the model through the LLM router, so
+# its callable ("ask") accepts an optional tier for the model selector.
+LlmCall = Callable[[str, str | None], Awaitable[dict]]
 SYSTEM_PROMPT = (
     "You are a support assistant. Answer using only the provided context. "
     "Cite the sources you use as [S1], [S2], and so on. If the context does "
@@ -70,12 +72,16 @@ def retrieval_response(
 
 
 async def answer(
-    query: str, llm_call: LlmCall, recall_k: int = 10, final_k: int = 3
+    query: str,
+    llm_call: LlmCall,
+    recall_k: int = 10,
+    final_k: int = 3,
+    tier: str | None = None,
 ) -> AskResponse:
     """Retrieve context, ask the LLM, and validate citations in the answer."""
     pipeline = get_pipeline()
     result = pipeline.ask(query, recall_k=recall_k, final_k=final_k)
-    completion = await llm_call(build_prompt(query, result["context"]))
+    completion = await llm_call(build_prompt(query, result["context"]), tier=tier)
     return AskResponse(
         query=result["query"],
         answer=completion["response"],

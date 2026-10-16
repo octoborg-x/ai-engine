@@ -2,7 +2,12 @@
 // at /api/backend/*, which attaches the API token before forwarding upstream,
 // so the browser never handles credentials.
 
-export type Tier = "main" | "cheap" | "balanced" | "powerful";
+export type Tier =
+  | "main"
+  | "cheap"
+  | "balanced"
+  | "powerful"
+  | "openai-compatible";
 
 export interface Health {
   status: string;
@@ -177,6 +182,8 @@ export interface RagAnswer {
   route?: string;
   latency_ms?: number;
   estimated_cost_usd?: number;
+  prompt_tokens?: number;
+  completion_tokens?: number;
 }
 
 export interface ScreeningReport {
@@ -342,8 +349,13 @@ export const api = {
     uploadFile<{ name: string; ok: boolean }>("/rag/sources", file),
   ragDelete: (name: string) =>
     del<{ ok: boolean }>(`/rag/sources?name=${encodeURIComponent(name)}`),
-  ask: (query: string, recall_k = 6, final_k = 3) =>
-    post<RagAnswer>("/ask", { query, recall_k, final_k }),
+  ask: (query: string, opts: { recall_k?: number; final_k?: number; tier?: Tier } = {}) =>
+    post<RagAnswer>("/ask", {
+      query,
+      recall_k: opts.recall_k ?? 6,
+      final_k: opts.final_k ?? 3,
+      tier: opts.tier ?? undefined,
+    }),
   securityPolicy: () => get<SecurityPolicy>("/security/policy"),
   screen: (job_description: string, resume: string) =>
     post<ScreeningReport>("/recruitment/screen", { job_description, resume }),
@@ -365,7 +377,16 @@ export async function streamChat(
   if (res.status === 503) {
     throw new Error("Chat is unavailable — the server is missing its API token.");
   }
-  if (!res.ok || !res.body) throw new Error(`Request failed: ${res.status}`);
+  if (!res.ok || !res.body) {
+    let detail = `Request failed: ${res.status}`;
+    try {
+      const body = await res.json();
+      if (body?.detail) detail = `${detail} — ${body.detail}`;
+    } catch {
+      /* non-JSON error body */
+    }
+    throw new Error(detail);
+  }
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
   let text = "";

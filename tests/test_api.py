@@ -115,6 +115,36 @@ async def test_stream_endpoint_forwards_selected_tier(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_stream_endpoint_surfaces_provider_error_before_200(monkeypatch):
+    """A provider failing before the first chunk must raise, not stream a 200."""
+    from openai import RateLimitError
+
+    async def failing_stream(prompt, tier=None):
+        raise RateLimitError.__new__(RateLimitError)
+        yield  # pragma: no cover — never reached
+
+    monkeypatch.setattr(api, "ask_stream", failing_stream)
+    with pytest.raises(api.HTTPException) as exc_info:
+        await api.chat_stream(api.ChatRequest(prompt="hello"))
+    assert exc_info.value.status_code == 429
+    assert "try again shortly" in exc_info.value.detail.lower()
+
+
+@pytest.mark.asyncio
+async def test_stream_endpoint_empty_provider_stream(monkeypatch):
+    """A provider that ends without any chunk is an empty successful stream."""
+
+    async def empty_stream(prompt, tier=None):
+        if False:
+            yield "never"
+
+    monkeypatch.setattr(api, "ask_stream", empty_stream)
+    response = await api.chat_stream(api.ChatRequest(prompt="hello"))
+    collected = [chunk async for chunk in response.body_iterator]
+    assert collected == []
+
+
+@pytest.mark.asyncio
 async def test_extract_ticket_returns_validated_model(monkeypatch):
     async def fake_extract(message):
         assert message == "My card was charged twice"

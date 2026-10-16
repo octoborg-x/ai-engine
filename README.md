@@ -37,7 +37,7 @@ Open http://localhost:3000.
 The Week 1 console exposes:
 
 - streaming playground
-- four selectable models (main + three routed tiers)
+- five selectable models (main + three routed tiers + an OpenAI-compatible slot)
 - custom OpenAI-compatible provider UX boundary
 - model comparison indices
 - test suite indices
@@ -52,7 +52,7 @@ backend state. It does not calculate domain metrics or invent benchmark values.
 
 The console surfaces:
 
-- streaming playground with a four-model selector (enforced by the backend router)
+- streaming playground with a five-model selector (enforced by the backend router)
 - live model list from `GET /models`
 - tier comparison benchmarks from `GET /compare`
 - packaged evaluation suites and runs from `GET /evals/suites` / `POST /evals/run`
@@ -129,7 +129,7 @@ Routing is deterministic and adds no extra LLM call.
 
 | Request | Tier |
 |---|---|
-| Explicit `tier` on the request (`main`/`cheap`/`balanced`/`powerful`) | that tier, pinned |
+| Explicit `tier` on the request (`main`/`cheap`/`balanced`/`powerful`/`openai-compatible`) | that tier, pinned |
 | Classification / extraction | `cheap` |
 | Normal chat | `balanced` |
 | Complex reasoning, architecture, debugging, long prompts | `powerful` |
@@ -144,4 +144,16 @@ MODEL_POWERFUL=your_free_powerful_model
 ```
 
 `MODEL_NAME` is exposed as the `main` model and is the default selection in the
-streaming playground; the other three are the router's tiers.
+streaming playground; the other three are the router's tiers. The
+`openai-compatible` tier always resolves via `OPENAI_API_KEY` +
+`OPENAI_BASE_URL` + `OPENAI_MODEL` — independent of the active provider — so
+an OpenAI-compatible endpoint (Gemini, Groq, Together, …) can be used side by
+side with OpenRouter. The Knowledge Assistant (`/ask`) shares the same model
+selector via its optional `tier` field.
+
+RAG retrieval embeddings follow the same provider: when `OPENAI_API_KEY` is
+set, `OPENAI_EMBEDDING_MODEL` (default `gemini-embedding-001` for Gemini
+endpoints, `text-embedding-3-small` for OpenAI) powers corpus indexing and
+query retrieval. This matters because OpenRouter free tiers cannot call
+`/embeddings`; with a Gemini/OpenAI key configured, retrieval works without
+OpenRouter embedding access.

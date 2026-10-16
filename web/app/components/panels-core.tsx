@@ -112,17 +112,28 @@ export function Playground() {
   }, []);
 
   const catalog = models.data?.tiers ?? [];
-  const label = (t: ModelTier) => (t.tier === "main" ? `${t.model} (main)` : `${t.model} — ${t.tier}`);
+  const label = (t: ModelTier) =>
+    t.tier === "main"
+      ? `${t.model} (main)`
+      : t.tier === "openai-compatible"
+        ? `${t.model} (openai-compatible)`
+        : `${t.model} — ${t.tier}`;
 
   async function run() {
     setRunning(true);
     setOutput("");
     setMeta("Streaming…");
     const started = performance.now();
+    let received = "";
     try {
-      await streamChat(prompt, tier, setOutput);
+      await streamChat(prompt, tier, (text) => {
+        received = text;
+        setOutput(text);
+      });
       setMeta(
-        `Completed · ${Math.round(performance.now() - started)} ms · tier pinned to ${tier}`,
+        received
+          ? `Completed · ${Math.round(performance.now() - started)} ms · tier pinned to ${tier}`
+          : "The provider finished without returning any text.",
       );
     } catch (e) {
       setMeta(e instanceof Error ? e.message : "Request failed");
@@ -136,7 +147,7 @@ export function Playground() {
       <Hero
         eyebrow="PLAYGROUND"
         title="Streaming chat"
-        blurb="Streams /chat/stream through the server-side proxy. Pick one of the four configured models; the backend enforces the choice."
+        blurb="Streams /chat/stream through the server-side proxy. Pick one of the configured models; the backend enforces the choice."
         right={
           <Badge tone={running ? "blue" : "green"}>
             {running ? "● streaming" : "● idle"}
@@ -188,7 +199,9 @@ export function Models() {
         ? "green"
         : tier === "balanced"
           ? "blue"
-          : "amber";
+          : tier === "openai-compatible"
+            ? "cyan"
+            : "amber";
 
   return (
     <div className="stack">

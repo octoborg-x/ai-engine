@@ -12,9 +12,7 @@ import time
 
 from app.evals.engine import CHAT_PREFIX, _score_chat, load_cases, percentile
 from app.llm.client import ask
-from app.llm.router import _model_for
-
-TIERS = ("main", "cheap", "balanced", "powerful")
+from app.llm.router import TIERS, _model_for
 
 
 def _model_for_tier(tier: str) -> str:

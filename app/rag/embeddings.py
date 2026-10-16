@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 from app.llm.providers import (
+    generic_provider,
     has_provider_key,
     provider_embedding_model,
     resolve_provider,
@@ -20,13 +21,39 @@ load_dotenv()
 
 
 def default_embedding_model() -> str:
-    """Resolve the embedding model for the active provider."""
+    """Resolve the embedding model used for retrieval.
+
+    When the OpenAI-compatible slot is configured (OPENAI_API_KEY), embeddings
+    come from that endpoint — OpenRouter free keys cannot embed, while a
+    Gemini/OpenAI key can. Otherwise the active provider's embedding model is
+    used.
+    """
+    if os.getenv("OPENAI_API_KEY"):
+        try:
+            return generic_provider().embedding_model
+        except RuntimeError:
+            pass
     return provider_embedding_model()
 
 
 def _offline_mode() -> bool:
     """True when tests/CI force deterministic zero-vector embeddings."""
     return os.getenv("EMBEDDINGS_OFFLINE", "0") == "1"
+
+
+def _embedding_provider():
+    """The provider used for embeddings: the OpenAI-compatible slot if built.
+
+    OpenRouter free keys cannot call /embeddings, so when the OpenAI-compatible
+    slot is configured (OPENAI_API_KEY) it is used for retrieval instead. This
+    keeps the existing key precedence for all other features.
+    """
+    if os.getenv("OPENAI_API_KEY"):
+        try:
+            return generic_provider()
+        except RuntimeError:
+            pass
+    return resolve_provider()
 
 
 def generate_embedding(text: str, model: str | None = None) -> list[float]:
@@ -40,7 +67,7 @@ def generate_embedding(text: str, model: str | None = None) -> list[float]:
     """
     if _offline_mode() or not has_provider_key():
         return [0.0] * 1536
-    provider = resolve_provider()
+    provider = _embedding_provider()
     client = OpenAI(api_key=provider.api_key, base_url=provider.base_url)
     response = client.embeddings.create(
         input=[text],

@@ -2,6 +2,8 @@
 
 from pydantic import BaseModel, Field
 
+from app.llm.schemas import TierName
+
 
 class AskRequest(BaseModel):
     """Question to answer from retrieved knowledge-base context."""
@@ -9,6 +11,7 @@ class AskRequest(BaseModel):
     query: str
     recall_k: int = Field(default=10, ge=1, le=50)
     final_k: int = Field(default=3, ge=1, le=10)
+    tier: TierName | None = None
 
 
 class SourceOut(BaseModel):
