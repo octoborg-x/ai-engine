@@ -295,6 +295,84 @@ async def ask_stream(prompt: str, tier: str | None = None) -> AsyncGenerator[str
         )
 
 
+async def stream_chat_meta(
+    messages: list[dict[str, str]],
+    tier: str | None = None,
+    route_text: str | None = None,
+) -> AsyncGenerator[tuple[str, dict | None], None]:
+    """Stream a completion as (delta, meta) pairs.
+
+    Text deltas are yielded as ``(text, None)`` so callers can render tokens
+    as they arrive. After the stream completes, a final ``("", meta)`` tuple
+    carries the call metadata: model, tier, usage, cost, total latency, and
+    ``ttft_ms`` (time to first token). Used by /ask/stream so grounded answers
+    can stream over SSE while still recording telemetry.
+    """
+    decision = route("chat", route_text or messages[-1]["content"], force_tier=tier)
+    started = time.perf_counter()
+    first_token_at: float | None = None
+    usage = None
+    status = "error"
+    try:
+        timeout_seconds = float(os.getenv("LLM_TIMEOUT_SECONDS", "30"))
+        completions = (
+            openai_compatible_client.chat.completions
+            if decision.tier == "openai-compatible"
+            else client.chat.completions
+        )
+        stream = await asyncio.wait_for(
+            completions.create(
+                model=decision.model,
+                messages=messages,
+                stream=True,
+                stream_options={"include_usage": True},
+            ),
+            timeout=timeout_seconds,
+        )
+        async for chunk in stream:
+            chunk_usage = getattr(chunk, "usage", None)
+            if chunk_usage is not None:
+                usage = chunk_usage
+            choices = chunk.choices or []
+            if choices and choices[0].delta.content:
+                if first_token_at is None:
+                    first_token_at = time.perf_counter()
+                yield choices[0].delta.content, None
+        status = "success"
+        yield (
+            "",
+            {
+                "model": decision.model,
+                "route": decision.tier,
+                "route_reason": decision.reason,
+                "prompt_tokens": getattr(usage, "prompt_tokens", None),
+                "completion_tokens": getattr(usage, "completion_tokens", None),
+                "estimated_cost_usd": calculate_cost(
+                    decision.model,
+                    getattr(usage, "prompt_tokens", 0) or 0,
+                    getattr(usage, "completion_tokens", 0) or 0,
+                ),
+                "latency_ms": round((time.perf_counter() - started) * 1000, 2),
+                "ttft_ms": (
+                    round((first_token_at - started) * 1000, 2)
+                    if first_token_at is not None
+                    else None
+                ),
+                "success": True,
+            },
+        )
+    finally:
+        record_call(
+            model=decision.model,
+            tier=decision.tier,
+            prompt_tokens=getattr(usage, "prompt_tokens", None),
+            completion_tokens=getattr(usage, "completion_tokens", None),
+            latency_ms=round((time.perf_counter() - started) * 1000, 2),
+            status=status,
+            attempt=1,
+        )
+
+
 @llm_retry
 async def extract_ticket_info(message: str) -> TicketExtraction:
     decision = route("extraction", message)

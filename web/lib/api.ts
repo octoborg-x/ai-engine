@@ -181,6 +181,7 @@ export interface RagAnswer {
   model?: string;
   route?: string;
   latency_ms?: number;
+  ttft_ms?: number;
   estimated_cost_usd?: number;
   prompt_tokens?: number;
   completion_tokens?: number;
@@ -360,6 +361,75 @@ export const api = {
   screen: (job_description: string, resume: string) =>
     post<ScreeningReport>("/recruitment/screen", { job_description, resume }),
 };
+
+export interface AskStreamHandlers {
+  onDelta: (text: string) => void;
+  onDone: (answer: RagAnswer) => void;
+}
+
+// Streaming grounded answer over SSE. The backend emits `data:` JSON events:
+// `{"type":"delta","text":...}` while tokens arrive, then a `done` event with
+// the full RagAnswer (sources, citations, ttft_ms, latency, tokens).
+export async function askStream(
+  query: string,
+  opts: { recall_k?: number; final_k?: number; tier?: Tier },
+  handlers: AskStreamHandlers,
+): Promise<void> {
+  const res = await fetch(`${BASE}/ask/stream`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query,
+      recall_k: opts.recall_k ?? 6,
+      final_k: opts.final_k ?? 3,
+      tier: opts.tier ?? undefined,
+    }),
+    cache: "no-store",
+  });
+  if (res.status === 503) {
+    throw new Error("Backend is unavailable — the server is missing its API token.");
+  }
+  if (!res.ok || !res.body) {
+    let detail = `Request failed: ${res.status}`;
+    try {
+      const body = await res.json();
+      if (body?.detail) detail = `${detail} — ${body.detail}`;
+    } catch {
+      /* non-JSON error body */
+    }
+    throw new Error(detail);
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let sep = buffer.indexOf("\n\n");
+    while (sep !== -1) {
+      const raw = buffer.slice(0, sep);
+      buffer = buffer.slice(sep + 2);
+      if (!raw.startsWith("data:")) {
+        sep = buffer.indexOf("\n\n");
+        continue;
+      }
+      const jsonStr = raw.slice(5).trim();
+      if (!jsonStr) {
+        sep = buffer.indexOf("\n\n");
+        continue;
+      }
+      try {
+        const event = JSON.parse(jsonStr);
+        if (event?.type === "delta" && event.text) handlers.onDelta(event.text);
+        else if (event?.type === "done" && event.answer) handlers.onDone(event.answer);
+      } catch {
+        /* skip malformed event */
+      }
+      sep = buffer.indexOf("\n\n");
+    }
+  }
+}
 
 // Streaming chat. Reads the upstream body incrementally so tokens render as
 // they arrive; the proxy passes the stream through untouched.

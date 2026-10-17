@@ -311,6 +311,85 @@ async def test_ask_stream_honors_pinned_tier(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_stream_chat_meta_yields_deltas_then_meta(monkeypatch):
+    """stream_chat_meta emits (delta, None) pairs and a final "" meta tuple."""
+    chunks = [
+        SimpleNamespace(
+            choices=[SimpleNamespace(delta=SimpleNamespace(content="Hel"))]
+        ),
+        SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content="lo"))]),
+        SimpleNamespace(
+            choices=[],
+            usage=SimpleNamespace(prompt_tokens=100, completion_tokens=25),
+        ),
+    ]
+
+    class FakeStream:
+        def __aiter__(self):
+            return self._iterator()
+
+        async def _iterator(self):
+            for chunk in chunks:
+                yield chunk
+
+    async def fake_create(**kwargs):
+        assert kwargs["stream"] is True
+        assert kwargs["stream_options"] == {"include_usage": True}
+        return FakeStream()
+
+    monkeypatch.setattr(llm_client.client.chat.completions, "create", fake_create)
+    events = [
+        event
+        async for event in llm_client.stream_chat_meta(
+            [{"role": "user", "content": "hello"}]
+        )
+    ]
+
+    (text_1, meta_1), (text_2, meta_2), (text_3, meta_3) = events
+    assert (text_1, meta_1) == ("Hel", None)
+    assert (text_2, meta_2) == ("lo", None)
+    assert text_3 == ""
+    assert meta_3["prompt_tokens"] == 100
+    assert meta_3["completion_tokens"] == 25
+    assert meta_3["success"] is True
+    assert meta_3["ttft_ms"] is not None
+    assert meta_3["latency_ms"] >= 0
+
+
+@pytest.mark.asyncio
+async def test_stream_chat_meta_records_telemetry_on_success(monkeypatch):
+    """Metadata streams feed token usage into telemetry aggregates."""
+    from app.telemetry.metrics import MetricsCollector
+
+    MetricsCollector.reset()
+
+    class FakeStream:
+        def __aiter__(self):
+            return self._iterator()
+
+        async def _iterator(self):
+            yield SimpleNamespace(
+                choices=[SimpleNamespace(delta=SimpleNamespace(content="ok"))]
+            )
+            yield SimpleNamespace(
+                choices=[],
+                usage=SimpleNamespace(prompt_tokens=7, completion_tokens=3),
+            )
+
+    async def fake_create(**kwargs):
+        return FakeStream()
+
+    monkeypatch.setattr(llm_client.client.chat.completions, "create", fake_create)
+    async for _ in llm_client.stream_chat_meta([{"role": "user", "content": "hello"}]):
+        pass
+
+    snapshot = MetricsCollector.snapshot()
+    assert snapshot["llm_input_tokens_total"] == 7
+    assert snapshot["llm_output_tokens_total"] == 3
+    assert snapshot["llm_total_tokens_total"] == 10
+
+
+@pytest.mark.asyncio
 async def test_extract_ticket_accepts_plain_json(monkeypatch):
     payload = {
         "summary": "Customer cannot log in.",

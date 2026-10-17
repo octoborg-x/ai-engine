@@ -291,6 +291,97 @@ def test_ask_is_distinct_from_chat_in_openapi():
     assert "ChatRequest" in chat_body["$ref"]
 
 
+async def _sse_events(response) -> list[dict]:
+    """Decode the raw SSE body into event payloads."""
+    import json
+
+    body = "".join([chunk async for chunk in response.body_iterator])
+    return [
+        json.loads(line[len("data: ") :])
+        for line in body.splitlines()
+        if line.startswith("data: ")
+    ]
+
+
+@pytest.mark.asyncio
+async def test_ask_stream_endpoint_emits_deltas_then_done(monkeypatch):
+    """The streaming endpoint returns SSE delta events and a done event."""
+    seen_messages = {}
+
+    def fake_stream_meta(messages, tier=None, route_text=None):
+        async def gen():
+            seen_messages["system"] = messages[0]["role"]
+            seen_messages["route_text"] = route_text
+            yield "Ref", None
+            yield "unds", None
+            yield (
+                "",
+                {
+                    "model": "test/model",
+                    "route": "balanced",
+                    "route_reason": "test",
+                    "prompt_tokens": 10,
+                    "completion_tokens": 5,
+                    "estimated_cost_usd": 0.002,
+                    "latency_ms": 1500.0,
+                    "ttft_ms": 800.0,
+                    "success": True,
+                },
+            )
+
+        return gen()
+
+    monkeypatch.setattr(api, "stream_chat_meta", fake_stream_meta)
+    response = await api.ask_stream_endpoint(
+        api.AskRequest(query="what is the refund policy?")
+    )
+    assert isinstance(response, api.StreamingResponse)
+    assert response.media_type == "text/event-stream"
+
+    events = await _sse_events(response)
+    assert [e["type"] for e in events] == ["delta", "delta", "done"]
+    assert events[0]["text"] == "Ref"
+    assert events[1]["text"] == "unds"
+
+    answer = events[-1]["answer"]
+    assert answer["answer"] == "Refunds"
+    assert answer["ttft_ms"] == 800.0
+    assert answer["latency_ms"] == 1500.0
+    assert answer["prompt_tokens"] == 10
+    assert answer["completion_tokens"] == 5
+    assert answer["model"] == "test/model"
+    assert answer["candidates"]
+    assert seen_messages["system"] == "system"
+    assert seen_messages["route_text"] == "what is the refund policy?"
+
+
+@pytest.mark.asyncio
+async def test_ask_stream_endpoint_rejects_empty_query():
+    with pytest.raises(api.HTTPException) as exc_info:
+        await api.ask_stream_endpoint(api.AskRequest(query="   "))
+    assert exc_info.value.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_ask_stream_endpoint_surfaces_provider_error_before_200(monkeypatch):
+    from openai import RateLimitError
+
+    def failing_stream_meta(messages, tier=None, route_text=None):
+        async def gen():
+            raise RateLimitError.__new__(RateLimitError)
+            yield  # pragma: no cover — never reached
+
+        return gen()
+
+    monkeypatch.setattr(api, "stream_chat_meta", failing_stream_meta)
+    with pytest.raises(api.HTTPException) as exc_info:
+        await api.ask_stream_endpoint(
+            api.AskRequest(query="what is the refund policy?")
+        )
+    assert exc_info.value.status_code == 429
+    assert "try again shortly" in exc_info.value.detail.lower()
+
+
 @pytest.mark.asyncio
 async def test_authenticate_accepts_bearer_token(monkeypatch):
     monkeypatch.setenv("API_AUTH_TOKEN", "secret-token")
@@ -364,6 +455,7 @@ async def test_ready_with_openai_fallback_key(monkeypatch):
     [
         ("POST", "/chat"),
         ("POST", "/ask"),
+        ("POST", "/ask/stream"),
         ("POST", "/chat/stream"),
         ("POST", "/extract-ticket"),
         ("POST", "/jobs"),
