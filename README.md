@@ -1,6 +1,12 @@
-demo:
-backend: https://ai-engine-octo-back.fastapicloud.dev/
-frontend: https://ai-engine-console.vercel.app/
+Demo
+
+- Backend (FastAPI): https://ai-engine-octo-back.fastapicloud.dev/
+- Frontend (Vercel): https://ai-engine-console.vercel.app/
+
+Preview
+
+"AI Engine Preview" (./bg.png)
+
 
 # AI API Project
 
