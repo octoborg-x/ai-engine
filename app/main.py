@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import time
@@ -8,12 +9,25 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from openai import APIError, APITimeoutError, RateLimitError
 from pydantic import BaseModel
 
-from app.llm.client import ask, ask_stream, extract_ticket_info
+from app.llm.client import (
+    ask,
+    ask_stream,
+    extract_ticket_info,
+    stream_chat_meta,
+)
 from app.llm.providers import has_provider_key
 from app.llm.schemas import ChatRequest, ChatResponse, TicketExtraction
 from app.rag.admin import delete_source, save_upload, sources_payload
 from app.rag.schemas import AskRequest, AskResponse, RetrievalResponse
-from app.rag.service import answer, rebuild_pipeline, retrieval_response
+from app.rag.service import (
+    SYSTEM_PROMPT,
+    answer,
+    build_prompt,
+    get_pipeline,
+    rebuild_pipeline,
+    retrieval_response,
+    sources_out,
+)
 from app.recruitment.screening import ScreeningReport, ScreenRequest, screen
 from app.security.auth import authenticate
 from app.security.rate_limit import client_key, rate_limiter
@@ -37,6 +51,7 @@ app = FastAPI(title="AI API Project")
 PROTECTED_ROUTES = {
     ("POST", "/chat"),
     ("POST", "/ask"),
+    ("POST", "/ask/stream"),
     ("POST", "/chat/stream"),
     ("POST", "/extract-ticket"),
     ("POST", "/jobs"),
@@ -423,6 +438,87 @@ async def ask_endpoint(req: AskRequest):
         )
     except Exception as e:
         raise _provider_error(e) from e
+
+
+def _sse(payload: dict) -> str:
+    """Serialize one event as a JSON `data:` line for consumption by EventSource."""
+    return f"data: {json.dumps(payload)}\n\n"
+
+
+async def _ask_stream_events(
+    query: str, tier: str | None, recall_k: int, final_k: int
+) -> AsyncGenerator[str, None]:
+    """Ground the query, then stream deltas + a final `done` event over SSE.
+
+    The `done` event mirrors the AskResponse shape plus ``ttft_ms`` so the
+    console shows time-to-first-token and total latency separately. Citation
+    validation runs on the fully accumulated answer, matching /ask.
+    """
+    result = get_pipeline().ask(query, recall_k=recall_k, final_k=final_k)
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": build_prompt(query, result["context"])},
+    ]
+    text_parts: list[str] = []
+    meta: dict | None = None
+    async for delta, call_meta in stream_chat_meta(
+        messages, tier=tier, route_text=query
+    ):
+        if delta:
+            text_parts.append(delta)
+            yield _sse({"type": "delta", "text": delta})
+        if call_meta is not None:
+            meta = call_meta
+    answer_text = "".join(text_parts)
+    payload = {
+        "query": result["query"],
+        "answer": answer_text,
+        "context": result["context"],
+        "sources": [s.model_dump() for s in sources_out(result)],
+        "retrieved_ids": result["retrieved_ids"],
+        "candidates": result["candidates"],
+        "model": meta["model"],
+        "route": meta["route"],
+        "prompt_tokens": meta["prompt_tokens"],
+        "completion_tokens": meta["completion_tokens"],
+        "estimated_cost_usd": meta["estimated_cost_usd"],
+        "latency_ms": meta["latency_ms"],
+        "ttft_ms": meta["ttft_ms"],
+        "citations": get_pipeline().validate_answer(answer_text, result["sources"]),
+    }
+    yield _sse({"type": "done", "answer": payload})
+
+
+@app.post("/ask/stream")
+async def ask_stream_endpoint(req: AskRequest):
+    """Stream a grounded answer over SSE as the model generates it.
+
+    Retrieval runs first (like /ask), then deltas arrive as tokens are produced,
+    finishing with a ``done`` event that carries sources, citations, token usage,
+    total latency, and ``ttft_ms``. Provider failures surface as real HTTP errors
+    before the 200 is sent, matching /chat/stream.
+    """
+    if not req.query.strip():
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
+    stream = _ask_stream_events(req.query, req.tier, req.recall_k, req.final_k)
+    try:
+        first = await stream.__anext__()
+    except StopAsyncIteration:
+        first = None
+    except Exception as e:
+        raise _provider_error(e) from e
+
+    async def buffered() -> AsyncGenerator[str, None]:
+        if first is not None:
+            yield first
+        async for event in stream:
+            yield event
+
+    return StreamingResponse(
+        buffered(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @app.post("/chat/stream")

@@ -125,14 +125,16 @@ export function Playground() {
     setMeta("Streaming…");
     const started = performance.now();
     let received = "";
+    let firstTokenMs: number | null = null;
     try {
       await streamChat(prompt, tier, (text) => {
         received = text;
         setOutput(text);
+        if (firstTokenMs === null) firstTokenMs = Math.round(performance.now() - started);
       });
       setMeta(
         received
-          ? `Completed · ${Math.round(performance.now() - started)} ms · tier pinned to ${tier}`
+          ? `Completed · ${Math.round(performance.now() - started)} ms · first token ${firstTokenMs ?? "—"} ms · tier pinned to ${tier}`
           : "The provider finished without returning any text.",
       );
     } catch (e) {

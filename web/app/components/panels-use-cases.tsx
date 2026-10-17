@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   api,
+  askStream,
   type CitationReport,
   type ModelTier,
   type RagAnswer,
@@ -90,8 +91,11 @@ export function Knowledge() {
   const [query, setQuery] = useState("What is the refund policy?");
   const [file, setFile] = useState<File | null>(null);
   const [tier, setTier] = useState<Tier>("main");
+  const [streaming, setStreaming] = useState(false);
+  const [streamingAnswer, setStreamingAnswer] = useState("");
+  const [streamMeta, setStreamMeta] = useState("");
   const models = useAsync<{ tiers: ModelTier[] }>();
-  const ask = useAsync<RagAnswer>();
+  const [retrieved, setRetrieved] = useState<RagAnswer | null>(null);
   const retrieve = useAsync<RagAnswer>();
   const sources = useAsync<SourcesResponse>();
   const upload = useAsync<{ ok: boolean; name: string }>();
@@ -103,8 +107,50 @@ export function Knowledge() {
   }, []);
 
   const refresh = () => sources.run(() => api.ragSources());
-  const runAsk = () => ask.run(() => api.ask(query, { tier }));
   const runRetrieve = () => retrieve.run(() => api.ragRetrieve(query));
+
+  const runAsk = async () => {
+    setRetrieved(null); // keep the answer card clean for the next run
+    setStreamingAnswer("");
+    setStreamMeta("Streaming…");
+    setStreaming(true);
+    const started = performance.now();
+    let firstTokenAt: number | null = null;
+    let finished = false;
+    try {
+      await askStream(
+        query,
+        { tier },
+        {
+          onDelta: (text) => {
+            if (firstTokenAt === null) {
+              firstTokenAt = performance.now();
+              setStreamMeta(`first token ${Math.round(firstTokenAt - started)} ms · streaming…`);
+            }
+            setStreamingAnswer((prev) => prev + text);
+          },
+          onDone: (answer) => {
+            finished = true;
+            const inferred = answer.ttft_ms ?? (firstTokenAt ? Math.round(firstTokenAt - started) : undefined);
+            const tokens = answer.completion_tokens ?? "?";
+            setStreamMeta(
+              `first token ${ms(inferred)} · total ${ms(answer.latency_ms)} · ${tokens} tokens · ${answer.model} · route ${answer.route}`,
+            );
+            setRetrieved(answer);
+          },
+        },
+      );
+      if (!finished) {
+        setStreamMeta("Stream ended before completion — no done event received.");
+        setRetrieved(null);
+      }
+    } catch (e) {
+      setStreamMeta(e instanceof Error ? e.message : "Request failed");
+      setRetrieved(null);
+    } finally {
+      setStreaming(false);
+    }
+  };
 
   const modelLabel = (t: ModelTier) =>
     t.tier === "main"
@@ -127,7 +173,7 @@ export function Knowledge() {
       if (res?.ok) refresh();
     });
 
-  const data = ask.data;
+  const data = retrieved;
   const cand = retrieve.data?.candidates ?? [];
   const files = sources.data?.sources ?? [];
 
@@ -221,28 +267,24 @@ export function Knowledge() {
               ))}
             </select>
           </label>
-          <button className="primary" onClick={runAsk} disabled={ask.loading}>
-            {ask.loading ? "Answering…" : "Ask"}
+          <button className="primary" onClick={runAsk} disabled={streaming}>
+            {streaming ? "Streaming…" : "Ask"}
           </button>
           <button onClick={runRetrieve} disabled={retrieve.loading}>
             {retrieve.loading ? "Retrieving…" : "Retrieve only"}
           </button>
-          {data?.route && (
-            <span className="muted">
-              {data.model} · route {data.route} · {ms(data.latency_ms)}
-            </span>
-          )}
+          {streamMeta && <span className="muted">{streamMeta}</span>}
         </div>
         <Notice error={models.error} />
       </Card>
 
-      {data && (
+      {(streaming || streamingAnswer || data) && (
         <Card>
           <div className="card-head">
             <h2>Grounded answer</h2>
-            <Badge>grounded</Badge>
+            <Badge>{streaming ? "● streaming" : "grounded"}</Badge>
           </div>
-          <p className="answer">{data.answer}</p>
+          <p className="answer">{streaming ? streamingAnswer : data?.answer}</p>
         </Card>
       )}
 
@@ -282,7 +324,7 @@ export function Knowledge() {
         </Card>
       )}
 
-      <Notice error={ask.error || retrieve.error} />
+      <Notice error={retrieve.error} />
     </div>
   );
 }
