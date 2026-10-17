@@ -1,3 +1,7 @@
+demo:
+backend: https://ai-engine-octo-back.fastapicloud.dev/
+frontend: https://ai-engine-console.vercel.app/
+
 # AI API Project
 
 A production-style FastAPI backend for LLM integration — chat, streaming,
