@@ -314,17 +314,20 @@ async def test_ask_stream_endpoint_emits_deltas_then_done(monkeypatch):
             seen_messages["route_text"] = route_text
             yield "Ref", None
             yield "unds", None
-            yield "", {
-                "model": "test/model",
-                "route": "balanced",
-                "route_reason": "test",
-                "prompt_tokens": 10,
-                "completion_tokens": 5,
-                "estimated_cost_usd": 0.002,
-                "latency_ms": 1500.0,
-                "ttft_ms": 800.0,
-                "success": True,
-            }
+            yield (
+                "",
+                {
+                    "model": "test/model",
+                    "route": "balanced",
+                    "route_reason": "test",
+                    "prompt_tokens": 10,
+                    "completion_tokens": 5,
+                    "estimated_cost_usd": 0.002,
+                    "latency_ms": 1500.0,
+                    "ttft_ms": 800.0,
+                    "success": True,
+                },
+            )
 
         return gen()
 

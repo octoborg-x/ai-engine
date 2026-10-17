@@ -339,25 +339,28 @@ async def stream_chat_meta(
                     first_token_at = time.perf_counter()
                 yield choices[0].delta.content, None
         status = "success"
-        yield "", {
-            "model": decision.model,
-            "route": decision.tier,
-            "route_reason": decision.reason,
-            "prompt_tokens": getattr(usage, "prompt_tokens", None),
-            "completion_tokens": getattr(usage, "completion_tokens", None),
-            "estimated_cost_usd": calculate_cost(
-                decision.model,
-                getattr(usage, "prompt_tokens", 0) or 0,
-                getattr(usage, "completion_tokens", 0) or 0,
-            ),
-            "latency_ms": round((time.perf_counter() - started) * 1000, 2),
-            "ttft_ms": (
-                round((first_token_at - started) * 1000, 2)
-                if first_token_at is not None
-                else None
-            ),
-            "success": True,
-        }
+        yield (
+            "",
+            {
+                "model": decision.model,
+                "route": decision.tier,
+                "route_reason": decision.reason,
+                "prompt_tokens": getattr(usage, "prompt_tokens", None),
+                "completion_tokens": getattr(usage, "completion_tokens", None),
+                "estimated_cost_usd": calculate_cost(
+                    decision.model,
+                    getattr(usage, "prompt_tokens", 0) or 0,
+                    getattr(usage, "completion_tokens", 0) or 0,
+                ),
+                "latency_ms": round((time.perf_counter() - started) * 1000, 2),
+                "ttft_ms": (
+                    round((first_token_at - started) * 1000, 2)
+                    if first_token_at is not None
+                    else None
+                ),
+                "success": True,
+            },
+        )
     finally:
         record_call(
             model=decision.model,
