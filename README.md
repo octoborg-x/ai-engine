@@ -5,7 +5,7 @@ Demo
 
 Preview
 
-"AI Engine Preview" (./bg.png)
+"AI Engine Preview" (./bg.jpg)
 
 
 # AI API Project
